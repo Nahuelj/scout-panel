@@ -1,0 +1,26 @@
+# Dependencias
+**/node_modules
+.pnpm-store
+
+# Entorno
+.env
+.env.local
+.env.*.local
+
+# Builds
+**/dist
+**/build
+.next
+.next/
+
+# Logs
+*.log
+
+# Prisma
+**/prisma/migrations
+**/prisma/*.db
+
+# IDEs
+.vscode/
+.idea/
+.cursor/
