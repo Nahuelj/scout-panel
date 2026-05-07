@@ -1,16 +1,15 @@
 model Club {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  shortName   String?
-  country     String
-  logoUrl     String?
-  league      String?
+  id        String  @id @default(cuid())
+  name      String  @unique
+  shortName String?
+  country   String
+  logoUrl   String?
+  league    String?
 
-  currentPlayers Player[]    @relation("CurrentClub")
-  contracts      Contract[]
+  seasons PlayerSeason[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("clubs")
 }

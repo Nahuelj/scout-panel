@@ -1,91 +1,73 @@
 model Stats {
-  id                    String     @id @default(cuid())
+  id                  String @id @default(cuid())
 
-  playerId              String
-  contractId            String
-  seasonId              String
+  playerSeasonId String @unique
 
-  player                Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  contract              Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  season                Season   @relation(fields: [seasonId], references: [id])
+  playerSeason PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
 
-  // === Métricas Básicas ===
-  matchesPlayed         Int      @default(0)
-  minutesPlayed         Int      @default(0)
-  goals                 Int      @default(0)
-  assists               Int      @default(0)
-  yellowCards           Int      @default(0)
-  redCards              Int      @default(0)
+  matchesPlayed Int   @default(0)
+  minutesPlayed Int   @default(0)
+  goals         Int   @default(0)
+  assists       Int   @default(0)
+  yellowCards   Int   @default(0)
+  redCards      Int   @default(0)
 
-  // =============================================
   // DRI — DRIBBLING
-  // =============================================
-  dribblesAttempted        Int?
-  dribbleSuccessPct        Float?
-  progressiveCarries       Float?
-  carriesIntoFinalThird    Float?
-  ballRetentionPct         Float?
-  foulsWon                 Float?
+  dribblesAttempted     Int?
+  dribbleSuccessPct     Float?
+  progressiveCarries    Int?
+  carriesIntoFinalThird Int?
+  ballRetentionPct      Float?
+  foulsWon              Int?
 
-  // =============================================
   // VEL — PACE
-  // =============================================
-  topSpeed                 Float?   // km/h
-  sprintDistance           Int?     // metros
-  accelerations            Int?
-  progressiveRuns          Float?
-  distanceCovered          Float?   // km
+  topSpeed        Float? // km/h
+  sprintDistance  Int?   // metros
+  accelerations   Int?
+  progressiveRuns Int?
+  distanceCovered Float? // km
 
-  // =============================================
   // PAS — PASSING
-  // =============================================
-  passAccuracyPct          Float?
-  progressivePasses        Float?
-  keyPasses                Float?
-  throughBalls             Float?
-  crossAccuracyPct         Float?
-  xA                       Float?   // Expected Assists
-  weakFootPassPct           Float?
-  weakFootPassAccuracyPct   Float?
-  progressiveWfPasses       Float?
+  passAccuracyPct         Float?
+  progressivePasses       Int?
+  keyPasses               Int?
+  throughBalls            Int?
+  crossAccuracyPct        Float?
+  xA                      Float? // Expected Assists
+  weakFootPassPct         Float?
+  weakFootPassAccuracyPct Float?
+  progressiveWfPasses     Int?
+  skillfulFootPassScore   Float?
 
-  // =============================================
   // TIR — SHOOTING
-  // =============================================
-  goalsPer90               Float?
-  xGPer90                  Float?
-  shotAccuracyPct          Float?
-  conversionRatePct        Float?
-  shotsOnTarget            Int?
-  touchesInBox             Int?
-  weakFootShotPct           Float?
-  weakFootGoals             Int?
-  weakFootShotAccuracyPct   Float?
+  goalsPer90              Float?
+  xGPer90                 Float?
+  shotAccuracyPct         Float?
+  conversionRatePct       Float?
+  shotsOnTarget           Int?
+  touchesInBox            Int?
+  weakFootShotPct         Float?
+  weakFootGoals           Int?
+  weakFootShotAccuracyPct Float?
+  skillfulFootShotScore   Float?
 
-  // =============================================
   // DEF — DEFENDING
-  // =============================================
-  tacklesWonPct            Float?
-  interceptions            Float?
-  recoveries               Float?
-  blocks                   Float?
-  aerialDuelsWonPct        Float?
-  clearances               Float?
+  tacklesWonPct     Float?
+  interceptions     Int?
+  recoveries        Int?
+  blocks            Int?
+  aerialDuelsWonPct Float?
+  clearances        Int?
 
-  // =============================================
   // FZA — PHYSICAL
-  // =============================================
-  physicalDuelsWonPct      Float?
-  strengthDuels            Float?
-  aerialWinsPct            Float?
-  balance                  Float?   // Score
-  stamina                  Float?   // Score
-  bodyContactSuccessPct    Float?
+  physicalDuelsWonPct  Float?
+  strengthDuels        Int?
+  balance              Float? // Score
+  stamina              Float? // Score
+  bodyContactSuccessPct Float?
 
-  createdAt                DateTime @default(now())
-  updatedAt                DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([contractId, seasonId])
-  @@index([playerId])
   @@map("stats")
 }

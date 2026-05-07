@@ -1,0 +1,5 @@
+enum PreferredFoot {
+  RIGHT
+  LEFT
+  BOTH
+}

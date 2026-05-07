@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 const AUTH_COOKIE = 'better-auth.session_token';
 
-const protectedRoutes = ['/dashboard'];
+const protectedRoutes = ['/players'];
 const authRoutes = ['/login', '/register'];
 
 export function proxy(request: NextRequest) {
@@ -11,7 +11,7 @@ export function proxy(request: NextRequest) {
   const isAuthenticated = Boolean(sessionCookie?.value);
 
   if (pathname === '/') {
-    const destination = isAuthenticated ? '/dashboard' : '/login';
+    const destination = isAuthenticated ? '/players' : '/login';
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -25,7 +25,7 @@ export function proxy(request: NextRequest) {
 
   if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (isAuthenticated) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      return NextResponse.redirect(new URL('/players', request.url));
     }
   }
 
@@ -33,5 +33,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/dashboard/:path*', '/login', '/register'],
+  matcher: ['/', '/players/:path*', '/login', '/register'],
 };

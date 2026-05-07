@@ -1,0 +1,23 @@
+model PlayerSeason {
+  id          String  @id @default(cuid())
+  playerId    String
+  seasonId    String
+  clubId      String
+  shirtNumber Int?
+
+  contractStart DateTime?
+  contractEnd   DateTime?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id])
+  club   Club   @relation(fields: [clubId], references: [id])
+  stats  Stats?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerId, seasonId])
+  @@index([seasonId])
+  @@index([clubId])
+  @@map("player_seasons")
+}
