@@ -1,0 +1,18 @@
+enum Position {
+  GK
+  RB
+  RWB
+  CB
+  LB
+  LWB
+  CDM
+  CM
+  CAM
+  RW
+  RM
+  LW
+  LM
+  ST
+  CF
+  SS
+}

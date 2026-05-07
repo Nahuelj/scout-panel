@@ -1,0 +1,91 @@
+model Stats {
+  id                    String     @id @default(cuid())
+
+  playerId              String
+  contractId            String
+  seasonId              String
+
+  player                Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  contract              Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  season                Season   @relation(fields: [seasonId], references: [id])
+
+  // === Métricas Básicas ===
+  matchesPlayed         Int      @default(0)
+  minutesPlayed         Int      @default(0)
+  goals                 Int      @default(0)
+  assists               Int      @default(0)
+  yellowCards           Int      @default(0)
+  redCards              Int      @default(0)
+
+  // =============================================
+  // DRI — DRIBBLING
+  // =============================================
+  dribblesAttempted        Int?
+  dribbleSuccessPct        Float?
+  progressiveCarries       Float?
+  carriesIntoFinalThird    Float?
+  ballRetentionPct         Float?
+  foulsWon                 Float?
+
+  // =============================================
+  // VEL — PACE
+  // =============================================
+  topSpeed                 Float?   // km/h
+  sprintDistance           Int?     // metros
+  accelerations            Int?
+  progressiveRuns          Float?
+  distanceCovered          Float?   // km
+
+  // =============================================
+  // PAS — PASSING
+  // =============================================
+  passAccuracyPct          Float?
+  progressivePasses        Float?
+  keyPasses                Float?
+  throughBalls             Float?
+  crossAccuracyPct         Float?
+  xA                       Float?   // Expected Assists
+  weakFootPassPct           Float?
+  weakFootPassAccuracyPct   Float?
+  progressiveWfPasses       Float?
+
+  // =============================================
+  // TIR — SHOOTING
+  // =============================================
+  goalsPer90               Float?
+  xGPer90                  Float?
+  shotAccuracyPct          Float?
+  conversionRatePct        Float?
+  shotsOnTarget            Int?
+  touchesInBox             Int?
+  weakFootShotPct           Float?
+  weakFootGoals             Int?
+  weakFootShotAccuracyPct   Float?
+
+  // =============================================
+  // DEF — DEFENDING
+  // =============================================
+  tacklesWonPct            Float?
+  interceptions            Float?
+  recoveries               Float?
+  blocks                   Float?
+  aerialDuelsWonPct        Float?
+  clearances               Float?
+
+  // =============================================
+  // FZA — PHYSICAL
+  // =============================================
+  physicalDuelsWonPct      Float?
+  strengthDuels            Float?
+  aerialWinsPct            Float?
+  balance                  Float?   // Score
+  stamina                  Float?   // Score
+  bodyContactSuccessPct    Float?
+
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@unique([contractId, seasonId])
+  @@index([playerId])
+  @@map("stats")
+}

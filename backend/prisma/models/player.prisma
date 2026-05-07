@@ -1,0 +1,19 @@
+model Player {
+  id             String    @id @default(cuid())
+  name           String
+  birthDate      DateTime?
+  nationality    String?
+  position       Position
+  photoUrl       String?
+
+  currentClubId  String?
+  currentClub    Club?     @relation("CurrentClub", fields: [currentClubId], references: [id])
+
+  contracts      Contract[]
+  stats          Stats[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("players")
+}
