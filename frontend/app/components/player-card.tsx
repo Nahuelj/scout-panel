@@ -108,9 +108,24 @@ export default function PlayerCard({ player, isSelected, onToggle }: Props) {
         )}
 
         {player.currentSeason && (
-          <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide text-center">
-            {player.currentSeason.club}
-            {age !== null && <span className="text-neutral-500"> • {age} YRS</span>}
+          <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide text-center flex items-center justify-center gap-1.5 flex-wrap">
+            {player.currentSeason.clubLogoUrl ? (
+              <span className="relative h-5 w-5 flex-shrink-0 overflow-hidden rounded bg-neutral-800">
+                <Image
+                  src={player.currentSeason.clubLogoUrl}
+                  alt=""
+                  fill
+                  className="object-contain p-0.5"
+                  sizes="20px"
+                  unoptimized
+                  aria-hidden
+                />
+              </span>
+            ) : null}
+            <span>
+              {player.currentSeason.club}
+              {age !== null && <span className="text-neutral-500"> • {age} YRS</span>}
+            </span>
           </p>
         )}
       </div>

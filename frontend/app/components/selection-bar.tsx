@@ -13,9 +13,12 @@ export default function SelectionBar() {
 
   const handleAction = () => {
     if (count === 1) {
-      router.push(`/players/${selectedPlayers[0].id}`);
+      const id = selectedPlayers[0].id;
+      clearSelection();
+      router.push(`/players/${id}`);
     } else {
       const ids = selectedPlayers.map((p) => p.id).join(',');
+      clearSelection();
       router.push(`/compare?ids=${ids}`);
     }
   };

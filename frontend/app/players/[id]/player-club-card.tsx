@@ -23,14 +23,14 @@ export default function PlayerClubCard({ player }: Props) {
   return (
     <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-6 flex flex-col gap-5">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
+        <div className="relative w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
           {club.logoUrl ? (
             <Image
               src={club.logoUrl}
               alt={club.name}
-              width={40}
-              height={40}
-              className="object-contain"
+              fill
+              className="object-contain p-1.5"
+              sizes="48px"
               unoptimized
             />
           ) : (
