@@ -1,5 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import { Bookmark } from 'lucide-react';
+import type { RefObject } from 'react';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 
 function calcAge(birthDate: string): number {
@@ -8,9 +11,12 @@ function calcAge(birthDate: string): number {
   );
 }
 
-type Props = { player: PlayerDetail };
+type Props = {
+  player: PlayerDetail;
+  nameAnchorRef?: RefObject<HTMLHeadingElement | null>;
+};
 
-export default function PlayerHero({ player }: Props) {
+export default function PlayerHero({ player, nameAnchorRef }: Props) {
   const age = player.birthDate ? calcAge(player.birthDate) : null;
   const stats = player.currentSeason?.stats;
 
@@ -52,7 +58,10 @@ export default function PlayerHero({ player }: Props) {
               )}
             </div>
           )}
-          <h1 className="text-white font-bold text-3xl leading-tight mb-2">
+          <h1
+            ref={nameAnchorRef}
+            className="text-white font-bold text-3xl leading-tight mb-2"
+          >
             {player.name}
           </h1>
           <div className="flex items-center justify-between gap-3">

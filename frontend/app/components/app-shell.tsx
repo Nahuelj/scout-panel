@@ -3,7 +3,7 @@ import DashboardHeader from '@/app/components/dashboard-header';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#080d14]">
-      <div className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#080d14]">
+      <div id="app-header" className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#080d14]">
         <div className="mx-auto max-w-screen-xl px-6 md:px-8 pb-4 pt-6 md:pt-8">
           <DashboardHeader />
         </div>

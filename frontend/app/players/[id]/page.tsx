@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getPlayerDetail } from '@/lib/player-detail-api';
-import PlayerHero from './player-hero';
+import PlayerDetailClient from './player-detail-client';
 import PlayerClubCard from './player-club-card';
 import PlayerAttributesBar from './player-attributes-bar';
 import PlayerAnalysis from './player-analysis';
@@ -15,9 +15,9 @@ export default async function PlayerDetailPage({ params }: Props) {
   if (!player) notFound();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
-        <PlayerHero player={player} />
+        <PlayerDetailClient player={player} />
         <PlayerClubCard player={player} />
       </div>
 
