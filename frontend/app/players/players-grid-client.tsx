@@ -1,7 +1,6 @@
 'use client';
 
 import PlayerCard from '@/app/components/player-card';
-import SelectionBar from '@/app/components/selection-bar';
 import { useSelectionStore } from '@/lib/selection-store';
 import type { PlayerCardData } from '@/lib/players-api';
 
@@ -19,18 +18,15 @@ export default function PlayersGridClient({ players }: Props) {
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6">
-        {players.map((player) => (
-          <PlayerCard
-            key={player.id}
-            player={player}
-            isSelected={selectedPlayers.some((p) => p.id === player.id)}
-            onToggle={() => togglePlayer(player)}
-          />
-        ))}
-      </div>
-      <SelectionBar />
-    </>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6">
+      {players.map((player) => (
+        <PlayerCard
+          key={player.id}
+          player={player}
+          isSelected={selectedPlayers.some((p) => p.id === player.id)}
+          onToggle={() => togglePlayer(player)}
+        />
+      ))}
+    </div>
   );
 }

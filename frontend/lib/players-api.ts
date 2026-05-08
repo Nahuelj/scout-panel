@@ -79,10 +79,16 @@ function serializeApiQuery(state: PlayersListRouteState): URLSearchParams {
   );
 }
 
-export async function getPlayers(state: PlayersListRouteState): Promise<PaginatedPlayersResponse> {
+export async function getPlayers(
+  state: PlayersListRouteState,
+  options?: { signal?: AbortSignal },
+): Promise<PaginatedPlayersResponse> {
   const params = serializeApiQuery(state);
   const origin = playersApiOrigin();
-  const res = await fetch(`${origin}/players?${params}`, { cache: 'no-store' });
+  const res = await fetch(`${origin}/players?${params}`, {
+    cache: 'no-store',
+    signal: options?.signal,
+  });
   if (!res.ok) throw new Error('Failed to fetch players');
   return res.json();
 }

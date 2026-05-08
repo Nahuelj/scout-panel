@@ -2827,7 +2827,7 @@ async function main() {
   }
 
   console.log(
-    '✅ Seed completado - 40 jugadores (Boca, River, Barcelona, Real Madrid), 2023-2024',
+    '✅ Seed completed — 40 players (Boca, River, Barcelona, Real Madrid), 2023-2024',
   );
 }
 

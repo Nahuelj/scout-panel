@@ -1,4 +1,5 @@
 import DashboardHeader from '@/app/components/dashboard-header';
+import SelectionBar from '@/app/components/selection-bar';
 import WaveMeshBackground from '@/app/components/wave-mesh-background';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -8,7 +9,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     >
       <div
         id="app-header"
-        className="relative sticky top-0 z-50 w-full overflow-hidden border-b border-white/5 bg-[#080d14]"
+        className="relative sticky top-0 z-50 w-full overflow-visible border-b border-white/5 bg-[#080d14]"
       >
         <WaveMeshBackground />
         <div className="relative z-10 mx-auto max-w-screen-xl px-6 pb-4 pt-6 md:px-8 md:pt-8">
@@ -18,6 +19,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className="mx-auto max-w-screen-xl px-6 md:px-8 pb-6 md:pb-8 pt-8">
         {children}
       </div>
+      <SelectionBar />
     </div>
   );
 }

@@ -23,10 +23,7 @@ export default function SelectionBar() {
     }
   };
 
-  const label =
-    count === 1
-      ? 'VER DETALLES'
-      : `COMPARAR ${count} JUGADORES`;
+  const label = count === 1 ? 'VIEW DETAILS' : `COMPARE ${count} PLAYERS`;
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200">
