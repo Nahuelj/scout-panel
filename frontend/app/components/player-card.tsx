@@ -55,7 +55,7 @@ export default function PlayerCard({ player, isSelected, onToggle }: Props) {
   return (
     <div
       onClick={onToggle}
-      className={`relative flex flex-col items-center rounded-2xl bg-[#0f1923] border p-5 gap-3 cursor-pointer transition-colors group ${
+      className={`relative flex min-w-0 flex-col items-center rounded-2xl bg-[#0f1923] border p-5 gap-3 cursor-pointer transition-colors group ${
         isSelected
           ? 'border-emerald-500/60 shadow-[0_0_0_1px_rgba(16,185,129,0.2)]'
           : 'border-white/5 hover:border-white/15'
@@ -91,7 +91,7 @@ export default function PlayerCard({ player, isSelected, onToggle }: Props) {
         )}
       </div>
 
-      <div className="flex flex-col items-center gap-1.5 w-full">
+      <div className="flex min-w-0 flex-col items-center gap-1.5 w-full">
         <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${posColor}`}>
           {posGroup}
         </span>
@@ -108,7 +108,7 @@ export default function PlayerCard({ player, isSelected, onToggle }: Props) {
         )}
 
         {player.currentSeason && (
-          <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide text-center flex items-center justify-center gap-1.5 flex-wrap">
+          <div className="flex w-full min-w-0 items-center justify-center gap-1.5">
             {player.currentSeason.clubLogoUrl ? (
               <span className="relative h-5 w-5 flex-shrink-0 overflow-hidden rounded bg-neutral-800">
                 <Image
@@ -122,11 +122,17 @@ export default function PlayerCard({ player, isSelected, onToggle }: Props) {
                 />
               </span>
             ) : null}
-            <span>
-              {player.currentSeason.club}
-              {age !== null && <span className="text-neutral-500"> • {age} YRS</span>}
-            </span>
-          </p>
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
+              <span className="min-w-0 flex-1 truncate text-emerald-400 text-xs font-semibold uppercase tracking-wide">
+                {player.currentSeason.club}
+              </span>
+              {age !== null && (
+                <span className="flex-shrink-0 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  • {age} YRS
+                </span>
+              )}
+            </div>
+          </div>
         )}
       </div>
 
