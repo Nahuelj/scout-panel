@@ -3,25 +3,7 @@
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { PlayerDetail } from '@/lib/player-detail-api';
-
-const POSITION_FULL: Record<string, string> = {
-  GK: 'Goalkeeper',
-  CB: 'Center Back',
-  RB: 'Right Back',
-  LB: 'Left Back',
-  RWB: 'Right Wing Back',
-  LWB: 'Left Wing Back',
-  CDM: 'Defensive Midfielder',
-  CM: 'Central Midfielder',
-  CAM: 'Attacking Midfielder',
-  RM: 'Right Midfielder',
-  LM: 'Left Midfielder',
-  RW: 'Right Winger',
-  LW: 'Left Winger',
-  ST: 'Striker',
-  CF: 'Center Forward',
-  SS: 'Second Striker',
-};
+import { POSITION_FULL } from '@/lib/player-stats-metadata';
 
 function scoreLabel(value: number | null): string {
   if (value === null) return '';
