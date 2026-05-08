@@ -10,6 +10,8 @@ export type PlayerDetailStats = {
   assists: number;
   yellowCards: number;
   redCards: number;
+  matchesPerYellowCard: number | null;
+  matchesPerRedCard: number | null;
   dribblesAttempted: number | null;
   dribbleSuccessPct: number | null;
   progressiveCarries: number | null;

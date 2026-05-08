@@ -23,7 +23,7 @@ function HeaderCard({ player, index }: CardProps) {
   const club = player.currentSeason?.club;
 
   return (
-    <div className="relative flex min-w-0 flex-col rounded-2xl border border-white/5 bg-[#0f1923] overflow-hidden">
+    <div className="relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden">
       <div
         className="h-1 w-full"
         style={{ backgroundColor: slot.base }}

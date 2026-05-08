@@ -16,6 +16,7 @@ import {
   categoryLabel,
   computeRadarScores,
   formatValue,
+  formatCardIntervalGames,
   clientToSvgPoint,
   pickCategoryByNearestAxis,
   type StatFormatKind,
@@ -191,6 +192,11 @@ export default function PlayerAnalysis({ stats }: Props) {
             <p className="text-white text-xl font-bold tabular-nums mt-0.5">
               {stats.redCards}
             </p>
+            <p className="text-neutral-500 text-[11px] mt-1 tabular-nums leading-snug">
+              {stats.matchesPerRedCard != null
+                ? formatCardIntervalGames(stats.matchesPerRedCard)
+                : 'No red cards'}
+            </p>
           </div>
           <div className="rounded-xl bg-white/[0.03] border border-white/5 px-3 py-2.5">
             <p className="text-neutral-500 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1.5">
@@ -202,6 +208,11 @@ export default function PlayerAnalysis({ stats }: Props) {
             </p>
             <p className="text-white text-xl font-bold tabular-nums mt-0.5">
               {stats.yellowCards}
+            </p>
+            <p className="text-neutral-500 text-[11px] mt-1 tabular-nums leading-snug">
+              {stats.matchesPerYellowCard != null
+                ? formatCardIntervalGames(stats.matchesPerYellowCard)
+                : 'No yellow cards'}
             </p>
           </div>
         </div>

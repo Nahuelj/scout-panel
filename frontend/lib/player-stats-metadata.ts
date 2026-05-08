@@ -305,6 +305,11 @@ export const METRIC_META: Record<string, StatMetricMeta> = {
   },
 };
 
+export function formatCardIntervalGames(matchesPerCard: number | null | undefined): string {
+  if (matchesPerCard === null || matchesPerCard === undefined) return '—';
+  return `≈ 1 card every ${matchesPerCard.toFixed(1)} games`;
+}
+
 export function formatValue(
   value: number | null | undefined,
   formatKind: StatFormatKind,

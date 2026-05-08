@@ -123,6 +123,8 @@ export class PlayersService {
                 assists: true,
                 yellowCards: true,
                 redCards: true,
+                matchesPerYellowCard: true,
+                matchesPerRedCard: true,
                 dribblesAttempted: true,
                 dribbleSuccessPct: true,
                 progressiveCarries: true,

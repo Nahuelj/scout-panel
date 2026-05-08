@@ -16,6 +16,7 @@ import {
   categoryLabel,
   computeRadarScores,
   formatValue,
+  formatCardIntervalGames,
   clientToSvgPoint,
   pickCategoryByNearestAxis,
   type StatFormatKind,
@@ -305,6 +306,20 @@ export default function CompareAnalysis({ players }: Props) {
                         {stats?.redCards ?? 0}
                       </span>
                     </div>
+                  </div>
+                  <div className="text-[10px] text-neutral-500 space-y-0.5 mt-1.5 pt-1.5 border-t border-white/[0.06] tabular-nums">
+                    <p>
+                      <span className="text-neutral-600">Yellow · </span>
+                      {stats?.matchesPerYellowCard != null
+                        ? formatCardIntervalGames(stats.matchesPerYellowCard)
+                        : 'No yellow cards'}
+                    </p>
+                    <p>
+                      <span className="text-neutral-600">Red · </span>
+                      {stats?.matchesPerRedCard != null
+                        ? formatCardIntervalGames(stats.matchesPerRedCard)
+                        : 'No red cards'}
+                    </p>
                   </div>
                 </div>
               );

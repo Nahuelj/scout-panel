@@ -10,6 +10,27 @@ import {
 const adapter = new PrismaPg(process.env.DATABASE_URL as string);
 const prisma = new PrismaClient({ adapter });
 
+function withCardFrequencies<
+  T extends { matchesPlayed: number; yellowCards: number; redCards: number },
+>(
+  stats: T,
+): T & {
+  matchesPerYellowCard: number | null;
+  matchesPerRedCard: number | null;
+} {
+  return {
+    ...stats,
+    matchesPerYellowCard:
+      stats.matchesPlayed > 0 && stats.yellowCards > 0
+        ? stats.matchesPlayed / stats.yellowCards
+        : null,
+    matchesPerRedCard:
+      stats.matchesPlayed > 0 && stats.redCards > 0
+        ? stats.matchesPlayed / stats.redCards
+        : null,
+  };
+}
+
 async function main() {
   await prisma.player.deleteMany({});
 
@@ -104,7 +125,7 @@ async function main() {
 
   const clubs = { boca, river, barcelona, realMadrid };
 
-  const playersData = [
+  const playersSeed = [
     {
       clubKey: 'boca' as const,
       id: 'boca-merentiel-001',
@@ -2745,6 +2766,11 @@ async function main() {
       },
     },
   ];
+
+  const playersData = playersSeed.map((p) => ({
+    ...p,
+    stats: withCardFrequencies(p.stats),
+  }));
 
   for (const p of playersData) {
     const player = await prisma.player.upsert({

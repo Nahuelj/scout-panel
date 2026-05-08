@@ -11,6 +11,8 @@ model Stats {
   assists       Int   @default(0)
   yellowCards   Int   @default(0)
   redCards      Int   @default(0)
+  matchesPerYellowCard Float?
+  matchesPerRedCard    Float?
 
   // DRI — DRIBBLING
   dribblesAttempted     Int?
