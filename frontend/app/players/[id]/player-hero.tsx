@@ -25,14 +25,14 @@ export default function PlayerHero({ player, nameAnchorRef }: Props) {
   return (
     <div className="relative flex min-h-0 min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden lg:h-full">
       <div
-        className="h-1 w-full shrink-0"
+        className="h-0.5 w-full shrink-0"
         style={{ backgroundColor: accent }}
         aria-hidden
       />
       <div className="relative flex min-h-0 flex-1 items-center px-6 py-5">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/20 to-transparent pointer-events-none" />
 
-        <div className="relative mx-auto flex w-full max-w-4xl items-center gap-5">
+        <div className="relative flex w-full max-w-4xl items-center gap-5">
           <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0 ring-2 ring-white/5">
             {player.photoUrl ? (
               <Image

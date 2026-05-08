@@ -1,22 +1,27 @@
 'use client';
 
+import { useRef } from 'react';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 import CompareHeaders from './compare-headers';
 import CompareAttributesTable from './compare-attributes-table';
 import CompareAnalysis from './compare-analysis';
 import CompareActivityChart from './compare-activity-chart';
+import CompareStickyBar from './compare-sticky-bar';
 
 type Props = { players: PlayerDetail[] };
 
 export default function CompareClient({ players }: Props) {
+  const nameAnchorRef = useRef<HTMLDivElement>(null);
   const playersWithStats = players.filter((p) => p.currentSeason?.stats);
   const playersWithActivity = players.filter(
     (p) => (p.currentSeason?.activity?.length ?? 0) > 0,
   );
 
   return (
-    <div className="space-y-4 pb-8">
-      <CompareHeaders players={players} />
+    <div className="space-y-4 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]">
+      <CompareStickyBar players={players} nameAnchorRef={nameAnchorRef} />
+
+      <CompareHeaders players={players} nameAnchorRef={nameAnchorRef} />
 
       <CompareAttributesTable players={players} />
 

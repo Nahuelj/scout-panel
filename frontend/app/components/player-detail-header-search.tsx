@@ -18,11 +18,18 @@ import {
 } from "@/lib/player-list-params";
 import { getPlayers, type PlayerCardData } from "@/lib/players-api";
 
-type Props = { currentPlayerId: string };
+type Props = {
+  currentIds: string[];
+  maxIds?: number;
+};
 
 const SEARCH_DEBOUNCE_MS = 380;
+const DEFAULT_MAX_IDS = 3;
 
-export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
+export default function PlayerDetailHeaderSearch({
+  currentIds,
+  maxIds = DEFAULT_MAX_IDS,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,6 +39,9 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
   const [debouncing, setDebouncing] = useState(false);
   const [loadedEmptyQuery, setLoadedEmptyQuery] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+
+  const currentIdsKey = currentIds.join(",");
+  const isAtMax = currentIds.length >= maxIds;
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +66,7 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
       ac = new AbortController();
       setPending(true);
       const queryRun = q;
+      const excludeIds = currentIdsKey ? currentIdsKey.split(",") : [];
       getPlayers(
         {
           search: queryRun,
@@ -66,7 +77,7 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
       )
         .then((res) => {
           if (!cancelled) {
-            const rows = res.data.filter((p) => p.id !== currentPlayerId);
+            const rows = res.data.filter((p) => !excludeIds.includes(p.id));
             setResults(rows);
             setLoadedEmptyQuery(rows.length === 0 ? queryRun : null);
           }
@@ -96,7 +107,7 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
       setDebouncing(false);
       ac?.abort();
     };
-  }, [draft, currentPlayerId]);
+  }, [draft, currentIdsKey]);
 
   useEffect(() => {
     function handlePointerDown(ev: MouseEvent) {
@@ -122,6 +133,20 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  useEffect(() => {
+    if (!panelOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [panelOpen]);
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = draft.trim();
@@ -145,12 +170,14 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
 
   const compareWith = useCallback(
     (id: string) => {
+      if (isAtMax) return;
       setPanelOpen(false);
-      router.push(
-        `/compare?ids=${encodeURIComponent(currentPlayerId)},${encodeURIComponent(id)}`,
-      );
+      const baseIds = currentIdsKey ? currentIdsKey.split(",") : [];
+      const nextIds = Array.from(new Set([...baseIds, id])).slice(0, maxIds);
+      const encoded = nextIds.map((x) => encodeURIComponent(x)).join(",");
+      router.push(`/compare?ids=${encoded}`);
     },
-    [router, currentPlayerId],
+    [router, currentIdsKey, isAtMax, maxIds],
   );
 
   const trimmedDraft = draft.trim();
@@ -199,102 +226,116 @@ export default function PlayerDetailHeaderSearch({ currentPlayerId }: Props) {
               className="h-10 w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-10 pr-3 text-sm text-white outline-none placeholder:text-neutral-500 focus:border-white/20"
             />
             {showPanel ? (
-              <div
-                id="player-detail-search-panel"
-                role="listbox"
-                aria-label="Search suggestions"
-                className="scrollbar-panel absolute left-0 right-0 top-[calc(100%+0.5rem)] max-h-[min(32rem,calc(100vh-9rem))] overflow-y-auto rounded-lg border border-white/10 bg-[#0f1923] py-2 shadow-xl ring-1 ring-black/40"
-              >
-                {debouncing || (pending && results.length === 0) ? (
-                  <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-neutral-500">
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                    <span>Searching…</span>
-                  </div>
-                ) : null}
-                {!pending &&
-                !debouncing &&
-                loadedEmptyQuery === trimmedDraft ? (
-                  <p className="px-4 py-6 text-center text-sm text-neutral-500">
-                    No players found
-                  </p>
-                ) : null}
-                <div className="flex flex-col gap-2 px-2 pb-1 pt-1">
-                  {results.map((player) => {
-                    const club = player.currentSeason?.club?.trim() || "N/A";
-                    return (
-                      <div
-                        key={player.id}
-                        role="option"
-                        aria-selected={false}
-                        className="flex flex-col gap-2 rounded-lg border border-white/[0.07] px-2 py-2 sm:flex-row sm:items-center sm:gap-2 [&:has(.player-row-compare-hit:hover)_.compare-action-hit]:border-emerald-400/55 [&:has(.player-row-compare-hit:hover)_.compare-action-hit]:bg-emerald-500/25 [&:has(.player-row-compare-hit:hover)_.compare-action-hit]:text-emerald-200"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => compareWith(player.id)}
-                          title="Compare with current player"
-                          aria-label={`Compare ${player.name} with current player`}
-                          className="player-row-compare-hit flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md px-1 py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/15"
+              <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-lg border border-white/10 bg-[#0f1923] shadow-xl ring-1 ring-black/40">
+                <div
+                  id="player-detail-search-panel"
+                  role="listbox"
+                  aria-label="Search suggestions"
+                  className="scrollbar-panel max-h-[min(32rem,calc(100vh-9rem))] overflow-y-auto py-2"
+                >
+                  {debouncing || (pending && results.length === 0) ? (
+                    <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-neutral-500">
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                      <span>Searching…</span>
+                    </div>
+                  ) : null}
+                  {!pending &&
+                  !debouncing &&
+                  loadedEmptyQuery === trimmedDraft ? (
+                    <p className="px-4 py-6 text-center text-sm text-neutral-500">
+                      No players found
+                    </p>
+                  ) : null}
+                  <div className="flex flex-col divide-y divide-white/10 px-2">
+                    {results.map((player) => {
+                      const club = player.currentSeason?.club?.trim() || "N/A";
+                      const compareTitle = isAtMax
+                        ? `Maximum ${maxIds} players in comparison`
+                        : "Compare with current player";
+                      const compareAriaLabel = isAtMax
+                        ? `Maximum ${maxIds} players in comparison`
+                        : "Compare with current player";
+                      return (
+                        <div
+                          key={player.id}
+                          role="option"
+                          aria-selected={false}
+                          className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:gap-2 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:border-emerald-400/55 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:bg-emerald-500/25 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:text-emerald-200"
                         >
-                          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-neutral-800">
-                            {player.photoUrl ? (
-                              <Image
-                                src={player.photoUrl}
-                                alt={player.name}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                                sizes="44px"
-                              />
-                            ) : (
-                              <span className="flex h-full w-full items-center justify-center text-neutral-600">
-                                ?
-                              </span>
-                            )}
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate font-semibold text-white">
-                              {player.name}
-                            </span>
-                            <span className="block truncate text-xs text-neutral-400">
-                              <span className="tabular-nums text-neutral-300">
-                                {player.position}
-                              </span>
-                              <span className="mx-1.5 text-neutral-600">·</span>
-                              <span>{club}</span>
-                            </span>
-                          </span>
-                        </button>
-                        <div className="flex shrink-0 items-center justify-end gap-2 sm:pl-1">
-                          <button
-                            type="button"
-                            onClick={() => goToPlayer(player.id)}
-                            title="Open player profile"
-                            aria-label="Open player profile"
-                            className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-neutral-300 outline-none transition-colors hover:border-white/30 hover:bg-white/[0.12] hover:text-white focus-visible:border-white/35 focus-visible:ring-2 focus-visible:ring-white/15"
-                          >
-                            <FileSpreadsheet
-                              className="size-[18px]"
-                              strokeWidth={1.65}
-                              aria-hidden
-                            />
-                          </button>
                           <button
                             type="button"
                             onClick={() => compareWith(player.id)}
-                            title="Compare with current player"
-                            aria-label="Compare with current player"
-                            className="compare-action-hit inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-emerald-500/35 bg-emerald-500/[0.12] text-emerald-400 outline-none transition-colors hover:border-emerald-400/70 hover:bg-emerald-500/35 hover:text-emerald-100 focus-visible:border-emerald-400/55 focus-visible:ring-2 focus-visible:ring-emerald-500/25"
+                            disabled={isAtMax}
+                            title={compareTitle}
+                            aria-label={
+                              isAtMax
+                                ? compareAriaLabel
+                                : `Compare ${player.name} with current player`
+                            }
+                            className="player-row-compare-hit flex min-w-0 flex-1 items-center gap-3 rounded-md px-1 py-1 text-left outline-none focus-visible:ring-2 focus-visible:ring-white/15 enabled:cursor-pointer disabled:cursor-not-allowed"
                           >
-                            <Users
-                              className="size-[18px]"
-                              strokeWidth={1.65}
-                              aria-hidden
-                            />
+                            <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-neutral-800">
+                              {player.photoUrl ? (
+                                <Image
+                                  src={player.photoUrl}
+                                  alt={player.name}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                  sizes="44px"
+                                />
+                              ) : (
+                                <span className="flex h-full w-full items-center justify-center text-neutral-600">
+                                  ?
+                                </span>
+                              )}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate font-semibold text-white">
+                                {player.name}
+                              </span>
+                              <span className="block truncate text-xs text-neutral-400">
+                                <span className="tabular-nums text-neutral-300">
+                                  {player.position}
+                                </span>
+                                <span className="mx-1.5 text-neutral-600">·</span>
+                                <span>{club}</span>
+                              </span>
+                            </span>
                           </button>
+                          <div className="flex shrink-0 items-center justify-end gap-2 sm:pl-1">
+                            <button
+                              type="button"
+                              onClick={() => goToPlayer(player.id)}
+                              title="Open player profile"
+                              aria-label="Open player profile"
+                              className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.04] text-neutral-300 outline-none transition-colors hover:border-white/30 hover:bg-white/[0.12] hover:text-white focus-visible:border-white/35 focus-visible:ring-2 focus-visible:ring-white/15"
+                            >
+                              <FileSpreadsheet
+                                className="size-[18px]"
+                                strokeWidth={1.65}
+                                aria-hidden
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => compareWith(player.id)}
+                              disabled={isAtMax}
+                              title={compareTitle}
+                              aria-label={compareAriaLabel}
+                              className="compare-action-hit inline-flex size-9 shrink-0 items-center justify-center rounded-lg border outline-none transition-colors enabled:border-emerald-500/35 enabled:bg-emerald-500/[0.12] enabled:text-emerald-400 enabled:hover:border-emerald-400/70 enabled:hover:bg-emerald-500/35 enabled:hover:text-emerald-100 enabled:focus-visible:border-emerald-400/55 enabled:focus-visible:ring-2 enabled:focus-visible:ring-emerald-500/25 disabled:cursor-not-allowed disabled:border-white/[0.06] disabled:bg-white/[0.03] disabled:text-neutral-600"
+                            >
+                              <Users
+                                className="size-[18px]"
+                                strokeWidth={1.65}
+                                aria-hidden
+                              />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             ) : null}

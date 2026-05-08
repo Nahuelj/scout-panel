@@ -121,13 +121,42 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply font-sans;
+    background-color: #080d14;
+  }
   body {
     @apply bg-background text-foreground font-sans;
     font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+    background-color: #080d14;
   }
-  html {
-    @apply font-sans;
-  }
+}
+
+:root {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 185, 129, 0.45) rgba(255, 255, 255, 0.06);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080d14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.4);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.62);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 @layer utilities {

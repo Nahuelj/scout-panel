@@ -5,6 +5,7 @@ import type { RefObject } from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import type { PlayerDetail } from '@/lib/player-detail-api';
+import { getSlotColor } from '@/lib/compare-colors';
 
 function calcAge(birthDate: string): number {
   return Math.floor(
@@ -61,6 +62,7 @@ export default function PlayerStickyBar({ player, nameAnchorRef }: Props) {
   }, [mounted, nameAnchorRef]);
 
   const age = player.birthDate ? calcAge(player.birthDate) : null;
+  const accent = getSlotColor(0).base;
 
   if (!mounted) return null;
 
@@ -72,34 +74,49 @@ export default function PlayerStickyBar({ player, nameAnchorRef }: Props) {
           : 'translate-y-0 opacity-100'
       }`}
     >
-      <div className="mx-auto max-w-screen-xl px-6 md:px-8 py-3 flex items-center gap-3">
-        <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0 ring-1 ring-white/10">
-          {player.photoUrl ? (
-            <Image
-              src={player.photoUrl}
-              alt={player.name}
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-sm text-neutral-500">
-              ?
+      <div className="mx-auto w-full max-w-screen-xl px-6 md:px-8">
+        <div className="grid w-max max-w-full grid-cols-1">
+          <div
+            className="h-0.5 min-w-0 shrink-0"
+            style={{ backgroundColor: accent }}
+            aria-hidden
+          />
+          <div className="flex min-w-0 items-center gap-4 py-3.5">
+            <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-white/10">
+              {player.photoUrl ? (
+                <Image
+                  src={player.photoUrl}
+                  alt={player.name}
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-base text-neutral-500">
+                  ?
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-white font-bold text-sm leading-none truncate">{player.name}</p>
-          <p className="text-neutral-500 text-xs mt-1">
-            {player.position}
-            {age !== null && (
-              <span> <span className="text-white/20">•</span> {age} years</span>
-            )}
-            {player.nationality && (
-              <span> <span className="text-white/20">•</span> {player.nationality}</span>
-            )}
-          </p>
+            <div className="min-w-0 max-w-[min(28rem,calc(100vw-5.5rem))]">
+              <p className="truncate text-base font-bold leading-none text-white">{player.name}</p>
+              <p className="mt-1.5 text-sm whitespace-nowrap text-neutral-500">
+                {player.position}
+                {age !== null && (
+                  <span>
+                    {' '}
+                    <span className="text-white/20">•</span> {age} years
+                  </span>
+                )}
+                {player.nationality && (
+                  <span>
+                    {' '}
+                    <span className="text-white/20">•</span> {player.nationality}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>,

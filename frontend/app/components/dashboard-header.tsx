@@ -1,9 +1,9 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Bookmark, LogOut, Crosshair } from 'lucide-react';
 import { signOut, useSession } from '@/lib/auth-client';
 import PlayerDetailHeaderSearch from '@/app/components/player-detail-header-search';
@@ -32,14 +32,39 @@ function isPlayerDetailPath(pathname: string | null): boolean {
   return true;
 }
 
+function isComparePath(pathname: string | null): boolean {
+  return pathname === '/compare';
+}
+
 export default function DashboardHeader() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const user = session?.user;
   const displayName = user?.name?.trim() || user?.email?.trim() || '';
   const isSavedSection = pathname?.startsWith('/players/saved') ?? false;
-  const showPlayerDetailSearch = isPlayerDetailPath(pathname ?? null);
+  const onPlayerDetail = isPlayerDetailPath(pathname ?? null);
+  const onCompare = isComparePath(pathname ?? null);
+  const showPlayerDetailSearch = onPlayerDetail || onCompare;
+
+  const compareIdsParam = searchParams?.get('ids') ?? '';
+  const searchCurrentIds = useMemo(() => {
+    if (onCompare) {
+      return Array.from(
+        new Set(
+          compareIdsParam
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+        ),
+      );
+    }
+    if (onPlayerDetail && pathname) {
+      return [pathname.slice('/players/'.length)];
+    }
+    return [];
+  }, [onCompare, onPlayerDetail, pathname, compareIdsParam]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -120,9 +145,7 @@ export default function DashboardHeader() {
         <div className="grid w-full grid-cols-1 items-center gap-4 lg:grid-cols-[auto_1fr_auto] lg:gap-6">
           <div className="justify-self-start">{brandLink}</div>
           <div className="flex w-full justify-center lg:min-w-0 lg:px-4">
-            {pathname ? (
-              <PlayerDetailHeaderSearch currentPlayerId={pathname.slice('/players/'.length)} />
-            ) : null}
+            <PlayerDetailHeaderSearch currentIds={searchCurrentIds} />
           </div>
           <div className="flex justify-end lg:justify-self-end">{actionsToolbar}</div>
         </div>

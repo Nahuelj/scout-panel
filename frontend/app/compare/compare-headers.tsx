@@ -1,8 +1,9 @@
 'use client';
 
+import type { RefObject } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Bookmark, X } from 'lucide-react';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 import { getSlotColor } from '@/lib/compare-colors';
 
@@ -15,12 +16,28 @@ function calcAge(birthDate: string): number {
 type CardProps = {
   player: PlayerDetail;
   index: number;
+  allIds: string[];
 };
 
-function HeaderCard({ player, index }: CardProps) {
+function HeaderCard({ player, index, allIds }: CardProps) {
+  const router = useRouter();
   const slot = getSlotColor(index);
   const age = player.birthDate ? calcAge(player.birthDate) : null;
   const club = player.currentSeason?.club;
+
+  const handleRemove = () => {
+    const remaining = allIds.filter((id) => id !== player.id);
+    if (remaining.length === 0) {
+      router.push('/players');
+      return;
+    }
+    const encoded = remaining.map((x) => encodeURIComponent(x)).join(',');
+    router.push(`/compare?ids=${encoded}`);
+  };
+
+  const handleSave = () => {
+    // TODO: wire up save player
+  };
 
   return (
     <div className="relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden">
@@ -29,7 +46,33 @@ function HeaderCard({ player, index }: CardProps) {
         style={{ backgroundColor: slot.base }}
         aria-hidden
       />
-      <div className="flex items-center gap-4 px-5 py-4">
+
+      <div className="absolute right-2 top-3 z-10 flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={handleSave}
+          aria-label={`Save ${player.name}`}
+          title="Save player"
+          className="group inline-flex size-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.025] text-neutral-400 outline-none transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] hover:text-neutral-200 focus-visible:border-emerald-500/35 focus-visible:ring-2 focus-visible:ring-emerald-500/25"
+        >
+          <Bookmark
+            className="size-[15px] shrink-0 text-neutral-500 transition-colors group-hover:text-neutral-200"
+            strokeWidth={1.75}
+            aria-hidden
+          />
+        </button>
+        <button
+          type="button"
+          onClick={handleRemove}
+          aria-label={`Remove ${player.name} from comparison`}
+          title="Remove from comparison"
+          className="inline-flex size-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.025] text-neutral-400 outline-none transition-all duration-200 hover:border-red-500/40 hover:bg-red-500/[0.08] hover:text-red-300 focus-visible:border-red-500/40 focus-visible:ring-2 focus-visible:ring-red-500/25"
+        >
+          <X className="size-[15px] shrink-0" strokeWidth={1.75} aria-hidden />
+        </button>
+      </div>
+
+      <div className="flex items-center gap-4 px-5 py-4 pr-24">
         <div
           className="relative w-16 h-16 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0 ring-2"
           style={{ boxShadow: `0 0 0 2px ${slot.base}40` }}
@@ -120,26 +163,17 @@ function HeaderCard({ player, index }: CardProps) {
   );
 }
 
-type Props = { players: PlayerDetail[] };
+type Props = {
+  players: PlayerDetail[];
+  nameAnchorRef?: RefObject<HTMLDivElement | null>;
+};
 
-export default function CompareHeaders({ players }: Props) {
+export default function CompareHeaders({ players, nameAnchorRef }: Props) {
   const count = players.length;
+  const allIds = players.map((p) => p.id);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <Link
-          href="/players"
-          className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-white text-sm transition-colors"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          Back to players
-        </Link>
-        <p className="text-neutral-500 text-xs uppercase tracking-widest font-semibold">
-          Comparing {count} players
-        </p>
-      </div>
-
+    <div ref={nameAnchorRef} className="space-y-3">
       <div
         className={`grid gap-3 ${
           count === 2
@@ -148,7 +182,7 @@ export default function CompareHeaders({ players }: Props) {
         }`}
       >
         {players.map((player, i) => (
-          <HeaderCard key={player.id} player={player} index={i} />
+          <HeaderCard key={player.id} player={player} index={i} allIds={allIds} />
         ))}
       </div>
     </div>

@@ -201,8 +201,8 @@ export default function CompareAttributesTable({ players }: Props) {
 
   return (
     <div className="rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden">
-      <div className={`grid ${gridCols} bg-[#0b121c] border-b border-white/10`}>
-        <div className="px-5 py-3 text-[10px] uppercase tracking-widest text-neutral-600 font-semibold">
+      <div className={`grid ${gridCols} border-b border-white/10`}>
+        <div className="px-5 py-3 text-[10px] uppercase tracking-widest text-neutral-600 font-semibold bg-[#0b121c]">
           Attribute
         </div>
         {players.map((p, i) => {
@@ -211,7 +211,7 @@ export default function CompareAttributesTable({ players }: Props) {
             <div
               key={p.id}
               className="px-5 py-3 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2"
-              style={{ color: slot.base }}
+              style={{ color: slot.base, backgroundColor: `${slot.base}1f` }}
             >
               <span
                 className="inline-block w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -236,11 +236,18 @@ export default function CompareAttributesTable({ players }: Props) {
           <div className="px-5 py-4 text-[10px] uppercase tracking-widest text-neutral-500 font-semibold flex items-center">
             {row.label}
           </div>
-          {players.map((p) => (
-            <div key={p.id} className="px-5 py-4 min-w-0 flex items-center">
-              {row.render(p)}
-            </div>
-          ))}
+          {players.map((p, i) => {
+            const slot = getSlotColor(i);
+            return (
+              <div
+                key={p.id}
+                className="px-5 py-4 min-w-0 flex items-center"
+                style={{ backgroundColor: `${slot.base}1f` }}
+              >
+                {row.render(p)}
+              </div>
+            );
+          })}
         </div>
       ))}
     </div>
