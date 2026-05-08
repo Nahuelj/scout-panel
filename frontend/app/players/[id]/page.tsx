@@ -4,6 +4,7 @@ import PlayerHero from './player-hero';
 import PlayerClubCard from './player-club-card';
 import PlayerAttributesBar from './player-attributes-bar';
 import PlayerAnalysis from './player-analysis';
+import PlayerActivityChart from './player-activity-chart';
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -24,6 +25,13 @@ export default async function PlayerDetailPage({ params }: Props) {
 
       {player.currentSeason?.stats && (
         <PlayerAnalysis stats={player.currentSeason.stats} />
+      )}
+
+      {player.currentSeason?.activity && player.currentSeason.activity.length > 0 && (
+        <PlayerActivityChart
+          activity={player.currentSeason.activity}
+          seasonName={player.currentSeason.season.name}
+        />
       )}
     </div>
   );

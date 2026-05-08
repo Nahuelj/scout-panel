@@ -60,6 +60,10 @@ export class PlayersService {
                 logoUrl: true,
               },
             },
+            activity: {
+              select: { monthDate: true, minutesPlayed: true },
+              orderBy: { monthDate: 'asc' as const },
+            },
             stats: {
               select: {
                 matchesPlayed: true,
@@ -139,6 +143,7 @@ export class PlayersService {
             contractStart: season.contractStart,
             contractEnd: season.contractEnd,
             stats: season.stats,
+            activity: season.activity,
           }
         : null,
     };

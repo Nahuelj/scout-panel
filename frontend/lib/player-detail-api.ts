@@ -1,3 +1,8 @@
+export type PlayerActivity = {
+  monthDate: string;
+  minutesPlayed: number;
+};
+
 export type PlayerDetailStats = {
   matchesPlayed: number;
   minutesPlayed: number;
@@ -73,6 +78,7 @@ export type PlayerDetail = {
     contractStart: string | null;
     contractEnd: string | null;
     stats: PlayerDetailStats | null;
+    activity: PlayerActivity[];
   } | null;
 };
 

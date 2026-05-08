@@ -129,3 +129,33 @@
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  .scrollbar-panel {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.45) rgba(255, 255, 255, 0.06);
+  }
+
+  .scrollbar-panel::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-panel::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.4);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .scrollbar-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.62);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}

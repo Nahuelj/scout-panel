@@ -1,0 +1,15 @@
+model PlayerActivity {
+  id             String       @id @default(cuid())
+  playerSeasonId String
+  monthDate      DateTime
+  minutesPlayed  Int          @default(0)
+
+  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerSeasonId, monthDate])
+  @@index([playerSeasonId])
+  @@map("player_activity")
+}

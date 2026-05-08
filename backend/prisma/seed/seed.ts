@@ -55,8 +55,10 @@ async function main() {
   });
 
   // PlayerSeason
-  const playerSeason = await prisma.playerSeason.create({
-    data: {
+  const playerSeason = await prisma.playerSeason.upsert({
+    where: { playerId_seasonId: { playerId: player.id, seasonId: season.id } },
+    update: {},
+    create: {
       playerId: player.id,
       seasonId: season.id,
       clubId: club.id,
@@ -134,7 +136,26 @@ async function main() {
     },
   });
 
-  console.log('✅ Seed completo:', { player, club, season, playerSeason });
+  // PlayerActivity
+  await prisma.playerActivity.createMany({
+    data: [
+      { monthDate: '2024-08-01', minutesPlayed: 270 },
+      { monthDate: '2024-09-01', minutesPlayed: 315 },
+      { monthDate: '2024-10-01', minutesPlayed: 360 },
+      { monthDate: '2024-11-01', minutesPlayed: 290 },
+      { monthDate: '2024-12-01', minutesPlayed: 270 },
+      { monthDate: '2025-01-01', minutesPlayed: 225 },
+      { monthDate: '2025-02-01', minutesPlayed: 180 },
+      { monthDate: '2025-03-01', minutesPlayed: 224 },
+    ].map(({ monthDate, minutesPlayed }) => ({
+      playerSeasonId: playerSeason.id,
+      monthDate: new Date(monthDate),
+      minutesPlayed,
+    })),
+    skipDuplicates: true,
+  });
+
+  console.log('Seed complete:', { player, club, season, playerSeason });
 }
 
 main()

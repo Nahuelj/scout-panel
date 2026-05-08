@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import {
   Radar,
   RadarChart,
@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { PlayerDetailStats } from '@/lib/player-detail-api';
+import { cn } from '@/lib/utils';
 
 type StatMetric = {
   label: string;
@@ -414,10 +415,42 @@ type Props = { stats: PlayerDetailStats };
 export default function PlayerAnalysis({ stats }: Props) {
   const [activeTab, setActiveTab] = useState('SHO');
   const radarData = computeRadarScores(stats);
+  const radarPanelRef = useRef<HTMLDivElement>(null);
+  const [tablePanelHeightPx, setTablePanelHeightPx] = useState<number | undefined>(
+    undefined,
+  );
+
+  useLayoutEffect(() => {
+    const el = radarPanelRef.current;
+    if (!el) return;
+
+    const mq = window.matchMedia('(min-width: 1024px)');
+
+    const sync = () => {
+      if (!mq.matches) {
+        setTablePanelHeightPx(undefined);
+        return;
+      }
+      setTablePanelHeightPx(el.getBoundingClientRect().height);
+    };
+
+    const ro = new ResizeObserver(sync);
+    ro.observe(el);
+    mq.addEventListener('change', sync);
+    sync();
+
+    return () => {
+      ro.disconnect();
+      mq.removeEventListener('change', sync);
+    };
+  }, []);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 lg:items-start">
-      <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-6 flex flex-col">
+      <div
+        ref={radarPanelRef}
+        className="flex flex-col rounded-2xl border border-white/5 bg-[#0f1923] p-6"
+      >
         <h3 className="text-white font-bold text-base tracking-tight mb-4 shrink-0">
           Radar chart
         </h3>
@@ -472,9 +505,20 @@ export default function PlayerAnalysis({ stats }: Props) {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-[#0f1923] border border-white/5 min-w-0 flex flex-col overflow-hidden p-0">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full gap-0">
-          <TabsList className="isolate flex min-h-11 w-full items-stretch justify-stretch gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
+      <div
+        className="flex max-h-[min(32rem,70vh)] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0f1923] p-0 lg:max-h-none"
+        style={
+          tablePanelHeightPx !== undefined
+            ? { height: tablePanelHeightPx }
+            : undefined
+        }
+      >
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex h-full min-h-0 w-full flex-col gap-0"
+        >
+          <TabsList className="isolate flex min-h-11 w-full shrink-0 items-stretch justify-stretch gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
             {Object.entries(STAT_CATEGORIES).map(([cat, { title }]) => (
               <TabsTrigger
                 key={cat}
@@ -503,36 +547,43 @@ export default function PlayerAnalysis({ stats }: Props) {
               });
 
             return (
-              <TabsContent key={cat} value={cat} className="mt-0 px-6 pb-6 pt-5 outline-none">
-                <div className="space-y-0">
-                  <div className="grid grid-cols-[1fr_1fr_88px] gap-4 pb-2 mb-1 border-b border-white/5">
-                    {(['Metric', 'Description', 'Value'] as const).map((h) => (
-                      <span
-                        key={h}
-                        className="text-neutral-600 text-[9px] uppercase tracking-widest"
-                      >
-                        {h}
-                      </span>
-                    ))}
-                  </div>
-                  {rows.length === 0 ? (
-                    <p className="text-neutral-600 text-sm py-4">
-                      No data available
-                    </p>
-                  ) : (
-                    rows.map((row) => (
-                      <div
-                        key={row.label}
-                        className="grid grid-cols-[1fr_1fr_88px] gap-4 py-3 border-b border-white/5 last:border-0"
-                      >
-                        <span className="text-white text-sm font-medium">{row.label}</span>
-                        <span className="text-neutral-500 text-sm">{row.description}</span>
-                        <span className="text-white font-bold text-sm text-right">
-                          {formatValue(row.value, row.formatKind)}
+              <TabsContent
+                key={cat}
+                value={cat}
+                className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden px-0 pt-0 pb-0 outline-none"
+              >
+                <div className="flex min-h-0 flex-1 flex-col px-6 pt-5">
+                  <div className="scrollbar-panel min-h-0 flex-1 overflow-y-auto pb-6">
+                    <div className="sticky top-0 z-[1] mb-1 grid grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/5 bg-[#0f1923] pb-2">
+                      {(['Metric', 'Description', 'Value'] as const).map((h) => (
+                        <span
+                          key={h}
+                          className={cn(
+                            'text-[9px] uppercase tracking-widest text-neutral-600',
+                            h === 'Value' && 'text-center',
+                          )}
+                        >
+                          {h}
                         </span>
-                      </div>
-                    ))
-                  )}
+                      ))}
+                    </div>
+                    {rows.length === 0 ? (
+                      <p className="py-4 text-sm text-neutral-600">No data available</p>
+                    ) : (
+                      rows.map((row) => (
+                        <div
+                          key={row.label}
+                          className="grid grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/5 py-3 last:border-0"
+                        >
+                          <span className="text-sm font-medium text-white">{row.label}</span>
+                          <span className="text-sm text-neutral-500">{row.description}</span>
+                          <span className="text-center text-sm font-bold tabular-nums text-white">
+                            {formatValue(row.value, row.formatKind)}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </TabsContent>
             );

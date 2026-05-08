@@ -11,7 +11,8 @@ model PlayerSeason {
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
   season Season @relation(fields: [seasonId], references: [id])
   club   Club   @relation(fields: [clubId], references: [id])
-  stats  Stats?
+  stats    Stats?
+  activity PlayerActivity[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
