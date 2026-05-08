@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { PlayerFiltersDto } from './dto/player-filters.dto';
+import {
+  buildPaginationMeta,
+  type PaginatedResult,
+} from '../common/pagination';
+import { PlayerListQueryDto } from './dto/player-list-query.dto';
 import { PlayerDetailQueryDto } from './dto/player-detail-query.dto';
 import { pctToZeroTenScale } from './skillful-foot-score.util';
 
@@ -22,9 +26,55 @@ const SEASON_SELECT = {
   },
 } as const;
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 100;
+
 @Injectable()
 export class PlayersService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private buildPlayerListWhere(
+    query: Pick<
+      PlayerListQueryDto,
+      | 'position'
+      | 'nationality'
+      | 'seasonId'
+      | 'clubId'
+      | 'search'
+      | 'league'
+    >,
+  ) {
+    const { position, nationality, seasonId, clubId, search, league } =
+      query;
+
+    const seasonWhere = seasonId
+      ? { seasonId }
+      : { season: { isCurrent: true } };
+
+    const playerSeasonWhere = {
+      ...seasonWhere,
+      ...(clubId && { clubId }),
+      ...(league && {
+        club: {
+          league: {
+            equals: league.trim(),
+            mode: 'insensitive' as const,
+          },
+        },
+      }),
+    };
+
+    return {
+      ...(position && { position }),
+      ...(nationality && { nationality }),
+      ...(search && {
+        name: { contains: search, mode: 'insensitive' as const },
+      }),
+      seasons: { some: playerSeasonWhere },
+      playerSeasonWhere,
+    };
+  }
 
   async findOne(id: string, query: PlayerDetailQueryDto) {
     const seasonWhere = query.seasonId
@@ -131,9 +181,11 @@ export class PlayersService {
       ? {
           ...rawStats,
           skillfulFootPassScore:
-            pctToZeroTenScale(rawStats.passAccuracyPct) ?? rawStats.skillfulFootPassScore,
+            pctToZeroTenScale(rawStats.passAccuracyPct) ??
+            rawStats.skillfulFootPassScore,
           skillfulFootShotScore:
-            pctToZeroTenScale(rawStats.shotAccuracyPct) ?? rawStats.skillfulFootShotScore,
+            pctToZeroTenScale(rawStats.shotAccuracyPct) ??
+            rawStats.skillfulFootShotScore,
         }
       : null;
 
@@ -161,25 +213,63 @@ export class PlayersService {
     };
   }
 
-  async findAll(filters: PlayerFiltersDto) {
-    const { position, nationality, seasonId, clubId, search } = filters;
+  async findClubsForListingFilters() {
+    return this.prisma.club.findMany({
+      select: { id: true, name: true },
+      orderBy: { name: 'asc' },
+      take: 500,
+    });
+  }
 
-    const seasonWhere = seasonId
-      ? { seasonId }
-      : { season: { isCurrent: true } };
+  async findLeaguesForListingFilters(): Promise<string[]> {
+    const rows = await this.prisma.club.findMany({
+      where: { league: { not: null } },
+      select: { league: true },
+      distinct: ['league'],
+      orderBy: { league: 'asc' },
+    });
+    return rows
+      .map((r) => r.league)
+      .filter((x): x is string => x != null && x.length > 0);
+  }
 
-    const playerSeasonWhere = {
-      ...seasonWhere,
-      ...(clubId && { clubId }),
-    };
+  async findFilterOptionsForListing(): Promise<{
+    leagues: string[];
+    clubs: { id: string; name: string }[];
+  }> {
+    const [leagues, clubs] = await Promise.all([
+      this.findLeaguesForListingFilters(),
+      this.findClubsForListingFilters(),
+    ]);
+    return { leagues, clubs };
+  }
 
-    const players = await this.prisma.player.findMany({
-      where: {
-        ...(position && { position }),
-        ...(nationality && { nationality }),
-        ...(search && { name: { contains: search, mode: 'insensitive' as const } }),
-        seasons: { some: playerSeasonWhere },
-      },
+  async findAll(
+    query: PlayerListQueryDto,
+  ): Promise<PaginatedResult<PlayerListCard>> {
+    const whereCtx = this.buildPlayerListWhere(query);
+    const { playerSeasonWhere, ...where } = whereCtx;
+
+    const rawPageSize =
+      query.pageSize === undefined || Number.isNaN(query.pageSize)
+        ? DEFAULT_PAGE_SIZE
+        : query.pageSize;
+    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, rawPageSize));
+    const requestedPage =
+      query.page === undefined || Number.isNaN(query.page)
+        ? DEFAULT_PAGE
+        : query.page;
+
+    const totalItems = await this.prisma.player.count({ where });
+    const meta = buildPaginationMeta({
+      page: requestedPage,
+      pageSize,
+      totalItems,
+    });
+    const skip = (meta.page - 1) * pageSize;
+
+    const rows = await this.prisma.player.findMany({
+      where,
       select: {
         id: true,
         name: true,
@@ -194,9 +284,11 @@ export class PlayersService {
         },
       },
       orderBy: { name: 'asc' },
+      skip,
+      take: pageSize,
     });
 
-    return players.map((player) => {
+    const data = rows.map((player) => {
       const season = player.seasons[0] ?? null;
       return {
         id: player.id,
@@ -215,5 +307,26 @@ export class PlayersService {
           : null,
       };
     });
+    return { data, meta };
   }
 }
+
+type PlayerListCard = {
+  id: string;
+  name: string;
+  photoUrl: string | null;
+  position: string;
+  nationality: string | null;
+  birthDate: Date | null;
+  currentSeason: {
+    club: string;
+    clubLogoUrl: string | null;
+    league: string | null;
+    stats: {
+      matchesPlayed: number;
+      goals: number;
+      assists: number;
+      xGPer90: number | null;
+    } | null;
+  } | null;
+};

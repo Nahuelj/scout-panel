@@ -1,11 +1,15 @@
 import { Suspense } from 'react';
-import PlayersGrid from './players-grid';
+import { PlayersGridFromSearchParams } from './players-grid';
 import PlayersGridSkeleton from './players-grid-skeleton';
 
-export default function PlayersPage() {
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default function PlayersPage({ searchParams }: Props) {
   return (
     <Suspense fallback={<PlayersGridSkeleton />}>
-      <PlayersGrid />
+      <PlayersGridFromSearchParams searchParams={searchParams} />
     </Suspense>
   );
 }

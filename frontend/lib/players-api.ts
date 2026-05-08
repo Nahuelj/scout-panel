@@ -1,3 +1,9 @@
+import {
+  DEFAULT_PLAYERS_PAGE,
+  PLAYERS_FIXED_PAGE_SIZE,
+  type PlayersListRouteState,
+} from './player-list-params';
+
 export type PlayerCardData = {
   id: string;
   name: string;
@@ -18,21 +24,85 @@ export type PlayerCardData = {
   } | null;
 };
 
-export type PlayerFilters = {
-  position?: string;
-  nationality?: string;
-  seasonId?: string;
-  clubId?: string;
-  search?: string;
+export type PaginationMeta = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+export type PaginatedPlayersResponse = {
+  data: PlayerCardData[];
+  meta: PaginationMeta;
+};
 
-export async function getPlayers(filters?: PlayerFilters): Promise<PlayerCardData[]> {
-  const params = new URLSearchParams(
-    Object.entries(filters ?? {}).filter(([, v]) => v !== undefined) as [string, string][],
+export type PlayersListingClubOption = {
+  id: string;
+  name: string;
+};
+
+export type PlayersFilterOptions = {
+  leagues: string[];
+  clubs: PlayersListingClubOption[];
+};
+
+function playersApiOrigin(): string {
+  const configured =
+    typeof process.env.NEXT_PUBLIC_API_URL === 'string'
+      ? process.env.NEXT_PUBLIC_API_URL.trim()
+      : '';
+
+  if (configured.length > 0) {
+    return configured.replace(/\/$/, '');
+  }
+
+  return typeof window === 'undefined'
+    ? 'http://127.0.0.1:8080'
+    : 'http://localhost:8080';
+}
+
+function serializeApiQuery(state: PlayersListRouteState): URLSearchParams {
+  const entries: Record<string, string | number | undefined> = {
+    ...(state.search && { search: state.search }),
+    ...(state.position && { position: state.position }),
+    ...(state.league && { league: state.league }),
+    ...(state.clubId && { clubId: state.clubId }),
+    page: state.page ?? DEFAULT_PLAYERS_PAGE,
+    pageSize: PLAYERS_FIXED_PAGE_SIZE,
+  };
+  return new URLSearchParams(
+    Object.entries(entries)
+      .filter(([, v]) => v !== undefined && v !== '')
+      .map(([k, v]) => [k, String(v)]),
   );
-  const res = await fetch(`${API_URL}/players?${params}`, { cache: 'no-store' });
+}
+
+export async function getPlayers(state: PlayersListRouteState): Promise<PaginatedPlayersResponse> {
+  const params = serializeApiQuery(state);
+  const origin = playersApiOrigin();
+  const res = await fetch(`${origin}/players?${params}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch players');
   return res.json();
+}
+
+export async function getPlayersFilterOptions(): Promise<PlayersFilterOptions> {
+  const origin = playersApiOrigin();
+  try {
+    const res = await fetch(`${origin}/players/filter-options`, { cache: 'no-store' });
+    if (!res.ok) return { leagues: [], clubs: [] };
+    const data: unknown = await res.json();
+    if (
+      typeof data !== 'object' ||
+      data === null ||
+      !Array.isArray((data as PlayersFilterOptions).leagues) ||
+      !Array.isArray((data as PlayersFilterOptions).clubs)
+    ) {
+      return { leagues: [], clubs: [] };
+    }
+    return data as PlayersFilterOptions;
+  } catch {
+    return { leagues: [], clubs: [] };
+  }
 }

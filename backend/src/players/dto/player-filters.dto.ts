@@ -21,4 +21,8 @@ export class PlayerFiltersDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  league?: string;
 }
