@@ -12,11 +12,9 @@ import {
   playersListHrefForState,
   type PlayersListRouteState,
 } from '@/lib/player-list-params';
-import type { PlayersListingClubOption } from '@/lib/players-api';
 
 type Props = {
-  leagues: string[];
-  clubs: PlayersListingClubOption[];
+  nationalities: string[];
   routeState: PlayersListRouteState;
 };
 
@@ -30,20 +28,8 @@ const selectFieldClass =
 
 const optionClass = 'bg-[#0f1923] text-neutral-100';
 
-function buildListingState(
-  routeState: Pick<PlayersListRouteState, 'position' | 'league' | 'clubId'>,
-  searchText: string,
-): PlayersListRouteState {
-  const search = searchText.trim();
-  return {
-    ...(routeState.position ? { position: routeState.position } : {}),
-    ...(routeState.league ? { league: routeState.league } : {}),
-    ...(routeState.clubId ? { clubId: routeState.clubId } : {}),
-    ...(search ? { search } : {}),
-    page: DEFAULT_PLAYERS_PAGE,
-    pageSize: PLAYERS_FIXED_PAGE_SIZE,
-  };
-}
+const ageInputClass =
+  'h-10 w-20 rounded-lg border border-white/10 bg-[#0f1923] px-3 text-sm text-neutral-100 outline-none transition-colors focus:border-white/25 focus:ring-1 focus:ring-white/10 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none';
 
 function FilterSelect({
   id,
@@ -104,24 +90,28 @@ function PlayersDebouncedSearch({
     }
   }, []);
 
+  const buildNext = useCallback(
+    (searchText: string): PlayersListRouteState => ({
+      ...(routeState.position ? { position: routeState.position } : {}),
+      ...(routeState.nationality ? { nationality: routeState.nationality } : {}),
+      ...(routeState.minAge !== undefined ? { minAge: routeState.minAge } : {}),
+      ...(routeState.maxAge !== undefined ? { maxAge: routeState.maxAge } : {}),
+      ...(searchText.trim() ? { search: searchText.trim() } : {}),
+      page: DEFAULT_PLAYERS_PAGE,
+      pageSize: PLAYERS_FIXED_PAGE_SIZE,
+    }),
+    [routeState.position, routeState.nationality, routeState.minAge, routeState.maxAge],
+  );
+
   const commitTrimmedSearch = useCallback(
     (raw: string) => {
       const trimmed = raw.trim();
       const currentUrl = (routeState.search ?? '').trim();
       if (trimmed === currentUrl) return;
       skipNextUrlSyncRef.current = true;
-      onCommitSearch(
-        buildListingState(
-          {
-            position: routeState.position,
-            league: routeState.league,
-            clubId: routeState.clubId,
-          },
-          trimmed,
-        ),
-      );
+      onCommitSearch(buildNext(trimmed));
     },
-    [onCommitSearch, routeState.search, routeState.position, routeState.league, routeState.clubId],
+    [onCommitSearch, routeState.search, buildNext],
   );
 
   useEffect(() => {
@@ -164,7 +154,123 @@ function PlayersDebouncedSearch({
   );
 }
 
-export default function PlayersListControls({ leagues, clubs, routeState }: Props) {
+function AgeRangeInputs({
+  routeState,
+  onCommit,
+}: {
+  routeState: PlayersListRouteState;
+  onCommit: (next: PlayersListRouteState) => void;
+}) {
+  const [localMin, setLocalMin] = useState(() =>
+    routeState.minAge !== undefined ? String(routeState.minAge) : '',
+  );
+  const [localMax, setLocalMax] = useState(() =>
+    routeState.maxAge !== undefined ? String(routeState.maxAge) : '',
+  );
+
+  const localMinRef = useRef(localMin);
+  const localMaxRef = useRef(localMax);
+  const debounceTimerRef = useRef<number | undefined>(undefined);
+  const skipMinSyncRef = useRef(false);
+  const skipMaxSyncRef = useRef(false);
+
+  useEffect(() => {
+    if (skipMinSyncRef.current) {
+      skipMinSyncRef.current = false;
+      return;
+    }
+    const next = routeState.minAge !== undefined ? String(routeState.minAge) : '';
+    setLocalMin(next);
+    localMinRef.current = next;
+  }, [routeState.minAge]);
+
+  useEffect(() => {
+    if (skipMaxSyncRef.current) {
+      skipMaxSyncRef.current = false;
+      return;
+    }
+    const next = routeState.maxAge !== undefined ? String(routeState.maxAge) : '';
+    setLocalMax(next);
+    localMaxRef.current = next;
+  }, [routeState.maxAge]);
+
+  const onCommitRef = useRef(onCommit);
+  onCommitRef.current = onCommit;
+
+  const routeStateRef = useRef(routeState);
+  routeStateRef.current = routeState;
+
+  const scheduleCommit = useCallback(() => {
+    if (debounceTimerRef.current !== undefined) {
+      clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = window.setTimeout(() => {
+      debounceTimerRef.current = undefined;
+      const minStr = localMinRef.current;
+      const maxStr = localMaxRef.current;
+      const minAge = minStr !== '' ? parseInt(minStr, 10) : undefined;
+      const maxAge = maxStr !== '' ? parseInt(maxStr, 10) : undefined;
+      const rs = routeStateRef.current;
+      onCommitRef.current({
+        ...(rs.search ? { search: rs.search } : {}),
+        ...(rs.position ? { position: rs.position } : {}),
+        ...(rs.nationality ? { nationality: rs.nationality } : {}),
+        ...(minAge !== undefined && Number.isFinite(minAge) && minAge >= 0 ? { minAge } : {}),
+        ...(maxAge !== undefined && Number.isFinite(maxAge) && maxAge >= 0 ? { maxAge } : {}),
+        page: DEFAULT_PLAYERS_PAGE,
+        pageSize: PLAYERS_FIXED_PAGE_SIZE,
+      });
+    }, SEARCH_DEBOUNCE_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== undefined) clearTimeout(debounceTimerRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        id="plc-min-age"
+        type="number"
+        min={0}
+        max={99}
+        value={localMin}
+        onChange={(e) => {
+          const val = e.target.value;
+          setLocalMin(val);
+          localMinRef.current = val;
+          skipMinSyncRef.current = true;
+          scheduleCommit();
+        }}
+        placeholder="Min"
+        aria-label="Minimum age"
+        className={ageInputClass}
+      />
+      <span className="text-xs text-neutral-500">–</span>
+      <input
+        id="plc-max-age"
+        type="number"
+        min={0}
+        max={99}
+        value={localMax}
+        onChange={(e) => {
+          const val = e.target.value;
+          setLocalMax(val);
+          localMaxRef.current = val;
+          skipMaxSyncRef.current = true;
+          scheduleCommit();
+        }}
+        placeholder="Max"
+        aria-label="Maximum age"
+        className={ageInputClass}
+      />
+    </div>
+  );
+}
+
+export default function PlayersListControls({ nationalities, routeState }: Props) {
   const router = useRouter();
 
   const pushListing = useCallback(
@@ -182,8 +288,9 @@ export default function PlayersListControls({ leagues, clubs, routeState }: Prop
   const hasActiveFilters =
     Boolean(routeState.search?.trim()) ||
     Boolean(routeState.position) ||
-    Boolean(routeState.league) ||
-    Boolean(routeState.clubId) ||
+    Boolean(routeState.nationality) ||
+    routeState.minAge !== undefined ||
+    routeState.maxAge !== undefined ||
     routeState.page !== DEFAULT_PLAYERS_PAGE;
 
   return (
@@ -201,8 +308,9 @@ export default function PlayersListControls({ leagues, clubs, routeState }: Prop
               const position = e.target.value.trim();
               pushListing({
                 ...(routeState.search ? { search: routeState.search } : {}),
-                ...(routeState.league ? { league: routeState.league } : {}),
-                ...(routeState.clubId ? { clubId: routeState.clubId } : {}),
+                ...(routeState.nationality ? { nationality: routeState.nationality } : {}),
+                ...(routeState.minAge !== undefined ? { minAge: routeState.minAge } : {}),
+                ...(routeState.maxAge !== undefined ? { maxAge: routeState.maxAge } : {}),
                 ...(position ? { position } : {}),
                 page: DEFAULT_PLAYERS_PAGE,
                 pageSize: PLAYERS_FIXED_PAGE_SIZE,
@@ -219,65 +327,44 @@ export default function PlayersListControls({ leagues, clubs, routeState }: Prop
             ))}
           </FilterSelect>
         </div>
+
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="plc-league" className={filterLabelClass}>
-            League
+          <label htmlFor="plc-nationality" className={filterLabelClass}>
+            Nationality
           </label>
           <FilterSelect
-            id="plc-league"
-            ariaLabel="Filter by league"
-            value={routeState.league ?? ''}
+            id="plc-nationality"
+            ariaLabel="Filter by nationality"
+            value={routeState.nationality ?? ''}
             onChange={(e) => {
-              const league = e.target.value.trim();
+              const nationality = e.target.value.trim();
               pushListing({
                 ...(routeState.search ? { search: routeState.search } : {}),
                 ...(routeState.position ? { position: routeState.position } : {}),
-                ...(routeState.clubId ? { clubId: routeState.clubId } : {}),
-                ...(league ? { league } : {}),
+                ...(routeState.minAge !== undefined ? { minAge: routeState.minAge } : {}),
+                ...(routeState.maxAge !== undefined ? { maxAge: routeState.maxAge } : {}),
+                ...(nationality ? { nationality } : {}),
                 page: DEFAULT_PLAYERS_PAGE,
                 pageSize: PLAYERS_FIXED_PAGE_SIZE,
               });
             }}
           >
             <option value="" className={optionClass}>
-              All leagues
+              All nationalities
             </option>
-            {leagues.map((name) => (
-              <option key={name} value={name} className={optionClass}>
-                {name}
+            {nationalities.map((n) => (
+              <option key={n} value={n} className={optionClass}>
+                {n}
               </option>
             ))}
           </FilterSelect>
         </div>
+
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="plc-club" className={filterLabelClass}>
-            Club
+          <label htmlFor="plc-min-age" className={filterLabelClass}>
+            Age range
           </label>
-          <FilterSelect
-            id="plc-club"
-            ariaLabel="Filter by club"
-            value={routeState.clubId ?? ''}
-            onChange={(e) => {
-              const clubId = e.target.value.trim();
-              pushListing({
-                ...(routeState.search ? { search: routeState.search } : {}),
-                ...(routeState.position ? { position: routeState.position } : {}),
-                ...(routeState.league ? { league: routeState.league } : {}),
-                ...(clubId ? { clubId } : {}),
-                page: DEFAULT_PLAYERS_PAGE,
-                pageSize: PLAYERS_FIXED_PAGE_SIZE,
-              });
-            }}
-          >
-            <option value="" className={optionClass}>
-              All clubs
-            </option>
-            {clubs.map((c) => (
-              <option key={c.id} value={c.id} className={optionClass}>
-                {c.name}
-              </option>
-            ))}
-          </FilterSelect>
+          <AgeRangeInputs routeState={routeState} onCommit={pushListing} />
         </div>
 
         <div className="flex flex-col gap-1.5">

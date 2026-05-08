@@ -18,8 +18,7 @@ export default async function PlayersGrid({
     getPlayersFilterOptions(),
     getPlayers(routeState),
   ]);
-  const leagues = filterOptions.leagues;
-  const clubs = filterOptions.clubs;
+  const { nationalities } = filterOptions;
 
   const { meta } = listing;
   if (
@@ -48,7 +47,7 @@ export default async function PlayersGrid({
         className="fixed inset-x-0 top-[var(--app-header-h)] z-[45] border-b border-white/10 bg-[#080d14]/95 py-4 backdrop-blur-md"
       >
         <div className="mx-auto max-w-screen-xl px-6 md:px-8">
-          <PlayersListControls leagues={leagues} clubs={clubs} routeState={syncedRouteState} />
+          <PlayersListControls nationalities={nationalities} routeState={syncedRouteState} />
         </div>
       </nav>
 

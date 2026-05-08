@@ -37,33 +37,31 @@ export class PlayersService {
   private buildPlayerListWhere(
     query: Pick<
       PlayerListQueryDto,
-      | 'position'
-      | 'nationality'
-      | 'seasonId'
-      | 'clubId'
-      | 'search'
-      | 'league'
+      'position' | 'nationality' | 'seasonId' | 'search' | 'minAge' | 'maxAge'
     >,
   ) {
-    const { position, nationality, seasonId, clubId, search, league } =
-      query;
+    const { position, nationality, seasonId, search, minAge, maxAge } = query;
 
     const seasonWhere = seasonId
       ? { seasonId }
       : { season: { isCurrent: true } };
 
-    const playerSeasonWhere = {
-      ...seasonWhere,
-      ...(clubId && { clubId }),
-      ...(league && {
-        club: {
-          league: {
-            equals: league.trim(),
-            mode: 'insensitive' as const,
-          },
-        },
-      }),
-    };
+    const playerSeasonWhere = { ...seasonWhere };
+
+    const today = new Date();
+    const birthDateFilter: { lte?: Date; gte?: Date } = {};
+    if (minAge !== undefined) {
+      const lte = new Date(today);
+      lte.setFullYear(lte.getFullYear() - minAge);
+      birthDateFilter.lte = lte;
+    }
+    if (maxAge !== undefined) {
+      const gte = new Date(today);
+      gte.setFullYear(gte.getFullYear() - maxAge - 1);
+      gte.setDate(gte.getDate() + 1);
+      birthDateFilter.gte = gte;
+    }
+    const hasBirthDateFilter = Object.keys(birthDateFilter).length > 0;
 
     return {
       ...(position && { position }),
@@ -71,6 +69,7 @@ export class PlayersService {
       ...(search && {
         name: { contains: search, mode: 'insensitive' as const },
       }),
+      ...(hasBirthDateFilter && { birthDate: birthDateFilter }),
       seasons: { some: playerSeasonWhere },
       playerSeasonWhere,
     };
@@ -215,35 +214,21 @@ export class PlayersService {
     };
   }
 
-  async findClubsForListingFilters() {
-    return this.prisma.club.findMany({
-      select: { id: true, name: true },
-      orderBy: { name: 'asc' },
-      take: 500,
-    });
-  }
-
-  async findLeaguesForListingFilters(): Promise<string[]> {
-    const rows = await this.prisma.club.findMany({
-      where: { league: { not: null } },
-      select: { league: true },
-      distinct: ['league'],
-      orderBy: { league: 'asc' },
+  async findNationalitiesForListingFilters(): Promise<string[]> {
+    const rows = await this.prisma.player.findMany({
+      where: { nationality: { not: null } },
+      select: { nationality: true },
+      distinct: ['nationality'],
+      orderBy: { nationality: 'asc' },
     });
     return rows
-      .map((r) => r.league)
+      .map((r) => r.nationality)
       .filter((x): x is string => x != null && x.length > 0);
   }
 
-  async findFilterOptionsForListing(): Promise<{
-    leagues: string[];
-    clubs: { id: string; name: string }[];
-  }> {
-    const [leagues, clubs] = await Promise.all([
-      this.findLeaguesForListingFilters(),
-      this.findClubsForListingFilters(),
-    ]);
-    return { leagues, clubs };
+  async findFilterOptionsForListing(): Promise<{ nationalities: string[] }> {
+    const nationalities = await this.findNationalitiesForListingFilters();
+    return { nationalities };
   }
 
   async findAll(

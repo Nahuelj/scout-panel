@@ -38,14 +38,8 @@ export type PaginatedPlayersResponse = {
   meta: PaginationMeta;
 };
 
-export type PlayersListingClubOption = {
-  id: string;
-  name: string;
-};
-
 export type PlayersFilterOptions = {
-  leagues: string[];
-  clubs: PlayersListingClubOption[];
+  nationalities: string[];
 };
 
 function playersApiOrigin(): string {
@@ -67,8 +61,9 @@ function serializeApiQuery(state: PlayersListRouteState): URLSearchParams {
   const entries: Record<string, string | number | undefined> = {
     ...(state.search && { search: state.search }),
     ...(state.position && { position: state.position }),
-    ...(state.league && { league: state.league }),
-    ...(state.clubId && { clubId: state.clubId }),
+    ...(state.nationality && { nationality: state.nationality }),
+    ...(state.minAge !== undefined && { minAge: state.minAge }),
+    ...(state.maxAge !== undefined && { maxAge: state.maxAge }),
     page: state.page ?? DEFAULT_PLAYERS_PAGE,
     pageSize: PLAYERS_FIXED_PAGE_SIZE,
   };
@@ -97,18 +92,17 @@ export async function getPlayersFilterOptions(): Promise<PlayersFilterOptions> {
   const origin = playersApiOrigin();
   try {
     const res = await fetch(`${origin}/players/filter-options`, { cache: 'no-store' });
-    if (!res.ok) return { leagues: [], clubs: [] };
+    if (!res.ok) return { nationalities: [] };
     const data: unknown = await res.json();
     if (
       typeof data !== 'object' ||
       data === null ||
-      !Array.isArray((data as PlayersFilterOptions).leagues) ||
-      !Array.isArray((data as PlayersFilterOptions).clubs)
+      !Array.isArray((data as PlayersFilterOptions).nationalities)
     ) {
-      return { leagues: [], clubs: [] };
+      return { nationalities: [] };
     }
     return data as PlayersFilterOptions;
   } catch {
-    return { leagues: [], clubs: [] };
+    return { nationalities: [] };
   }
 }

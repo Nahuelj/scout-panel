@@ -24,8 +24,9 @@ export const PLAYER_POSITION_VALUES = [
 export type PlayersListRouteState = {
   search?: string;
   position?: string;
-  league?: string;
-  clubId?: string;
+  nationality?: string;
+  minAge?: number;
+  maxAge?: number;
   page: number;
   pageSize: number;
 };
@@ -48,14 +49,19 @@ export function parsePlayerListSearchParams(
 
   const search = firstSearchParamValue(sp, 'search')?.trim();
   const position = firstSearchParamValue(sp, 'position')?.trim();
-  const league = firstSearchParamValue(sp, 'league')?.trim();
-  const clubId = firstSearchParamValue(sp, 'clubId')?.trim();
+  const nationality = firstSearchParamValue(sp, 'nationality')?.trim();
+
+  const minAgeRaw = firstSearchParamValue(sp, 'minAge');
+  const maxAgeRaw = firstSearchParamValue(sp, 'maxAge');
+  const minAge = minAgeRaw !== undefined ? parseInt(minAgeRaw, 10) : undefined;
+  const maxAge = maxAgeRaw !== undefined ? parseInt(maxAgeRaw, 10) : undefined;
 
   return {
     ...(search ? { search } : {}),
     ...(position ? { position } : {}),
-    ...(league ? { league } : {}),
-    ...(clubId ? { clubId } : {}),
+    ...(nationality ? { nationality } : {}),
+    ...(minAge !== undefined && Number.isFinite(minAge) && minAge >= 0 ? { minAge } : {}),
+    ...(maxAge !== undefined && Number.isFinite(maxAge) && maxAge >= 0 ? { maxAge } : {}),
     page,
     pageSize: PLAYERS_FIXED_PAGE_SIZE,
   };
@@ -65,8 +71,9 @@ export function serializePlayersListToPathQuery(state: PlayersListRouteState): s
   const p = new URLSearchParams();
   if (state.search) p.set('search', state.search);
   if (state.position) p.set('position', state.position);
-  if (state.league) p.set('league', state.league);
-  if (state.clubId) p.set('clubId', state.clubId);
+  if (state.nationality) p.set('nationality', state.nationality);
+  if (state.minAge !== undefined) p.set('minAge', String(state.minAge));
+  if (state.maxAge !== undefined) p.set('maxAge', String(state.maxAge));
   if (state.page !== DEFAULT_PLAYERS_PAGE) p.set('page', String(state.page));
   const qs = p.toString();
   return qs ? `?${qs}` : '';

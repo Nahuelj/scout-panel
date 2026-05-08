@@ -1,4 +1,5 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { Position } from '../../../generated/prisma/enums';
 
 export class PlayerFiltersDto {
@@ -16,13 +17,17 @@ export class PlayerFiltersDto {
 
   @IsOptional()
   @IsString()
-  clubId?: string;
-
-  @IsOptional()
-  @IsString()
   search?: string;
 
   @IsOptional()
-  @IsString()
-  league?: string;
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minAge?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxAge?: number;
 }
