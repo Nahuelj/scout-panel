@@ -21,7 +21,7 @@ export default function DashboardHeader() {
     'inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-white/10 px-3 text-sm font-medium text-neutral-300 transition-colors hover:border-white/25 hover:text-white';
 
   return (
-    <header className="mb-8 flex flex-col gap-4 md:grid md:grid-cols-3 md:items-center md:gap-6">
+    <header className="flex flex-col gap-4 md:grid md:grid-cols-3 md:items-center md:gap-6">
       <div className="flex min-h-10 w-full min-w-0 flex-wrap items-center gap-3 md:justify-self-start">
         <Link
           href="/players"

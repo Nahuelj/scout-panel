@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   Radar,
   RadarChart,
@@ -400,6 +400,62 @@ function computeRadarScores(stats: PlayerDetailStats) {
   ];
 }
 
+type RadarPointEntry = {
+  x?: number;
+  y?: number;
+  cx?: number;
+  cy?: number;
+  payload?: { category?: string };
+};
+
+function clientToSvgPoint(svg: SVGSVGElement, clientX: number, clientY: number) {
+  const p = svg.createSVGPoint();
+  p.x = clientX;
+  p.y = clientY;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  const t = p.matrixTransform(ctm.inverse());
+  return { x: t.x, y: t.y };
+}
+
+function normalizeAngle(rad: number) {
+  let a = rad;
+  while (a <= -Math.PI) a += 2 * Math.PI;
+  while (a > Math.PI) a -= 2 * Math.PI;
+  return a;
+}
+
+function angleDiff(a: number, b: number) {
+  return Math.abs(normalizeAngle(a - b));
+}
+
+function pickCategoryByNearestAxis(
+  pole: { x: number; y: number },
+  vertices: { x: number; y: number; category: string }[],
+  mouse: { x: number; y: number },
+  maxRadius: number,
+) {
+  if (vertices.length === 0) return null;
+  const effectiveMax = Math.max(maxRadius, 1);
+  const dx = mouse.x - pole.x;
+  const dy = mouse.y - pole.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist > effectiveMax * 1.4) return null;
+
+  const mouseAngle = Math.atan2(dy, dx);
+  let best = vertices[0]?.category ?? null;
+  let bestDiff = Infinity;
+  for (const v of vertices) {
+    const va = Math.atan2(v.y - pole.y, v.x - pole.x);
+    const d = angleDiff(mouseAngle, va);
+    if (d < bestDiff) {
+      bestDiff = d;
+      best = v.category;
+    }
+  }
+  return best;
+}
+
 function formatValue(
   value: number | null | undefined,
   formatKind: string,
@@ -416,6 +472,27 @@ export default function PlayerAnalysis({ stats }: Props) {
   const [activeTab, setActiveTab] = useState('SHO');
   const radarData = computeRadarScores(stats);
   const radarPanelRef = useRef<HTMLDivElement>(null);
+  const radarChartWrapRef = useRef<HTMLDivElement>(null);
+  const radarGeomRef = useRef<{
+    pole: { x: number; y: number };
+    vertices: { x: number; y: number; category: string }[];
+    maxRadius: number;
+  } | null>(null);
+
+  const handleRadarMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const geom = radarGeomRef.current;
+    const wrap = radarChartWrapRef.current;
+    if (!geom || !wrap) return;
+    const svg = wrap.querySelector('svg');
+    if (!svg) return;
+    const pt = clientToSvgPoint(svg, e.clientX, e.clientY);
+    if (!pt) return;
+    const next = pickCategoryByNearestAxis(geom.pole, geom.vertices, pt, geom.maxRadius);
+    if (next && next in STAT_CATEGORIES) {
+      setActiveTab((prev) => (prev === next ? prev : next));
+    }
+  }, []);
+
   const [tablePanelHeightPx, setTablePanelHeightPx] = useState<number | undefined>(
     undefined,
   );
@@ -454,7 +531,11 @@ export default function PlayerAnalysis({ stats }: Props) {
         <h3 className="text-white font-bold text-base tracking-tight mb-4 shrink-0">
           Radar chart
         </h3>
-        <div className="w-full h-[300px] shrink-0">
+        <div
+          ref={radarChartWrapRef}
+          className="w-full h-[300px] shrink-0"
+          onMouseMove={handleRadarMouseMove}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart
               data={radarData}
@@ -472,7 +553,57 @@ export default function PlayerAnalysis({ stats }: Props) {
                 fill="#10b981"
                 fillOpacity={0.15}
                 strokeWidth={2}
-                dot={{ fill: '#10b981', strokeWidth: 0, r: 4.5 }}
+                dot={(dotProps) => {
+                  const dp = dotProps as unknown as {
+                    cx?: number;
+                    cy?: number;
+                    index?: number;
+                    points?: RadarPointEntry[];
+                    payload?: { category?: string };
+                  };
+                  const { cx, cy, payload, points, index } = dp;
+                  if (
+                    points &&
+                    points.length > 0 &&
+                    index === 0 &&
+                    points[0].cx != null &&
+                    points[0].cy != null
+                  ) {
+                    const pole = { x: points[0].cx, y: points[0].cy };
+                    const vertices = points
+                      .map((p) => {
+                        const cat = p.payload?.category;
+                        if (p.x == null || p.y == null || !cat) return null;
+                        return { x: p.x, y: p.y, category: cat };
+                      })
+                      .filter(
+                        (v): v is { x: number; y: number; category: string } =>
+                          v !== null,
+                      );
+                    const radii = vertices.map((v) =>
+                      Math.hypot(v.x - pole.x, v.y - pole.y),
+                    );
+                    const maxRadius = radii.length > 0 ? Math.max(...radii) : 0;
+                    radarGeomRef.current = { pole, vertices, maxRadius };
+                  }
+                  if (cx == null || cy == null) return null;
+                  const category = payload?.category;
+                  const selected = category === activeTab;
+                  const side = selected ? 10 : 8;
+                  const half = side / 2;
+                  return (
+                    <rect
+                      x={cx - half}
+                      y={cy - half}
+                      width={side}
+                      height={side}
+                      fill="#10b981"
+                      stroke="#0f1923"
+                      strokeWidth={selected ? 2 : 1}
+                      className="pointer-events-none"
+                    />
+                  );
+                }}
               />
             </RadarChart>
           </ResponsiveContainer>

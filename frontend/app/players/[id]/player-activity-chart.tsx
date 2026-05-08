@@ -62,6 +62,40 @@ export default function PlayerActivityChart({ activity, seasonName }: Props) {
             fill="var(--color-minutesPlayed)"
             fillOpacity={0.4}
             stroke="var(--color-minutesPlayed)"
+            dot={(props) => {
+              const { cx, cy } = props as { cx?: number; cy?: number };
+              if (cx == null || cy == null) return null;
+              const side = 8;
+              const h = side / 2;
+              return (
+                <rect
+                  x={cx - h}
+                  y={cy - h}
+                  width={side}
+                  height={side}
+                  fill="#10b981"
+                  stroke="#0f1923"
+                  strokeWidth={1}
+                />
+              );
+            }}
+            activeDot={(props) => {
+              const { cx, cy } = props as { cx?: number; cy?: number };
+              if (cx == null || cy == null) return null;
+              const side = 10;
+              const h = side / 2;
+              return (
+                <rect
+                  x={cx - h}
+                  y={cy - h}
+                  width={side}
+                  height={side}
+                  fill="#10b981"
+                  stroke="#0f1923"
+                  strokeWidth={2}
+                />
+              );
+            }}
           />
         </AreaChart>
       </ChartContainer>

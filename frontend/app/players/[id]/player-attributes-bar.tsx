@@ -1,13 +1,26 @@
+'use client';
+
+import { useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 
 const POSITION_FULL: Record<string, string> = {
   GK: 'Goalkeeper',
-  CB: 'Center Back', RB: 'Right Back', LB: 'Left Back',
-  RWB: 'Right Wing Back', LWB: 'Left Wing Back',
-  CDM: 'Defensive Midfielder', CM: 'Central Midfielder',
-  CAM: 'Attacking Midfielder', RM: 'Right Midfielder', LM: 'Left Midfielder',
-  RW: 'Right Winger', LW: 'Left Winger',
-  ST: 'Striker', CF: 'Center Forward', SS: 'Second Striker',
+  CB: 'Center Back',
+  RB: 'Right Back',
+  LB: 'Left Back',
+  RWB: 'Right Wing Back',
+  LWB: 'Left Wing Back',
+  CDM: 'Defensive Midfielder',
+  CM: 'Central Midfielder',
+  CAM: 'Attacking Midfielder',
+  RM: 'Right Midfielder',
+  LM: 'Left Midfielder',
+  RW: 'Right Winger',
+  LW: 'Left Winger',
+  ST: 'Striker',
+  CF: 'Center Forward',
+  SS: 'Second Striker',
 };
 
 function scoreLabel(value: number | null): string {
@@ -44,6 +57,55 @@ function Divider() {
   return <div className="w-px shrink-0 self-stretch bg-white/5 my-3.5" />;
 }
 
+function MouseFollowTooltip({
+  text,
+  children,
+}: {
+  text: string;
+  children: React.ReactNode;
+}) {
+  const [visible, setVisible] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    setPos({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  return (
+    <>
+      <span
+        className="inline-flex cursor-help"
+        onPointerEnter={() => setVisible(true)}
+        onPointerLeave={() => setVisible(false)}
+        onPointerMove={onMove}
+      >
+        {children}
+      </span>
+      {visible &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            role="tooltip"
+            className="fixed z-[200] max-w-[min(18rem,calc(100vw-1.5rem))] pointer-events-none rounded-lg border border-white/10 bg-[#1a2633] px-3 py-2 text-[11px] leading-snug text-neutral-200 shadow-xl"
+            style={{ left: pos.x + 14, top: pos.y + 14 }}
+          >
+            {text}
+          </div>,
+          document.body,
+        )}
+    </>
+  );
+}
+
+const TOOLTIP_SKILLFUL_PASS =
+  'Rating = pass accuracy % ÷ 10 (same 0–10 scale as weak foot). Comes from season pass accuracy in stats, not a manual scout mark. HIGH ≥ 8, MED ≥ 5, LOW under 5.';
+const TOOLTIP_SKILLFUL_SHOT =
+  'Rating = shot accuracy % ÷ 10 from season stats. Not subjective. HIGH ≥ 8, MED ≥ 5, LOW under 5.';
+const TOOLTIP_WEAK_PASS =
+  'Rating = weak-foot pass accuracy % ÷ 10. Same formula and HIGH/MED/LOW bands as strong-foot display.';
+const TOOLTIP_WEAK_SHOT =
+  'Rating = weak-foot shot accuracy % ÷ 10. Same bands: HIGH ≥ 8, MED ≥ 5, LOW under 5.';
+
 function weakFootAccuracyToRating(accuracyPct: number): number {
   return accuracyPct / 10;
 }
@@ -51,27 +113,41 @@ function weakFootAccuracyToRating(accuracyPct: number): number {
 function WeakFootRating({
   label,
   accuracyPct,
+  tooltip,
 }: {
   label: string;
   accuracyPct: number;
+  tooltip: string;
 }) {
   const s = weakFootAccuracyToRating(accuracyPct);
   return (
-    <span className="flex items-center gap-1.5">
-      <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
-      <span>{s.toFixed(1)}</span>
-      <span className={`text-xs font-bold ${scoreLabelColor(s)}`}>{scoreLabel(s)}</span>
-    </span>
+    <MouseFollowTooltip text={tooltip}>
+      <span className="flex items-center gap-1.5">
+        <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
+        <span>{s.toFixed(1)}</span>
+        <span className={`text-xs font-bold ${scoreLabelColor(s)}`}>{scoreLabel(s)}</span>
+      </span>
+    </MouseFollowTooltip>
   );
 }
 
-function SkillfulFootRating({ label, score }: { label: string; score: number }) {
+function SkillfulFootRating({
+  label,
+  score,
+  tooltip,
+}: {
+  label: string;
+  score: number;
+  tooltip: string;
+}) {
   return (
-    <span className="flex items-center gap-1.5">
-      <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
-      <span>{score.toFixed(1)}</span>
-      <span className={`text-xs font-bold ${scoreLabelColor(score)}`}>{scoreLabel(score)}</span>
-    </span>
+    <MouseFollowTooltip text={tooltip}>
+      <span className="flex items-center gap-1.5">
+        <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
+        <span>{score.toFixed(1)}</span>
+        <span className={`text-xs font-bold ${scoreLabelColor(score)}`}>{scoreLabel(score)}</span>
+      </span>
+    </MouseFollowTooltip>
   );
 }
 
@@ -122,12 +198,14 @@ export default function PlayerAttributesBar({ player }: Props) {
                   <SkillfulFootRating
                     label="Pass"
                     score={stats.skillfulFootPassScore}
+                    tooltip={TOOLTIP_SKILLFUL_PASS}
                   />
                 )}
                 {stats?.skillfulFootShotScore != null && (
                   <SkillfulFootRating
                     label="Shot"
                     score={stats.skillfulFootShotScore}
+                    tooltip={TOOLTIP_SKILLFUL_SHOT}
                   />
                 )}
               </span>
@@ -135,8 +213,8 @@ export default function PlayerAttributesBar({ player }: Props) {
             <Divider />
           </>
         )}
-        {(stats?.weakFootPassAccuracyPct !== null ||
-          stats?.weakFootShotAccuracyPct !== null) && (
+        {(stats?.weakFootPassAccuracyPct != null ||
+          stats?.weakFootShotAccuracyPct != null) && (
           <>
             <StatItem label="Weak Foot">
               <span className="flex flex-wrap items-center justify-center gap-3 text-sm">
@@ -144,12 +222,14 @@ export default function PlayerAttributesBar({ player }: Props) {
                   <WeakFootRating
                     label="Pass"
                     accuracyPct={stats.weakFootPassAccuracyPct}
+                    tooltip={TOOLTIP_WEAK_PASS}
                   />
                 )}
                 {stats?.weakFootShotAccuracyPct != null && (
                   <WeakFootRating
                     label="Shot"
                     accuracyPct={stats.weakFootShotAccuracyPct}
+                    tooltip={TOOLTIP_WEAK_SHOT}
                   />
                 )}
               </span>

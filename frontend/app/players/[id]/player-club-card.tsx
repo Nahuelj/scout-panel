@@ -47,20 +47,15 @@ export default function PlayerClubCard({ player }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col items-stretch gap-3">
-        <h3 className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest text-left">
-          Contract
-        </h3>
-        <div className="flex items-center justify-start gap-4">
-          <div className="text-left">
-            <p className="text-neutral-600 text-[9px] uppercase tracking-widest mb-1">From</p>
-            <p className="text-white text-sm font-medium">{fmt(contractStart)}</p>
-          </div>
-          <div className="h-px w-10 sm:w-16 bg-white/5 shrink-0" />
-          <div className="text-left">
-            <p className="text-neutral-600 text-[9px] uppercase tracking-widest mb-1">To</p>
-            <p className="text-white text-sm font-medium">{fmt(contractEnd)}</p>
-          </div>
+      <div className="flex items-center justify-start gap-4">
+        <div className="text-left">
+          <p className="text-neutral-600 text-[9px] uppercase tracking-widest mb-1">From</p>
+          <p className="text-white text-sm font-medium">{fmt(contractStart)}</p>
+        </div>
+        <div className="h-px w-10 sm:w-16 bg-white/5 shrink-0" />
+        <div className="text-left">
+          <p className="text-neutral-600 text-[9px] uppercase tracking-widest mb-1">To</p>
+          <p className="text-white text-sm font-medium">{fmt(contractEnd)}</p>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFiltersDto } from './dto/player-filters.dto';
 import { PlayerDetailQueryDto } from './dto/player-detail-query.dto';
+import { pctToZeroTenScale } from './skillful-foot-score.util';
 
 const SEASON_SELECT = {
   club: {
@@ -125,6 +126,17 @@ export class PlayersService {
 
     const season = player.seasons[0] ?? null;
 
+    const rawStats = season?.stats ?? null;
+    const stats = rawStats
+      ? {
+          ...rawStats,
+          skillfulFootPassScore:
+            pctToZeroTenScale(rawStats.passAccuracyPct) ?? rawStats.skillfulFootPassScore,
+          skillfulFootShotScore:
+            pctToZeroTenScale(rawStats.shotAccuracyPct) ?? rawStats.skillfulFootShotScore,
+        }
+      : null;
+
     return {
       id: player.id,
       name: player.name,
@@ -142,7 +154,7 @@ export class PlayersService {
             shirtNumber: season.shirtNumber,
             contractStart: season.contractStart,
             contractEnd: season.contractEnd,
-            stats: season.stats,
+            stats,
             activity: season.activity,
           }
         : null,
