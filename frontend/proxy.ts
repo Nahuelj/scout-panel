@@ -1,13 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
-
-const AUTH_COOKIE = 'better-auth.session_token';
+import { BETTER_AUTH_SESSION_COOKIE } from '@/lib/better-auth-session-cookie';
 
 const protectedRoutes = ['/players'];
 const authRoutes = ['/login', '/register'];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get(AUTH_COOKIE);
+  const sessionCookie = request.cookies.get(BETTER_AUTH_SESSION_COOKIE);
   const isAuthenticated = Boolean(sessionCookie?.value);
 
   if (pathname === '/') {

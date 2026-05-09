@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
 import PlayerCard from '@/app/components/player-card';
@@ -8,19 +8,16 @@ import { useSelectionStore } from '@/lib/selection-store';
 import type { PlayerCardData } from '@/lib/players-api';
 import { removeFromShortlist } from '@/lib/shortlist-api';
 
-type Props = { players: PlayerCardData[] };
+type Props = { players: PlayerCardData[]; initialCanShortlist: boolean };
 
-export default function ShortlistGridClient({ players }: Props) {
+export default function ShortlistGridClient({ players, initialCanShortlist }: Props) {
   const router = useRouter();
   const { selectedPlayers, togglePlayer } = useSelectionStore();
-  const { data: session } = useSession();
-  const [mounted, setMounted] = useState(() => false);
-  const canShortlist = mounted && Boolean(session?.user);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+  const { data: session, isPending } = useSession();
+  const canShortlist = useMemo(() => {
+    if (isPending) return initialCanShortlist;
+    return Boolean(session?.user);
+  }, [initialCanShortlist, isPending, session?.user]);
 
   const handleShortlistToggle = useCallback(
     async (player: PlayerCardData, e: React.MouseEvent) => {
@@ -48,7 +45,7 @@ export default function ShortlistGridClient({ players }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {players.map((player) => (
         <PlayerCard
           key={player.id}

@@ -1,3 +1,4 @@
+import AppHeaderHeightSync from '@/app/components/app-header-height-sync';
 import DashboardHeader from '@/app/components/dashboard-header';
 import PageTransition from '@/app/components/page-transition';
 import SelectionBar from '@/app/components/selection-bar';
@@ -6,8 +7,10 @@ import WaveMeshBackground from '@/app/components/wave-mesh-background';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div
+      id="app-shell-root"
       className="min-h-screen bg-[#080d14] [--app-header-h:5.625rem] sm:[--app-header-h:5.875rem] md:[--app-header-h:6.25rem]"
     >
+      <AppHeaderHeightSync rootId="app-shell-root" />
       <div
         id="app-header"
         className="relative sticky top-0 z-50 w-full overflow-visible border-b border-white/5 bg-[#080d14]"

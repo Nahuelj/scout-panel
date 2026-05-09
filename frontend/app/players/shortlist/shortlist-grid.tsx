@@ -11,6 +11,7 @@ import { fetchShortlistServer } from '@/lib/shortlist-api';
 import PlayersListControls from '@/app/players/players-list-controls';
 import PlayersPagination from '@/app/players/players-pagination';
 import ShortlistGridClient from './shortlist-grid-client';
+import { BETTER_AUTH_SESSION_COOKIE } from '@/lib/better-auth-session-cookie';
 
 export default async function ShortlistGrid({
   routeState,
@@ -22,6 +23,7 @@ export default async function ShortlistGrid({
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join('; ');
+  const initialCanShortlist = Boolean(cookieStore.get(BETTER_AUTH_SESSION_COOKIE)?.value);
 
   const [filterOptions, listing] = await Promise.all([
     getPlayersFilterOptions(),
@@ -70,8 +72,8 @@ export default async function ShortlistGrid({
         </div>
       </nav>
 
-      <div className="pb-0 pt-[110px]">
-        <ShortlistGridClient players={listing.data} />
+      <div className="pt-[110px] pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+        <ShortlistGridClient players={listing.data} initialCanShortlist={initialCanShortlist} />
       </div>
       <PlayersPagination
         routeState={syncedRouteState}

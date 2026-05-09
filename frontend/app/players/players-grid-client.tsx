@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSession } from '@/lib/auth-client';
 import PlayerCard from '@/app/components/player-card';
 import { useSelectionStore } from '@/lib/selection-store';
@@ -13,31 +13,58 @@ import {
 
 const EMPTY_SHORTLIST_IDS = new Set<string>();
 
-type Props = { players: PlayerCardData[] };
+type Props = {
+  players: PlayerCardData[];
+  initialShortlistIds: string[];
+  initialCanShortlist: boolean;
+};
 
-export default function PlayersGridClient({ players }: Props) {
+export default function PlayersGridClient({
+  players,
+  initialShortlistIds,
+  initialCanShortlist,
+}: Props) {
   const { selectedPlayers, togglePlayer } = useSelectionStore();
-  const { data: session } = useSession();
-  const [mounted, setMounted] = useState(() => false);
-  const [shortlistIds, setShortlistIds] = useState<Set<string>>(() => new Set());
-  const canShortlist = mounted && Boolean(session?.user);
+  const { data: session, isPending } = useSession();
+  const canShortlist = useMemo(() => {
+    if (isPending) return initialCanShortlist;
+    return Boolean(session?.user);
+  }, [initialCanShortlist, isPending, session?.user]);
+  const [shortlistIds, setShortlistIds] = useState<Set<string>>(
+    () => new Set(initialShortlistIds),
+  );
+  const serverShortlistKey = [...initialShortlistIds].sort().join('|');
+  const prevServerShortlistKey = useRef<string | null>(null);
+
   const idsForUi = useMemo(
     () => (canShortlist ? shortlistIds : EMPTY_SHORTLIST_IDS),
     [canShortlist, shortlistIds],
   );
 
   useEffect(() => {
-    // Defer showing shortlist controls until after hydration to avoid server/client markup drift.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+    if (prevServerShortlistKey.current === null) {
+      prevServerShortlistKey.current = serverShortlistKey;
+      return;
+    }
+    if (prevServerShortlistKey.current === serverShortlistKey) return;
+    prevServerShortlistKey.current = serverShortlistKey;
+    setShortlistIds(new Set(initialShortlistIds));
+  }, [initialShortlistIds, serverShortlistKey]);
 
   useEffect(() => {
     if (!canShortlist) return;
     let cancelled = false;
     fetchShortlistPlayerIds()
       .then((ids) => {
-        if (!cancelled) setShortlistIds(new Set(ids));
+        if (cancelled) return;
+        setShortlistIds((prev) => {
+          const next = new Set(ids);
+          if (prev.size !== next.size) return next;
+          for (const id of prev) {
+            if (!next.has(id)) return next;
+          }
+          return prev;
+        });
       })
       .catch(() => {
         if (!cancelled) setShortlistIds(new Set());
@@ -81,7 +108,7 @@ export default function PlayersGridClient({ players }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 animate-in fade-in duration-700 ease-out">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-in fade-in duration-700 ease-out">
       {players.map((player) => (
         <PlayerCard
           key={player.id}

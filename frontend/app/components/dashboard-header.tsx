@@ -98,7 +98,7 @@ export default function DashboardHeader() {
   );
 
   const actionsToolbar = (
-    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-2.5">
+    <div className="flex shrink-0 flex-nowrap items-center justify-end gap-2 sm:gap-2.5">
       <Link
         href={'/players/shortlist' as Route}
         prefetch={false}
@@ -146,7 +146,7 @@ export default function DashboardHeader() {
       className={
         showPlayerDetailSearch
           ? 'flex flex-col gap-4'
-          : 'flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6'
+          : 'flex flex-row items-center justify-between gap-4 lg:gap-6'
       }
     >
       {showPlayerDetailSearch ? (
@@ -163,22 +163,24 @@ export default function DashboardHeader() {
             <div className="flex min-h-11 w-max max-w-full items-center lg:w-auto">
               {brandLink}
 
-              <StepConnector />
+              <div className="hidden shrink-0 items-center lg:flex">
+                <StepConnector />
 
-              {WORKFLOW_STEPS.map((step, i) => (
-                <Fragment key={step.n}>
-                  <div
-                    className="inline-flex shrink-0 items-center gap-2.5 rounded-full border border-white/[0.07] bg-white/[0.025] px-4 py-2 text-sm transition-colors"
-                    aria-label={`Step ${step.n}: ${step.label}`}
-                  >
-                    <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[10px] font-semibold tabular-nums text-neutral-400">
-                      {step.n}
-                    </span>
-                    <span className="text-neutral-300">{step.label}</span>
-                  </div>
-                  {i < WORKFLOW_STEPS.length - 1 ? <StepConnector /> : null}
-                </Fragment>
-              ))}
+                {WORKFLOW_STEPS.map((step, i) => (
+                  <Fragment key={step.n}>
+                    <div
+                      className="inline-flex shrink-0 items-center gap-2.5 rounded-full border border-white/[0.07] bg-white/[0.025] px-4 py-2 text-sm transition-colors"
+                      aria-label={`Step ${step.n}: ${step.label}`}
+                    >
+                      <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-[10px] font-semibold tabular-nums text-neutral-400">
+                        {step.n}
+                      </span>
+                      <span className="text-neutral-300">{step.label}</span>
+                    </div>
+                    {i < WORKFLOW_STEPS.length - 1 ? <StepConnector /> : null}
+                  </Fragment>
+                ))}
+              </div>
             </div>
           </div>
 

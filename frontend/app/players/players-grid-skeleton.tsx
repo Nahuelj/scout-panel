@@ -25,8 +25,8 @@ export default function PlayersGridSkeleton() {
         </div>
       </div>
 
-      <div className="pb-0 pt-[110px]">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6">
+      <div className="pt-[110px] pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}

@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
   parsePlayerListSearchParams,
@@ -5,18 +6,27 @@ import {
   type PlayersListRouteState,
 } from '@/lib/player-list-params';
 import { getPlayers, getPlayersFilterOptions } from '@/lib/players-api';
+import { fetchShortlistPlayerIdsServer } from '@/lib/shortlist-api';
 import PlayersGridClient from './players-grid-client';
 import PlayersListControls from './players-list-controls';
 import PlayersPagination from './players-pagination';
+import { BETTER_AUTH_SESSION_COOKIE } from '@/lib/better-auth-session-cookie';
 
 export default async function PlayersGrid({
   routeState,
 }: {
   routeState: PlayersListRouteState;
 }) {
-  const [filterOptions, listing] = await Promise.all([
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join('; ');
+  const initialCanShortlist = Boolean(cookieStore.get(BETTER_AUTH_SESSION_COOKIE)?.value);
+  const [filterOptions, listing, initialShortlistIds] = await Promise.all([
     getPlayersFilterOptions(),
     getPlayers(routeState),
+    fetchShortlistPlayerIdsServer(cookieHeader),
   ]);
   const { nationalities } = filterOptions;
 
@@ -51,8 +61,12 @@ export default async function PlayersGrid({
         </div>
       </nav>
 
-      <div className="pb-0 pt-[110px]">
-        <PlayersGridClient players={listing.data} />
+      <div className="pt-[110px] pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+        <PlayersGridClient
+          players={listing.data}
+          initialShortlistIds={initialShortlistIds}
+          initialCanShortlist={initialCanShortlist}
+        />
       </div>
       <PlayersPagination routeState={syncedRouteState} meta={listing.meta} />
     </>
