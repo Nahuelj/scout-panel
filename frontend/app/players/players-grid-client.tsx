@@ -101,8 +101,11 @@ export default function PlayersGridClient({
 
   if (players.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="flex flex-col items-center justify-center gap-2 py-24 text-center px-4">
         <p className="text-neutral-500 text-lg">No players found</p>
+        <p className="max-w-md text-sm text-neutral-600">
+          Try clearing your filters and searching again.
+        </p>
       </div>
     );
   }

@@ -5,22 +5,33 @@ export default function PlayersGridSkeleton() {
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-[var(--app-header-h)] z-[45] border-b border-white/10 bg-[#080d14]/95 py-4 backdrop-blur-md"
       >
-        <div className="mx-auto flex max-w-screen-xl flex-col gap-4 px-6 sm:flex-row sm:items-end sm:justify-between md:px-8">
-          <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex flex-col gap-1.5">
-                <div className="h-3 w-16 rounded-full bg-white/[0.06] animate-pulse" />
-                <div className="h-10 w-36 rounded-lg border border-white/10 bg-[#0f1923] animate-pulse" />
+        <div className="mx-auto max-w-screen-xl px-6 md:px-8">
+          <div className="flex flex-col gap-3 lg:hidden">
+            <div className="flex items-end gap-2">
+              <div className="min-w-0 flex-1 flex flex-col gap-1.5">
+                <div className="h-3 w-14 rounded-full bg-white/[0.06] animate-pulse" />
+                <div className="h-10 w-full rounded-lg border border-white/10 bg-white/5 animate-pulse" />
               </div>
-            ))}
-            <div className="flex flex-col gap-1.5">
-              <div className="h-3 w-12 rounded-full bg-white/[0.06] animate-pulse" />
-              <div className="h-10 w-44 rounded-lg border border-white/10 bg-[#0f1923] animate-pulse" />
+              <div className="h-10 w-[5.5rem] shrink-0 rounded-lg border border-white/10 bg-white/[0.06] animate-pulse" />
             </div>
           </div>
-          <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:max-w-sm sm:shrink-0">
-            <div className="h-3 w-14 rounded-full bg-white/[0.06] animate-pulse" />
-            <div className="h-10 w-full rounded-lg border border-white/10 bg-white/5 animate-pulse sm:w-72" />
+          <div className="hidden flex-col gap-4 sm:flex-row sm:items-start sm:justify-between lg:flex">
+            <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-1.5">
+                  <div className="h-3 w-16 rounded-full bg-white/[0.06] animate-pulse" />
+                  <div className="h-10 w-36 rounded-lg border border-white/10 bg-[#0f1923] animate-pulse" />
+                </div>
+              ))}
+              <div className="flex flex-col gap-1.5">
+                <div className="h-3 w-12 rounded-full bg-white/[0.06] animate-pulse" />
+                <div className="h-10 w-44 rounded-lg border border-white/10 bg-[#0f1923] animate-pulse" />
+              </div>
+            </div>
+            <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:max-w-sm sm:shrink-0">
+              <div className="h-3 w-14 rounded-full bg-white/[0.06] animate-pulse" />
+              <div className="h-10 w-full rounded-lg border border-white/10 bg-white/5 animate-pulse sm:w-72" />
+            </div>
           </div>
         </div>
       </div>

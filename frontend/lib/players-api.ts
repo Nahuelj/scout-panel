@@ -70,16 +70,34 @@ export function playersApiOrigin(): string {
   return coerceServerLoopbackOrigin(base);
 }
 
+function formatPlayersApiConnectionError(url: string, cause: unknown): Error {
+  const detail = cause instanceof Error ? cause.message : String(cause);
+  const message = [
+    'Cannot reach the players API.',
+    'Start the Nest backend (e.g. pnpm dev in backend/) on the port you use (default 8080),',
+    'or set NEXT_PUBLIC_API_URL in frontend/.env.local to the API base URL (no trailing slash).',
+    `Request: ${url}`,
+    `Detail: ${detail}`,
+  ].join(' ');
+  return new Error(message, { cause });
+}
+
 export async function getPlayers(
   state: PlayersListRouteState,
   options?: { signal?: AbortSignal },
 ): Promise<PaginatedPlayersResponse> {
   const params = serializePlayersListApiQuery(state);
   const origin = playersApiOrigin();
-  const res = await fetch(`${origin}/players?${params}`, {
-    cache: 'no-store',
-    signal: options?.signal,
-  });
+  const url = `${origin}/players?${params}`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      cache: 'no-store',
+      signal: options?.signal,
+    });
+  } catch (err) {
+    throw formatPlayersApiConnectionError(url, err);
+  }
   if (!res.ok) throw new Error('Failed to fetch players');
   return res.json();
 }

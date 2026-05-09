@@ -45,7 +45,7 @@ export default function ShortlistGridClient({ players, initialCanShortlist }: Pr
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 animate-in fade-in duration-700 ease-out">
       {players.map((player) => (
         <PlayerCard
           key={player.id}
