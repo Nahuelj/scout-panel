@@ -5,7 +5,8 @@ import {
   useEffect,
   useRef,
   useState,
-  type FormEvent,
+  useSyncExternalStore,
+  type SubmitEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
@@ -39,6 +40,11 @@ export default function PlayerDetailHeaderSearch({
   const [debouncing, setDebouncing] = useState(false);
   const [loadedEmptyQuery, setLoadedEmptyQuery] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const portalMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const currentIdsKey = currentIds.join(",");
   const isAtMax = currentIds.length >= maxIds;
@@ -147,7 +153,7 @@ export default function PlayerDetailHeaderSearch({
     };
   }, [panelOpen]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = draft.trim();
     router.push(
@@ -190,17 +196,16 @@ export default function PlayerDetailHeaderSearch({
       results.length > 0 ||
       (loadedEmptyQuery !== null && loadedEmptyQuery === trimmedDraft));
 
-  const mainDim =
-    typeof document !== "undefined"
-      ? createPortal(
-          <div
-            aria-hidden
-            className={`fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 ${showPanel ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-            onMouseDown={() => setPanelOpen(false)}
-          />,
-          document.body,
-        )
-      : null;
+  const mainDim = portalMounted
+    ? createPortal(
+        <div
+          aria-hidden
+          className={`fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 ${showPanel ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+          onMouseDown={() => setPanelOpen(false)}
+        />,
+        document.body,
+      )
+    : null;
 
   return (
     <>
