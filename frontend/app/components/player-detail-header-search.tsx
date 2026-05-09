@@ -137,13 +137,13 @@ export default function PlayerDetailHeaderSearch({
     if (!panelOpen) return;
     const html = document.documentElement;
     const body = document.body;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
+    const prevPaddingRight = body.style.paddingRight;
+    body.style.paddingRight = `${scrollbarWidth}px`;
     html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
     return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
+      html.style.overflow = "";
+      body.style.paddingRight = prevPaddingRight;
     };
   }, [panelOpen]);
 
@@ -191,11 +191,11 @@ export default function PlayerDetailHeaderSearch({
       (loadedEmptyQuery !== null && loadedEmptyQuery === trimmedDraft));
 
   const mainDim =
-    typeof document !== "undefined" && showPanel
+    typeof document !== "undefined"
       ? createPortal(
           <div
             aria-hidden
-            className="fixed inset-0 z-40 bg-black/45 pointer-events-auto"
+            className={`fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 ${showPanel ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
             onMouseDown={() => setPanelOpen(false)}
           />,
           document.body,
