@@ -16,7 +16,6 @@ import {
   categoryLabel,
   computeRadarScores,
   formatValue,
-  formatCardIntervalGames,
   clientToSvgPoint,
   pickCategoryByNearestAxis,
   type StatFormatKind,
@@ -262,70 +261,6 @@ export default function CompareAnalysis({ players }: Props) {
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-white/5 shrink-0">
-          <p className="text-neutral-500 text-[9px] uppercase tracking-widest font-semibold mb-2">
-            Discipline
-          </p>
-          <div
-            className={`grid gap-2 ${
-              players.length === 2 ? 'grid-cols-2' : 'grid-cols-3'
-            }`}
-          >
-            {players.map((p, i) => {
-              const slot = getSlotColor(i);
-              const stats = p.currentSeason?.stats;
-              return (
-                <div
-                  key={p.id}
-                  className="rounded-xl bg-white/[0.03] border border-white/5 px-3 py-2"
-                >
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <span
-                      className="size-2 shrink-0 rounded-[2px]"
-                      style={{ backgroundColor: slot.base }}
-                      aria-hidden
-                    />
-                    <span className="text-neutral-400 text-[10px] truncate">{p.name}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    <div className="flex items-center gap-1">
-                      <span
-                        className="size-1.5 rounded-[2px] bg-amber-400/90"
-                        aria-hidden
-                      />
-                      <span className="text-white text-sm font-bold tabular-nums">
-                        {stats?.yellowCards ?? 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span
-                        className="size-1.5 rounded-[2px] bg-red-600/90"
-                        aria-hidden
-                      />
-                      <span className="text-white text-sm font-bold tabular-nums">
-                        {stats?.redCards ?? 0}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-[10px] text-neutral-500 space-y-0.5 mt-1.5 pt-1.5 border-t border-white/[0.06] tabular-nums">
-                    <p>
-                      <span className="text-neutral-600">Yellow · </span>
-                      {stats?.matchesPerYellowCard != null
-                        ? formatCardIntervalGames(stats.matchesPerYellowCard)
-                        : 'No yellow cards'}
-                    </p>
-                    <p>
-                      <span className="text-neutral-600">Red · </span>
-                      {stats?.matchesPerRedCard != null
-                        ? formatCardIntervalGames(stats.matchesPerRedCard)
-                        : 'No red cards'}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       <div
@@ -361,8 +296,8 @@ export default function CompareAnalysis({ players }: Props) {
                 value={cat}
                 className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden px-0 pt-0 pb-0 outline-none"
               >
-                <div className="flex min-h-0 flex-1 flex-col px-6 pt-5">
-                  <div className="scrollbar-panel min-h-0 flex-1 overflow-x-auto overflow-y-auto pb-6">
+                <div className="flex min-h-0 flex-1 flex-col pl-6 pr-2 pt-5">
+                  <div className="scrollbar-panel min-h-0 flex-1 overflow-x-auto overflow-y-auto pb-6 pr-4">
                     <div className="min-w-[36rem]">
                       <div
                         className={cn(

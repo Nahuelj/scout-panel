@@ -172,6 +172,7 @@ export default function PlayerDetailHeaderSearch({
     (id: string) => {
       if (isAtMax) return;
       setPanelOpen(false);
+      setDraft("");
       const baseIds = currentIdsKey ? currentIdsKey.split(",") : [];
       const nextIds = Array.from(new Set([...baseIds, id])).slice(0, maxIds);
       const encoded = nextIds.map((x) => encodeURIComponent(x)).join(",");

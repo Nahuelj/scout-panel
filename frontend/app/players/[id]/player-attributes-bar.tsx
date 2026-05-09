@@ -13,10 +13,10 @@ function scoreLabel(value: number | null): string {
 }
 
 function scoreLabelColor(value: number | null): string {
-  if (value === null) return 'text-neutral-500';
-  if (value >= 8) return 'text-emerald-400';
-  if (value >= 5) return 'text-amber-400';
-  return 'text-red-400';
+  if (value === null) return 'text-neutral-400';
+  if (value >= 8) return 'text-emerald-300';
+  if (value >= 5) return 'text-amber-300';
+  return 'text-rose-300';
 }
 
 type StatItemProps = {
@@ -28,7 +28,7 @@ function StatItem({ label, children }: StatItemProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 sm:px-5 py-5 min-w-0">
       <div className="text-white text-base font-semibold text-center leading-snug">{children}</div>
-      <p className="text-neutral-600 text-[10px] uppercase tracking-widest mt-2 text-center px-1">
+      <p className="mt-2 text-center px-1 text-[11px] font-semibold uppercase tracking-widest text-neutral-400">
         {label}
       </p>
     </div>
@@ -36,7 +36,7 @@ function StatItem({ label, children }: StatItemProps) {
 }
 
 function Divider() {
-  return <div className="w-px shrink-0 self-stretch bg-white/5 my-3.5" />;
+  return <div className="my-3.5 w-px shrink-0 self-stretch bg-white/12" />;
 }
 
 function MouseFollowTooltip({
@@ -105,8 +105,10 @@ function WeakFootRating({
   return (
     <MouseFollowTooltip text={tooltip}>
       <span className="flex items-center gap-1.5">
-        <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
-        <span>{s.toFixed(1)}</span>
+        <span className="mr-0.5 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          {label}
+        </span>
+        <span className="tabular-nums text-white">{s.toFixed(1)}</span>
         <span className={`text-xs font-bold ${scoreLabelColor(s)}`}>{scoreLabel(s)}</span>
       </span>
     </MouseFollowTooltip>
@@ -125,8 +127,10 @@ function SkillfulFootRating({
   return (
     <MouseFollowTooltip text={tooltip}>
       <span className="flex items-center gap-1.5">
-        <span className="text-neutral-500 text-xs font-medium uppercase mr-0.5">{label}</span>
-        <span>{score.toFixed(1)}</span>
+        <span className="mr-0.5 text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          {label}
+        </span>
+        <span className="tabular-nums text-white">{score.toFixed(1)}</span>
         <span className={`text-xs font-bold ${scoreLabelColor(score)}`}>{scoreLabel(score)}</span>
       </span>
     </MouseFollowTooltip>

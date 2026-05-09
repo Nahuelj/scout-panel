@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { PlayerDetail } from '@/lib/player-detail-api';
-import { POSITION_FULL } from '@/lib/player-stats-metadata';
+import { POSITION_FULL, formatCardIntervalGames } from '@/lib/player-stats-metadata';
 import { getSlotColor } from '@/lib/compare-colors';
 
 const TOOLTIP_SKILLFUL_PASS =
@@ -23,10 +23,10 @@ function scoreLabel(value: number | null): string {
 }
 
 function scoreLabelColor(value: number | null): string {
-  if (value === null) return 'text-neutral-500';
-  if (value >= 8) return 'text-emerald-400';
-  if (value >= 5) return 'text-amber-400';
-  return 'text-red-400';
+  if (value === null) return 'text-neutral-400';
+  if (value >= 8) return 'text-emerald-300';
+  if (value >= 5) return 'text-amber-300';
+  return 'text-rose-300';
 }
 
 function MouseFollowTooltip({
@@ -80,10 +80,12 @@ function FootRating({
 }) {
   return (
     <MouseFollowTooltip text={tooltip}>
-      <span className="flex items-center gap-1.5 text-sm whitespace-nowrap">
-        <span className="text-neutral-500 text-[10px] font-medium uppercase">{label}</span>
-        <span className="text-white">{score.toFixed(1)}</span>
-        <span className={`text-[10px] font-bold ${scoreLabelColor(score)}`}>
+      <span className="flex items-center gap-2 text-sm whitespace-nowrap leading-relaxed">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+          {label}
+        </span>
+        <span className="tabular-nums font-semibold text-white">{score.toFixed(1)}</span>
+        <span className={`text-[11px] font-bold ${scoreLabelColor(score)}`}>
           {scoreLabel(score)}
         </span>
       </span>
@@ -103,14 +105,16 @@ function FootCell({ player }: { player: PlayerDetail }) {
   const hasAny =
     skillPass != null || skillShot != null || weakPass != null || weakShot != null;
 
-  if (!hasAny) return <span className="text-neutral-600">—</span>;
+  if (!hasAny) return <span className="text-sm text-neutral-500">—</span>;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {(skillPass != null || skillShot != null) && (
-        <div className="flex flex-col gap-1">
-          <p className="text-neutral-600 text-[9px] uppercase tracking-widest">Skillful</p>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+            Skillful
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {skillPass != null && (
               <FootRating
                 label="Pass"
@@ -129,9 +133,11 @@ function FootCell({ player }: { player: PlayerDetail }) {
         </div>
       )}
       {(weakPass != null || weakShot != null) && (
-        <div className="flex flex-col gap-1">
-          <p className="text-neutral-600 text-[9px] uppercase tracking-widest">Weak foot</p>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+            Weak foot
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {weakPass != null && (
               <FootRating label="Pass" score={weakPass} tooltip={TOOLTIP_WEAK_PASS} />
             )}
@@ -188,6 +194,48 @@ const ROWS: AttributeRow[] = [
     label: 'Foot ratings',
     render: (p) => <FootCell player={p} />,
   },
+  {
+    label: 'Yellow cards',
+    render: (p) => {
+      const stats = p.currentSeason?.stats;
+      const count = stats?.yellowCards ?? null;
+      if (count === null) return <span className="text-sm text-neutral-500">—</span>;
+      return (
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 shrink-0 rounded-[2px] bg-amber-400/90" aria-hidden />
+            <span className="tabular-nums font-bold text-white text-sm">{count}</span>
+          </div>
+          <span className="text-[11px] tabular-nums text-neutral-400 leading-snug">
+            {stats?.matchesPerYellowCard != null
+              ? formatCardIntervalGames(stats.matchesPerYellowCard)
+              : 'No yellow cards'}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    label: 'Red cards',
+    render: (p) => {
+      const stats = p.currentSeason?.stats;
+      const count = stats?.redCards ?? null;
+      if (count === null) return <span className="text-sm text-neutral-500">—</span>;
+      return (
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-2">
+            <span className="size-2 shrink-0 rounded-[2px] bg-red-500/90" aria-hidden />
+            <span className="tabular-nums font-bold text-white text-sm">{count}</span>
+          </div>
+          <span className="text-[11px] tabular-nums text-neutral-400 leading-snug">
+            {stats?.matchesPerRedCard != null
+              ? formatCardIntervalGames(stats.matchesPerRedCard)
+              : 'No red cards'}
+          </span>
+        </div>
+      );
+    },
+  },
 ];
 
 type Props = { players: PlayerDetail[] };
@@ -202,7 +250,7 @@ export default function CompareAttributesTable({ players }: Props) {
   return (
     <div className="rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden">
       <div className={`grid ${gridCols} border-b border-white/10`}>
-        <div className="px-5 py-3 text-[10px] uppercase tracking-widest text-neutral-600 font-semibold bg-[#0b121c]">
+        <div className="px-5 py-3 text-[10px] uppercase tracking-widest font-semibold text-neutral-400 bg-[#0b121c]">
           Attribute
         </div>
         {players.map((p, i) => {
@@ -233,7 +281,7 @@ export default function CompareAttributesTable({ players }: Props) {
             idx < ROWS.length - 1 ? 'border-b border-white/5' : ''
           }`}
         >
-          <div className="px-5 py-4 text-[10px] uppercase tracking-widest text-neutral-500 font-semibold flex items-center">
+          <div className="px-5 py-4 text-[10px] uppercase tracking-widest text-neutral-400 font-semibold flex items-center">
             {row.label}
           </div>
           {players.map((p, i) => {
