@@ -28,6 +28,7 @@ type CardProps = {
   canShortlist: boolean;
   shortlistBusy: boolean;
   onShortlistClick: (e: MouseEvent) => void;
+  className?: string;
 };
 
 function HeaderCard({
@@ -38,6 +39,7 @@ function HeaderCard({
   canShortlist,
   shortlistBusy,
   onShortlistClick,
+  className,
 }: CardProps) {
   const router = useRouter();
   const slot = getSlotColor(index);
@@ -55,7 +57,7 @@ function HeaderCard({
   };
 
   return (
-    <div className="relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden">
+    <div className={`relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden${className ? ` ${className}` : ''}`}>
       <div
         className="h-1 w-full"
         style={{ backgroundColor: slot.base }}
@@ -256,15 +258,14 @@ export default function CompareHeaders({
   const count = players.length;
   const allIds = players.map((p) => p.id);
 
+  const gridClass =
+    count === 2
+      ? 'grid grid-cols-1 gap-3 sm:grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
+      : 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
+
   return (
     <div ref={nameAnchorRef} className="space-y-3">
-      <div
-        className={`grid gap-3 ${
-          count === 2
-            ? 'grid-cols-1 sm:grid-cols-2'
-            : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-        }`}
-      >
+      <div className={gridClass}>
         {players.map((player, i) => (
           <HeaderCard
             key={player.id}
@@ -275,6 +276,13 @@ export default function CompareHeaders({
             canShortlist={canShortlist}
             shortlistBusy={busyId === player.id}
             onShortlistClick={(e) => handleShortlistClick(player, e)}
+            className={
+              i === 0
+                ? count === 2
+                  ? 'sm:col-span-2'
+                  : 'lg:col-span-2'
+                : undefined
+            }
           />
         ))}
       </div>

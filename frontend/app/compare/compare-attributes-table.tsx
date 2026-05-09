@@ -224,8 +224,8 @@ export default function CompareAttributesTable({ players }: Props) {
   const count = players.length;
   const gridCols =
     count === 2
-      ? 'grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
-      : 'grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
+      ? 'gap-x-3 grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
+      : 'gap-x-3 grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
 
   return (
     <div className='rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden'>
