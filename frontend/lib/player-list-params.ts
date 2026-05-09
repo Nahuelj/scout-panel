@@ -79,6 +79,27 @@ export function serializePlayersListToPathQuery(state: PlayersListRouteState): s
   return qs ? `?${qs}` : '';
 }
 
+export function serializePlayersListApiQuery(state: PlayersListRouteState): string {
+  const entries: Record<string, string | number | undefined> = {
+    ...(state.search && { search: state.search }),
+    ...(state.position && { position: state.position }),
+    ...(state.nationality && { nationality: state.nationality }),
+    ...(state.minAge !== undefined && { minAge: state.minAge }),
+    ...(state.maxAge !== undefined && { maxAge: state.maxAge }),
+    page: state.page ?? DEFAULT_PLAYERS_PAGE,
+    pageSize: state.pageSize ?? PLAYERS_FIXED_PAGE_SIZE,
+  };
+  return new URLSearchParams(
+    Object.entries(entries)
+      .filter(([, v]) => v !== undefined && v !== '')
+      .map(([k, v]) => [k, String(v)]),
+  ).toString();
+}
+
 export function playersListHrefForState(state: PlayersListRouteState): string {
   return `/players${serializePlayersListToPathQuery(state)}`;
+}
+
+export function shortlistListHrefForState(state: PlayersListRouteState): string {
+  return `/players/shortlist${serializePlayersListToPathQuery(state)}`;
 }

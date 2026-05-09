@@ -1,6 +1,5 @@
 import {
-  DEFAULT_PLAYERS_PAGE,
-  PLAYERS_FIXED_PAGE_SIZE,
+  serializePlayersListApiQuery,
   type PlayersListRouteState,
 } from './player-list-params';
 
@@ -42,43 +41,40 @@ export type PlayersFilterOptions = {
   nationalities: string[];
 };
 
-function playersApiOrigin(): string {
+function coerceServerLoopbackOrigin(url: string): string {
+  if (typeof window !== 'undefined') return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'localhost') {
+      u.hostname = '127.0.0.1';
+    }
+    return u.origin;
+  } catch {
+    return url;
+  }
+}
+
+export function playersApiOrigin(): string {
   const configured =
     typeof process.env.NEXT_PUBLIC_API_URL === 'string'
       ? process.env.NEXT_PUBLIC_API_URL.trim()
       : '';
 
-  if (configured.length > 0) {
-    return configured.replace(/\/$/, '');
-  }
+  const base =
+    configured.length > 0
+      ? configured.replace(/\/$/, '')
+      : typeof window === 'undefined'
+        ? 'http://127.0.0.1:8080'
+        : 'http://localhost:8080';
 
-  return typeof window === 'undefined'
-    ? 'http://127.0.0.1:8080'
-    : 'http://localhost:8080';
-}
-
-function serializeApiQuery(state: PlayersListRouteState): URLSearchParams {
-  const entries: Record<string, string | number | undefined> = {
-    ...(state.search && { search: state.search }),
-    ...(state.position && { position: state.position }),
-    ...(state.nationality && { nationality: state.nationality }),
-    ...(state.minAge !== undefined && { minAge: state.minAge }),
-    ...(state.maxAge !== undefined && { maxAge: state.maxAge }),
-    page: state.page ?? DEFAULT_PLAYERS_PAGE,
-    pageSize: PLAYERS_FIXED_PAGE_SIZE,
-  };
-  return new URLSearchParams(
-    Object.entries(entries)
-      .filter(([, v]) => v !== undefined && v !== '')
-      .map(([k, v]) => [k, String(v)]),
-  );
+  return coerceServerLoopbackOrigin(base);
 }
 
 export async function getPlayers(
   state: PlayersListRouteState,
   options?: { signal?: AbortSignal },
 ): Promise<PaginatedPlayersResponse> {
-  const params = serializeApiQuery(state);
+  const params = serializePlayersListApiQuery(state);
   const origin = playersApiOrigin();
   const res = await fetch(`${origin}/players?${params}`, {
     cache: 'no-store',

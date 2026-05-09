@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent, FormEvent, ReactNode } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, Search, XCircle } from 'lucide-react';
@@ -9,13 +9,15 @@ import {
   DEFAULT_PLAYERS_PAGE,
   PLAYERS_FIXED_PAGE_SIZE,
   PLAYER_POSITION_VALUES,
-  playersListHrefForState,
+  serializePlayersListToPathQuery,
   type PlayersListRouteState,
 } from '@/lib/player-list-params';
 
 type Props = {
   nationalities: string[];
   routeState: PlayersListRouteState;
+  listPathBase?: string;
+  searchPlaceholder?: string;
 };
 
 const SEARCH_DEBOUNCE_MS = 380;
@@ -67,9 +69,11 @@ function FilterSelect({
 function PlayersDebouncedSearch({
   routeState,
   onCommitSearch,
+  searchPlaceholder,
 }: {
   routeState: PlayersListRouteState;
   onCommitSearch: (next: PlayersListRouteState) => void;
+  searchPlaceholder: string;
 }) {
   const [localSearch, setLocalSearch] = useState(() => routeState.search ?? '');
   const debounceTimerRef = useRef<number | undefined>(undefined);
@@ -144,7 +148,7 @@ function PlayersDebouncedSearch({
           type="search"
           value={localSearch}
           onChange={(e) => setLocalSearch(e.target.value)}
-          placeholder="Search players…"
+          placeholder={searchPlaceholder}
           autoComplete="off"
           aria-label="Search players by name"
           className="h-10 w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-10 pr-3 text-sm text-white outline-none placeholder:text-neutral-500 focus:border-white/20"
@@ -195,10 +199,15 @@ function AgeRangeInputs({
   }, [routeState.maxAge]);
 
   const onCommitRef = useRef(onCommit);
-  onCommitRef.current = onCommit;
-
   const routeStateRef = useRef(routeState);
-  routeStateRef.current = routeState;
+
+  useEffect(() => {
+    onCommitRef.current = onCommit;
+  }, [onCommit]);
+
+  useEffect(() => {
+    routeStateRef.current = routeState;
+  }, [routeState]);
 
   const scheduleCommit = useCallback(() => {
     if (debounceTimerRef.current !== undefined) {
@@ -270,21 +279,31 @@ function AgeRangeInputs({
   );
 }
 
-export default function PlayersListControls({ nationalities, routeState }: Props) {
+export default function PlayersListControls({
+  nationalities,
+  routeState,
+  listPathBase = '/players',
+  searchPlaceholder = 'Search players…',
+}: Props) {
   const router = useRouter();
+  const listHrefForState = useMemo(
+    () => (state: PlayersListRouteState) =>
+      `${listPathBase}${serializePlayersListToPathQuery(state)}`,
+    [listPathBase],
+  );
 
   const pushListing = useCallback(
     (next: PlayersListRouteState) => {
-      router.push(playersListHrefForState(next));
+      router.push(listHrefForState(next));
     },
-    [router],
+    [router, listHrefForState],
   );
 
   const clearedState: PlayersListRouteState = {
     page: DEFAULT_PLAYERS_PAGE,
     pageSize: PLAYERS_FIXED_PAGE_SIZE,
   };
-  const clearHref = playersListHrefForState(clearedState);
+  const clearHref = listHrefForState(clearedState);
   const hasActiveFilters =
     Boolean(routeState.search?.trim()) ||
     Boolean(routeState.position) ||
@@ -394,7 +413,11 @@ export default function PlayersListControls({ nationalities, routeState }: Props
         <label htmlFor="plc-search" className={filterLabelClass}>
           Search
         </label>
-        <PlayersDebouncedSearch routeState={routeState} onCommitSearch={pushListing} />
+        <PlayersDebouncedSearch
+          routeState={routeState}
+          onCommitSearch={pushListing}
+          searchPlaceholder={searchPlaceholder}
+        />
       </div>
     </div>
   );

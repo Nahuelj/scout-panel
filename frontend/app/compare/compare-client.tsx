@@ -8,9 +8,9 @@ import CompareAnalysis from './compare-analysis';
 import CompareActivityChart from './compare-activity-chart';
 import CompareStickyBar from './compare-sticky-bar';
 
-type Props = { players: PlayerDetail[] };
+type Props = { players: PlayerDetail[]; initialShortlistedIds: string[] };
 
-export default function CompareClient({ players }: Props) {
+export default function CompareClient({ players, initialShortlistedIds }: Props) {
   const nameAnchorRef = useRef<HTMLDivElement>(null);
   const playersWithStats = players.filter((p) => p.currentSeason?.stats);
   const playersWithActivity = players.filter(
@@ -21,7 +21,11 @@ export default function CompareClient({ players }: Props) {
     <div className="space-y-4 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]">
       <CompareStickyBar players={players} nameAnchorRef={nameAnchorRef} />
 
-      <CompareHeaders players={players} nameAnchorRef={nameAnchorRef} />
+      <CompareHeaders
+        players={players}
+        nameAnchorRef={nameAnchorRef}
+        initialShortlistedIds={initialShortlistedIds}
+      />
 
       <CompareAttributesTable players={players} />
 

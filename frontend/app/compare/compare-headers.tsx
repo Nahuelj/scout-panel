@@ -1,11 +1,18 @@
 'use client';
 
-import type { RefObject } from 'react';
+import type { MouseEvent, RefObject } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Bookmark, X } from 'lucide-react';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 import { getSlotColor } from '@/lib/compare-colors';
+import { useSession } from '@/lib/auth-client';
+import {
+  addToShortlist,
+  fetchShortlistPlayerIds,
+  removeFromShortlist,
+} from '@/lib/shortlist-api';
 
 function calcAge(birthDate: string): number {
   return Math.floor(
@@ -17,9 +24,21 @@ type CardProps = {
   player: PlayerDetail;
   index: number;
   allIds: string[];
+  isShortlisted: boolean;
+  canShortlist: boolean;
+  shortlistBusy: boolean;
+  onShortlistClick: (e: MouseEvent) => void;
 };
 
-function HeaderCard({ player, index, allIds }: CardProps) {
+function HeaderCard({
+  player,
+  index,
+  allIds,
+  isShortlisted,
+  canShortlist,
+  shortlistBusy,
+  onShortlistClick,
+}: CardProps) {
   const router = useRouter();
   const slot = getSlotColor(index);
   const age = player.birthDate ? calcAge(player.birthDate) : null;
@@ -35,10 +54,6 @@ function HeaderCard({ player, index, allIds }: CardProps) {
     router.push(`/compare?ids=${encoded}`);
   };
 
-  const handleSave = () => {
-    // TODO: wire up save player
-  };
-
   return (
     <div className="relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden">
       <div
@@ -50,13 +65,18 @@ function HeaderCard({ player, index, allIds }: CardProps) {
       <div className="absolute right-2 top-3 z-10 flex items-center gap-1.5">
         <button
           type="button"
-          onClick={handleSave}
-          aria-label={`Save ${player.name}`}
-          title="Save player"
-          className="group inline-flex size-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.025] text-neutral-400 outline-none transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] hover:text-neutral-200 focus-visible:border-emerald-500/35 focus-visible:ring-2 focus-visible:ring-emerald-500/25"
+          disabled={!canShortlist || shortlistBusy}
+          onClick={onShortlistClick}
+          aria-label={isShortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+          title={isShortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+          className={`group inline-flex size-8 items-center justify-center rounded-lg border outline-none transition-all duration-200 focus-visible:border-sky-500/40 focus-visible:ring-2 focus-visible:ring-sky-500/25 disabled:pointer-events-none disabled:opacity-40 ${
+            isShortlisted
+              ? 'border-sky-500/50 bg-sky-500/15 text-sky-300'
+              : 'border-white/15 bg-[#0f1923]/90 text-neutral-500 hover:border-sky-500/25 hover:text-sky-200/90'
+          }`}
         >
           <Bookmark
-            className="size-[15px] shrink-0 text-neutral-500 transition-colors group-hover:text-neutral-200"
+            className={`size-[15px] shrink-0 ${isShortlisted ? 'fill-sky-400/40' : ''}`}
             strokeWidth={1.75}
             aria-hidden
           />
@@ -166,9 +186,73 @@ function HeaderCard({ player, index, allIds }: CardProps) {
 type Props = {
   players: PlayerDetail[];
   nameAnchorRef?: RefObject<HTMLDivElement | null>;
+  initialShortlistedIds: string[];
 };
 
-export default function CompareHeaders({ players, nameAnchorRef }: Props) {
+export default function CompareHeaders({
+  players,
+  nameAnchorRef,
+  initialShortlistedIds,
+}: Props) {
+  const { data: session } = useSession();
+  const [mounted, setMounted] = useState(false);
+  const [shortlistIds, setShortlistIds] = useState(
+    () => new Set(initialShortlistedIds),
+  );
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const canShortlist = mounted && Boolean(session?.user);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!canShortlist) return;
+    let cancelled = false;
+    fetchShortlistPlayerIds()
+      .then((ids) => {
+        if (!cancelled) setShortlistIds(new Set(ids));
+      })
+      .catch(() => {
+        if (!cancelled) setShortlistIds(new Set());
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [canShortlist]);
+
+  const handleShortlistClick = useCallback(
+    (player: PlayerDetail, e: MouseEvent) => {
+      e.preventDefault();
+      if (!canShortlist || busyId) return;
+      const on = shortlistIds.has(player.id);
+      setBusyId(player.id);
+      void (async () => {
+        try {
+          if (on) {
+            await removeFromShortlist(player.id);
+            setShortlistIds((prev) => {
+              const next = new Set(prev);
+              next.delete(player.id);
+              return next;
+            });
+          } else {
+            await addToShortlist(player.id);
+            setShortlistIds((prev) => new Set(prev).add(player.id));
+          }
+        } catch {
+          const ids = await fetchShortlistPlayerIds().catch(() => [] as string[]);
+          setShortlistIds(new Set(ids));
+        } finally {
+          setBusyId(null);
+        }
+      })();
+    },
+    [busyId, canShortlist, shortlistIds],
+  );
+
   const count = players.length;
   const allIds = players.map((p) => p.id);
 
@@ -182,7 +266,16 @@ export default function CompareHeaders({ players, nameAnchorRef }: Props) {
         }`}
       >
         {players.map((player, i) => (
-          <HeaderCard key={player.id} player={player} index={i} allIds={allIds} />
+          <HeaderCard
+            key={player.id}
+            player={player}
+            index={i}
+            allIds={allIds}
+            isShortlisted={shortlistIds.has(player.id)}
+            canShortlist={canShortlist}
+            shortlistBusy={busyId === player.id}
+            onShortlistClick={(e) => handleShortlistClick(player, e)}
+          />
         ))}
       </div>
     </div>

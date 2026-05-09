@@ -84,14 +84,14 @@ export type PlayerDetail = {
   } | null;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
+import { playersApiOrigin } from './players-api';
 
 export async function getPlayerDetail(
   id: string,
   seasonId?: string,
 ): Promise<PlayerDetail | null> {
   const params = seasonId ? `?seasonId=${seasonId}` : '';
-  const res = await fetch(`${API_URL}/players/${id}${params}`, { cache: 'no-store' });
+  const res = await fetch(`${playersApiOrigin()}/players/${id}${params}`, { cache: 'no-store' });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to fetch player detail');
   return res.json();

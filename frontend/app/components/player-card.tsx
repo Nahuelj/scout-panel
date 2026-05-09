@@ -1,6 +1,9 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Bookmark } from 'lucide-react';
+import type { MouseEvent } from 'react';
 import type { PlayerCardData } from '@/lib/players-api';
 
 const POSITION_LABEL: Record<string, string> = {
@@ -39,41 +42,98 @@ function calcAge(birthDate: string): number {
   );
 }
 
+export type PlayerCardBehavior = 'compare' | 'openDetail';
+
+export type PlayerCardVisualVariant = 'default' | 'shortlist';
+
 type Props = {
   player: PlayerCardData;
   isSelected: boolean;
   onToggle: () => void;
+  cardBehavior?: PlayerCardBehavior;
+  visualVariant?: PlayerCardVisualVariant;
+  isShortlisted?: boolean;
+  onShortlistToggle?: (e: MouseEvent) => void;
 };
 
-export default function PlayerCard({ player, isSelected, onToggle }: Props) {
+export default function PlayerCard({
+  player,
+  isSelected,
+  onToggle,
+  cardBehavior = 'compare',
+  visualVariant = 'default',
+  isShortlisted = false,
+  onShortlistToggle,
+}: Props) {
+  const router = useRouter();
   const posGroup = POSITION_LABEL[player.position] ?? player.position;
   const posColor = POSITION_COLOR[posGroup] ?? 'bg-neutral-600 text-white';
   const flag = player.nationality ? (FLAG_BY_NATIONALITY[player.nationality] ?? '🏳️') : null;
   const age = player.birthDate ? calcAge(player.birthDate) : null;
   const stats = player.currentSeason?.stats;
+  const isShortlistVisual = visualVariant === 'shortlist';
+
+  const handleCardClick = () => {
+    if (cardBehavior === 'openDetail') {
+      router.push(`/players/${player.id}`);
+      return;
+    }
+    onToggle();
+  };
+
+  const cardBorderClass =
+    cardBehavior === 'compare' && isSelected
+      ? 'border-emerald-500/60 shadow-[0_0_0_1px_rgba(16,185,129,0.2)]'
+      : isShortlistVisual
+        ? 'border-sky-500/25 hover:border-sky-400/45'
+        : 'border-white/5 hover:border-white/15';
+
+  const cardBgClass = isShortlistVisual
+    ? 'bg-[radial-gradient(ellipse_115%_90%_at_50%_-18%,rgba(125,211,252,0.28),rgba(56,189,248,0.12)_38%,rgba(30,58,138,0.08)_55%,transparent_72%),radial-gradient(ellipse_95%_75%_at_100%_85%,rgba(96,165,250,0.18),transparent_58%),linear-gradient(165deg,rgb(18,32,52)_0%,rgb(14,26,44)_45%,rgb(12,22,40)_100%)]'
+    : 'bg-[#0f1923]';
 
   return (
     <div
-      onClick={onToggle}
-      className={`relative flex min-w-0 flex-col items-center rounded-2xl bg-[#0f1923] border p-5 gap-3 cursor-pointer transition-colors group ${
-        isSelected
-          ? 'border-emerald-500/60 shadow-[0_0_0_1px_rgba(16,185,129,0.2)]'
-          : 'border-white/5 hover:border-white/15'
-      }`}
+      onClick={handleCardClick}
+      className={`relative flex min-w-0 flex-col items-center overflow-hidden rounded-2xl border p-5 gap-3 cursor-pointer transition-colors group ${cardBgClass} ${cardBorderClass}`}
     >
-      <div
-        className={`absolute top-4 right-4 w-5 h-5 rounded flex items-center justify-center transition-all ${
-          isSelected
-            ? 'bg-emerald-500 border-emerald-500'
-            : 'border border-white/20 group-hover:border-white/40'
-        }`}
-      >
-        {isSelected && (
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </div>
+      {onShortlistToggle ? (
+        <button
+          type="button"
+          aria-label={isShortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+          onClick={(e) => {
+            e.stopPropagation();
+            onShortlistToggle(e);
+          }}
+          className={`absolute top-4 left-4 z-[1] inline-flex size-8 items-center justify-center rounded-lg border outline-none transition-all duration-200 focus-visible:border-sky-500/40 focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+            isShortlisted
+              ? 'border-sky-500/50 bg-sky-500/15 text-sky-300'
+              : 'border-white/15 bg-[#0f1923]/90 text-neutral-500 hover:border-sky-500/25 hover:text-sky-200/90'
+          }`}
+        >
+          <Bookmark
+            className={`size-[15px] shrink-0 ${isShortlisted ? 'fill-sky-400/40' : ''}`}
+            strokeWidth={1.75}
+            aria-hidden
+          />
+        </button>
+      ) : null}
+
+      {cardBehavior === 'compare' ? (
+        <div
+          className={`absolute top-4 right-4 w-5 h-5 rounded flex items-center justify-center transition-all ${
+            isSelected
+              ? 'bg-emerald-500 border-emerald-500'
+              : 'border border-white/20 group-hover:border-white/40'
+          }`}
+        >
+          {isSelected && (
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+      ) : null}
 
       <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0">
         {player.photoUrl ? (

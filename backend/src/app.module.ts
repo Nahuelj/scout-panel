@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PlayersModule } from './players/players.module';
+import { ShortlistModule } from './shortlist/shortlist.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PlayersModule } from './players/players.module';
     PrismaModule,
     AuthModule,
     PlayersModule,
+    ShortlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

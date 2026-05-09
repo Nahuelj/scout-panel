@@ -7,24 +7,12 @@ import {
 import { PlayerListQueryDto } from './dto/player-list-query.dto';
 import { PlayerDetailQueryDto } from './dto/player-detail-query.dto';
 import { pctToZeroTenScale } from './skillful-foot-score.util';
-
-const SEASON_SELECT = {
-  club: {
-    select: {
-      name: true,
-      league: true,
-      logoUrl: true,
-    },
-  },
-  stats: {
-    select: {
-      matchesPlayed: true,
-      goals: true,
-      assists: true,
-      xGPer90: true,
-    },
-  },
-} as const;
+import {
+  mapRowToPlayerListCard,
+  PLAYER_LIST_SEASON_SELECT,
+  type PlayerListCard,
+} from './player-list-card';
+import { buildPlayerListWhereContext } from './player-list-where';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
@@ -33,47 +21,6 @@ const MAX_PAGE_SIZE = 100;
 @Injectable()
 export class PlayersService {
   constructor(private readonly prisma: PrismaService) {}
-
-  private buildPlayerListWhere(
-    query: Pick<
-      PlayerListQueryDto,
-      'position' | 'nationality' | 'seasonId' | 'search' | 'minAge' | 'maxAge'
-    >,
-  ) {
-    const { position, nationality, seasonId, search, minAge, maxAge } = query;
-
-    const seasonWhere = seasonId
-      ? { seasonId }
-      : { season: { isCurrent: true } };
-
-    const playerSeasonWhere = { ...seasonWhere };
-
-    const today = new Date();
-    const birthDateFilter: { lte?: Date; gte?: Date } = {};
-    if (minAge !== undefined) {
-      const lte = new Date(today);
-      lte.setFullYear(lte.getFullYear() - minAge);
-      birthDateFilter.lte = lte;
-    }
-    if (maxAge !== undefined) {
-      const gte = new Date(today);
-      gte.setFullYear(gte.getFullYear() - maxAge - 1);
-      gte.setDate(gte.getDate() + 1);
-      birthDateFilter.gte = gte;
-    }
-    const hasBirthDateFilter = Object.keys(birthDateFilter).length > 0;
-
-    return {
-      ...(position && { position }),
-      ...(nationality && { nationality }),
-      ...(search && {
-        name: { contains: search, mode: 'insensitive' as const },
-      }),
-      ...(hasBirthDateFilter && { birthDate: birthDateFilter }),
-      seasons: { some: playerSeasonWhere },
-      playerSeasonWhere,
-    };
-  }
 
   async findOne(id: string, query: PlayerDetailQueryDto) {
     const seasonWhere = query.seasonId
@@ -234,7 +181,7 @@ export class PlayersService {
   async findAll(
     query: PlayerListQueryDto,
   ): Promise<PaginatedResult<PlayerListCard>> {
-    const whereCtx = this.buildPlayerListWhere(query);
+    const whereCtx = buildPlayerListWhereContext(query);
     const { playerSeasonWhere, ...where } = whereCtx;
 
     const rawPageSize =
@@ -267,7 +214,7 @@ export class PlayersService {
         seasons: {
           where: playerSeasonWhere,
           take: 1,
-          select: SEASON_SELECT,
+          select: PLAYER_LIST_SEASON_SELECT,
         },
       },
       orderBy: { name: 'asc' },
@@ -275,45 +222,7 @@ export class PlayersService {
       take: pageSize,
     });
 
-    const data = rows.map((player) => {
-      const season = player.seasons[0] ?? null;
-      return {
-        id: player.id,
-        name: player.name,
-        photoUrl: player.photoUrl,
-        position: player.position,
-        nationality: player.nationality,
-        birthDate: player.birthDate,
-        currentSeason: season
-          ? {
-              club: season.club.name,
-              clubLogoUrl: season.club.logoUrl,
-              league: season.club.league,
-              stats: season.stats,
-            }
-          : null,
-      };
-    });
+    const data = rows.map((player) => mapRowToPlayerListCard(player));
     return { data, meta };
   }
 }
-
-type PlayerListCard = {
-  id: string;
-  name: string;
-  photoUrl: string | null;
-  position: string;
-  nationality: string | null;
-  birthDate: Date | null;
-  currentSeason: {
-    club: string;
-    clubLogoUrl: string | null;
-    league: string | null;
-    stats: {
-      matchesPlayed: number;
-      goals: number;
-      assists: number;
-      xGPer90: number | null;
-    } | null;
-  } | null;
-};

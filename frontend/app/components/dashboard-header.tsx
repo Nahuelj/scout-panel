@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -28,7 +28,7 @@ function isPlayerDetailPath(pathname: string | null): boolean {
   if (!pathname?.startsWith('/players/')) return false;
   const slug = pathname.slice('/players/'.length);
   if (!slug || slug.includes('/')) return false;
-  if (slug === 'saved') return false;
+  if (slug === 'shortlist') return false;
   return true;
 }
 
@@ -36,14 +36,26 @@ function isComparePath(pathname: string | null): boolean {
   return pathname === '/compare';
 }
 
+const sessionUserSkeleton = (
+  <div className="flex items-center gap-2.5" aria-hidden>
+    <div className="h-8 w-8 animate-pulse rounded-full bg-white/[0.06]" />
+    <div className="hidden h-3.5 w-20 animate-pulse rounded-full bg-white/[0.06] sm:block" />
+  </div>
+);
+
 export default function DashboardHeader() {
   const { data: session, isPending } = useSession();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const user = session?.user;
   const displayName = user?.name?.trim() || user?.email?.trim() || '';
-  const isSavedSection = pathname?.startsWith('/players/saved') ?? false;
+  const isShortlistSection = pathname?.startsWith('/players/shortlist') ?? false;
   const onPlayerDetail = isPlayerDetailPath(pathname ?? null);
   const onCompare = isComparePath(pathname ?? null);
   const showPlayerDetailSearch = onPlayerDetail || onCompare;
@@ -88,39 +100,35 @@ export default function DashboardHeader() {
   const actionsToolbar = (
     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:gap-2.5">
       <Link
-        href={'/players/saved' as Route}
+        href={'/players/shortlist' as Route}
         prefetch={false}
-        data-active={isSavedSection}
-        className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.025] px-4 text-sm font-medium text-neutral-400 outline-none transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] hover:text-neutral-200 focus-visible:border-emerald-500/35 focus-visible:ring-2 focus-visible:ring-emerald-500/25 data-[active=true]:border-emerald-500/30 data-[active=true]:bg-emerald-500/[0.08] data-[active=true]:text-emerald-300"
+        data-active={isShortlistSection}
+        className="group inline-flex shrink-0 items-center gap-1.5 py-1 text-sm font-medium text-neutral-400 underline-offset-[6px] transition-colors duration-200 hover:text-sky-300 hover:underline focus-visible:rounded-sm focus-visible:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 data-[active=true]:font-semibold data-[active=true]:text-sky-300 data-[active=true]:underline"
       >
         <Bookmark
-          className="size-[15px] shrink-0 transition-colors data-[active=true]:fill-emerald-400/20"
+          className="size-[15px] shrink-0 text-neutral-500 transition-colors group-hover:text-sky-300 group-data-[active=true]:fill-sky-400/20 group-data-[active=true]:text-sky-300"
           strokeWidth={1.75}
           aria-hidden
         />
-        <span>Saved</span>
+        <span>Shortlist</span>
       </Link>
 
       <div className="mx-0.5 h-5 w-px shrink-0 bg-white/[0.08]" aria-hidden />
 
-      {isPending && (
-        <div className="flex items-center gap-2.5" aria-hidden>
-          <div className="h-8 w-8 animate-pulse rounded-full bg-white/[0.06]" />
-          <div className="hidden h-3.5 w-20 animate-pulse rounded-full bg-white/[0.06] sm:block" />
-        </div>
-      )}
-      {!isPending && user && (
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neutral-600 to-neutral-700 text-sm font-semibold text-white shadow-inner ring-1 ring-white/[0.1]">
-            {displayName ? displayName.charAt(0).toUpperCase() : '?'}
-          </div>
-          {displayName ? (
-            <span className="hidden max-w-[9rem] truncate text-sm text-neutral-400 sm:inline">
-              {displayName}
-            </span>
-          ) : null}
-        </div>
-      )}
+      {!mounted || isPending
+        ? sessionUserSkeleton
+        : user && (
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neutral-600 to-neutral-700 text-sm font-semibold text-white shadow-inner ring-1 ring-white/[0.1]">
+                {displayName ? displayName.charAt(0).toUpperCase() : '?'}
+              </div>
+              {displayName ? (
+                <span className="hidden max-w-[9rem] truncate text-sm text-neutral-400 sm:inline">
+                  {displayName}
+                </span>
+              ) : null}
+            </div>
+          )}
 
       <button
         type="button"

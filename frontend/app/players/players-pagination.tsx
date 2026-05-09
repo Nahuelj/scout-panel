@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
-  playersListHrefForState,
+  serializePlayersListToPathQuery,
   type PlayersListRouteState,
 } from '@/lib/player-list-params';
 import type { PaginationMeta } from '@/lib/players-api';
@@ -9,6 +9,9 @@ import type { PaginationMeta } from '@/lib/players-api';
 type Props = {
   routeState: PlayersListRouteState;
   meta: PaginationMeta;
+  listPathBase?: string;
+  summaryEntityLabel?: string;
+  ariaLabel?: string;
 };
 
 const activeClass =
@@ -17,24 +20,36 @@ const activeClass =
 const disabledClass =
   'inline-flex min-h-9 cursor-not-allowed items-center justify-center gap-1 rounded-lg border border-white/10 px-3 text-sm font-medium text-neutral-500 opacity-40';
 
-export default function PlayersPagination({ routeState, meta }: Props) {
+export default function PlayersPagination({
+  routeState,
+  meta,
+  listPathBase = '/players',
+  summaryEntityLabel = 'players',
+  ariaLabel = 'Players list pagination',
+}: Props) {
   const base: PlayersListRouteState = {
     ...routeState,
     page: meta.page,
     pageSize: meta.pageSize,
   };
 
-  const prevHref = playersListHrefForState({ ...base, page: meta.page - 1 });
-  const nextHref = playersListHrefForState({ ...base, page: meta.page + 1 });
+  const prevHref = `${listPathBase}${serializePlayersListToPathQuery({
+    ...base,
+    page: meta.page - 1,
+  })}`;
+  const nextHref = `${listPathBase}${serializePlayersListToPathQuery({
+    ...base,
+    page: meta.page + 1,
+  })}`;
 
   const summary =
     meta.totalItems === 0
       ? 'No results'
-      : `Page ${meta.page} of ${meta.totalPages} · ${meta.totalItems} players`;
+      : `Page ${meta.page} of ${meta.totalPages} · ${meta.totalItems} ${summaryEntityLabel}`;
 
   return (
     <nav
-      aria-label="Players list pagination"
+      aria-label={ariaLabel}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#080d14]/95 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md md:pb-[calc(1rem+env(safe-area-inset-bottom))] md:pt-4"
     >
       <div className="mx-auto flex max-w-screen-xl flex-col gap-3 px-6 sm:flex-row sm:items-center sm:justify-between md:px-8">

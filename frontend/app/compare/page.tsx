@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getPlayerDetail, type PlayerDetail } from '@/lib/player-detail-api';
+import { fetchShortlistPlayerIdsServer } from '@/lib/shortlist-api';
 import CompareClient from './compare-client';
 
 const MAX_PLAYERS = 3;
@@ -24,5 +26,14 @@ export default async function ComparePage({ searchParams }: Props) {
   if (players.length === 0) redirect('/players');
   if (players.length === 1) redirect(`/players/${players[0].id}`);
 
-  return <CompareClient players={players} />;
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join('; ');
+  const initialShortlistedIds = await fetchShortlistPlayerIdsServer(cookieHeader);
+
+  return (
+    <CompareClient players={players} initialShortlistedIds={initialShortlistedIds} />
+  );
 }

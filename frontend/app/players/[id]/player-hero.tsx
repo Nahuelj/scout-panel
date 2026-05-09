@@ -1,10 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import { Bookmark } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { PlayerDetail } from '@/lib/player-detail-api';
 import { getSlotColor } from '@/lib/compare-colors';
+import { useSession } from '@/lib/auth-client';
+import { addToShortlist, removeFromShortlist } from '@/lib/shortlist-api';
 
 function calcAge(birthDate: string): number {
   return Math.floor(
@@ -15,9 +18,18 @@ function calcAge(birthDate: string): number {
 type Props = {
   player: PlayerDetail;
   nameAnchorRef?: RefObject<HTMLHeadingElement | null>;
+  initialShortlisted: boolean;
 };
 
-export default function PlayerHero({ player, nameAnchorRef }: Props) {
+export default function PlayerHero({
+  player,
+  nameAnchorRef,
+  initialShortlisted,
+}: Props) {
+  const { data: session } = useSession();
+  const [shortlisted, setShortlisted] = useState(initialShortlisted);
+  const [busy, setBusy] = useState(false);
+
   const age = player.birthDate ? calcAge(player.birthDate) : null;
   const stats = player.currentSeason?.stats;
   const accent = getSlotColor(0).base;
@@ -96,16 +108,43 @@ export default function PlayerHero({ player, nameAnchorRef }: Props) {
               </div>
               <button
                 type="button"
-                aria-label="Save player"
-                className="group inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2 text-sm font-medium text-neutral-400 outline-none transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] hover:text-neutral-200 focus-visible:border-emerald-500/35 focus-visible:ring-2 focus-visible:ring-emerald-500/25 max-sm:self-end"
+                disabled={!session?.user || busy}
+                aria-label={shortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
+                onClick={() => {
+                  if (!session?.user || busy) return;
+                  const previous = shortlisted;
+                  setBusy(true);
+                  void (async () => {
+                    try {
+                      if (shortlisted) {
+                        await removeFromShortlist(player.id);
+                        setShortlisted(false);
+                      } else {
+                        await addToShortlist(player.id);
+                        setShortlisted(true);
+                      }
+                    } catch {
+                      setShortlisted(previous);
+                    } finally {
+                      setBusy(false);
+                    }
+                  })();
+                }}
+                className={`group inline-flex w-fit shrink-0 items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium outline-none transition-all duration-200 focus-visible:border-sky-500/40 focus-visible:ring-2 focus-visible:ring-sky-500/25 max-sm:self-end disabled:pointer-events-none disabled:opacity-40 ${
+                  shortlisted
+                    ? 'border-sky-500/35 bg-sky-500/[0.08] text-sky-200 hover:border-sky-500/45 hover:bg-sky-500/[0.12]'
+                    : 'border-white/[0.08] bg-white/[0.025] text-neutral-400 hover:border-sky-500/25 hover:bg-sky-500/[0.06] hover:text-sky-200/90'
+                }`}
               >
                 <Bookmark
-                  className="size-[15px] shrink-0 text-neutral-500 transition-colors group-hover:text-neutral-200"
+                  className={`size-[15px] shrink-0 transition-colors group-hover:text-sky-200 ${
+                    shortlisted ? 'fill-sky-400/35 text-sky-300' : 'text-neutral-500 group-hover:text-sky-300'
+                  }`}
                   strokeWidth={1.75}
                   aria-hidden
                 />
                 <span className="hidden text-[11px] font-bold uppercase tracking-widest sm:inline-flex sm:items-center leading-none">
-                  Save
+                  {shortlisted ? 'Shortlisted' : 'Shortlist'}
                 </span>
               </button>
             </div>
