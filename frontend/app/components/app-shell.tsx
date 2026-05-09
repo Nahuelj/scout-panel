@@ -1,4 +1,5 @@
 import DashboardHeader from '@/app/components/dashboard-header';
+import PageTransition from '@/app/components/page-transition';
 import SelectionBar from '@/app/components/selection-bar';
 import WaveMeshBackground from '@/app/components/wave-mesh-background';
 
@@ -17,7 +18,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <div className="mx-auto max-w-screen-xl px-6 md:px-8 pb-6 md:pb-8 pt-8">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </div>
       <SelectionBar />
     </div>

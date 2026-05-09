@@ -268,7 +268,7 @@ export default function CompareHeaders({
       <div className={gridClass}>
         {players.map((player, i) => (
           <HeaderCard
-            key={player.id}
+            key={`${player.id}-${i}`}
             player={player}
             index={i}
             allIds={allIds}

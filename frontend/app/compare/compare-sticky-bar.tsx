@@ -132,7 +132,7 @@ export default function CompareStickyBar({ players, nameAnchorRef }: Props) {
       <div className="mx-auto w-full max-w-screen-xl px-6 md:px-8">
         <div className="scrollbar-panel flex w-full items-center overflow-x-auto">
           {players.map((player, i) => (
-            <Fragment key={player.id}>
+            <Fragment key={`${player.id}-${i}`}>
               {i > 0 && (
                 <div
                   className="mx-4 h-10 w-px shrink-0 self-center bg-white/10"

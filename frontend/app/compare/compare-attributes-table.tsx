@@ -61,7 +61,7 @@ function MouseFollowTooltip({
         createPortal(
           <div
             role='tooltip'
-            className='fixed z-[200] max-w-[min(18rem,calc(100vw-1.5rem))] pointer-events-none rounded-lg border border-white/10 bg-[#1a2633] px-3 py-2 text-[11px] leading-snug text-neutral-200 shadow-xl'
+            className='fixed z-[200] max-w-[min(18rem,calc(100vw-1.5rem))] pointer-events-none rounded-lg border border-white/10 bg-[#1a2633] px-3 py-2 text-[11px] leading-snug text-neutral-200 shadow-xl animate-in fade-in duration-150'
             style={{ left: pos.x + 14, top: pos.y + 14 }}
           >
             {text}
@@ -237,8 +237,8 @@ export default function CompareAttributesTable({ players }: Props) {
           const slot = getSlotColor(i);
           return (
             <div
-              key={p.id}
-              className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2'
+              key={`${p.id}-${i}`}
+              className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2 transition-[background-color] duration-300'
               style={{ color: slot.base, backgroundColor: `${slot.base}1f` }}
             >
               <span
@@ -268,8 +268,8 @@ export default function CompareAttributesTable({ players }: Props) {
             const slot = getSlotColor(i);
             return (
               <div
-                key={p.id}
-                className='px-5 py-4 min-w-0 flex items-center'
+                key={`${row.label}-${p.id}-${i}`}
+                className='px-5 py-4 min-w-0 flex items-center transition-[background-color] duration-300'
                 style={{ backgroundColor: `${slot.base}1f` }}
               >
                 {row.render(p)}

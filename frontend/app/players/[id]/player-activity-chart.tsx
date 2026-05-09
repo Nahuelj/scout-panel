@@ -62,6 +62,8 @@ export default function PlayerActivityChart({ activity, seasonName }: Props) {
             fill="var(--color-minutesPlayed)"
             fillOpacity={0.4}
             stroke="var(--color-minutesPlayed)"
+            animationDuration={480}
+            animationEasing="ease-out"
             dot={(props) => {
               const { cx, cy } = props as { cx?: number; cy?: number };
               if (cx == null || cy == null) return null;

@@ -35,7 +35,7 @@ type Row = {
   label: string;
   description: string;
   formatKind: StatFormatKind;
-  values: (number | null)[];
+  values: { playerId: string; value: number | null }[];
 };
 
 function buildCategoryRows(
@@ -49,9 +49,9 @@ function buildCategoryRows(
       const values = players.map((p) => {
         const stats = p.currentSeason?.stats ?? null;
         const v = stats ? (stats[key] as number | null | undefined) : null;
-        return v == null ? null : v;
+        return { playerId: p.id, value: v == null ? null : v };
       });
-      if (values.every((v) => v === null)) return [];
+      if (values.every(({ value }) => value === null)) return [];
       const row: Row = {
         label: meta.label,
         description: meta.description,
@@ -62,13 +62,15 @@ function buildCategoryRows(
     });
 }
 
-function getLeaderIndices(values: (number | null)[]): Set<number> {
-  const present = values.filter((v): v is number => v !== null);
+function getLeaderIndices(values: { value: number | null }[]): Set<number> {
+  const present = values
+    .map(({ value }) => value)
+    .filter((v): v is number => v !== null);
   if (present.length < 2) return new Set();
   const max = Math.max(...present);
   const leaders = new Set<number>();
-  values.forEach((v, i) => {
-    if (v === max) leaders.add(i);
+  values.forEach(({ value }, i) => {
+    if (value === max) leaders.add(i);
   });
   return leaders;
 }
@@ -163,7 +165,7 @@ export default function CompareAnalysis({ players }: Props) {
           {players.map((p, i) => {
             const slot = getSlotColor(i);
             return (
-              <div key={p.id} className="flex items-center gap-1.5 min-w-0">
+              <div key={`${p.id}-${i}`} className="flex items-center gap-1.5 min-w-0">
                 <span
                   className="size-2.5 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: slot.base }}
@@ -195,13 +197,15 @@ export default function CompareAnalysis({ players }: Props) {
                 const slot = getSlotColor(seriesIdx);
                 return (
                   <Radar
-                    key={p.id}
+                    key={`${p.id}-${seriesIdx}`}
                     name={p.name}
                     dataKey={`p${seriesIdx}`}
                     stroke={slot.base}
                     fill={slot.base}
                     fillOpacity={0.12}
                     strokeWidth={2}
+                    animationDuration={480}
+                    animationEasing="ease-out"
                     dot={(dotProps) => {
                       const dp = dotProps as unknown as {
                         cx?: number;
@@ -315,7 +319,7 @@ export default function CompareAnalysis({ players }: Props) {
                           const slot = getSlotColor(i);
                           return (
                             <span
-                              key={p.id}
+                              key={`${p.id}-${i}`}
                               className="text-[9px] uppercase tracking-widest text-center flex items-center justify-center gap-1.5 min-w-0"
                               style={{ color: slot.base }}
                             >
@@ -335,11 +339,11 @@ export default function CompareAnalysis({ players }: Props) {
                           No data available
                         </p>
                       ) : (
-                        rows.map((row) => {
+                        rows.map((row, rowIndex) => {
                           const leaders = getLeaderIndices(row.values);
                           return (
                             <div
-                              key={row.label}
+                              key={`${cat}-${row.label}-${rowIndex}`}
                               className={cn(
                                 'grid gap-x-3 border-b border-white/5 py-3 last:border-0',
                                 valueColTemplate,
@@ -351,12 +355,12 @@ export default function CompareAnalysis({ players }: Props) {
                               <span className="text-sm text-neutral-500 truncate">
                                 {row.description}
                               </span>
-                              {row.values.map((value, i) => {
+                              {row.values.map(({ playerId, value }, i) => {
                                 const slot = getSlotColor(i);
                                 const isLeader = leaders.has(i);
                                 return (
                                   <span
-                                    key={i}
+                                    key={`${playerId}-${i}`}
                                     className={cn(
                                       'text-center text-sm tabular-nums px-2 py-0.5 rounded-md',
                                       isLeader ? 'font-bold' : 'font-medium text-white',

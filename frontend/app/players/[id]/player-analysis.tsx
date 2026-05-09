@@ -125,6 +125,8 @@ export default function PlayerAnalysis({ stats }: Props) {
                 fill="#10b981"
                 fillOpacity={0.15}
                 strokeWidth={2}
+                animationDuration={480}
+                animationEasing="ease-out"
                 dot={(dotProps) => {
                   const dp = dotProps as unknown as {
                     cx?: number;

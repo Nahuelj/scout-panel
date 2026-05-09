@@ -89,7 +89,7 @@ export default function CompareActivityChart({ players }: Props) {
           {players.map((p, i) => {
             const slot = getSlotColor(i);
             return (
-              <div key={p.id} className="flex items-center gap-1.5 min-w-0">
+              <div key={`${p.id}-${i}`} className="flex items-center gap-1.5 min-w-0">
                 <span
                   className="size-2.5 shrink-0 rounded-[2px]"
                   style={{ backgroundColor: slot.base }}
@@ -121,7 +121,7 @@ export default function CompareActivityChart({ players }: Props) {
             const slot = getSlotColor(i);
             return (
               <Area
-                key={p.id}
+                key={`${p.id}-${i}`}
                 dataKey={`p${i}`}
                 name={p.name}
                 type="linear"
@@ -130,6 +130,8 @@ export default function CompareActivityChart({ players }: Props) {
                 stroke={slot.base}
                 strokeWidth={2}
                 connectNulls
+                animationDuration={480}
+                animationEasing="ease-out"
                 dot={(props) => {
                   const { cx, cy } = props as { cx?: number; cy?: number };
                   if (cx == null || cy == null) return null;
