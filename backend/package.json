@@ -8,9 +8,10 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "db:push": "prisma db push",
+    "start": "pnpm db:push && nest start",
+    "dev": "pnpm db:push && nest start --watch",
+    "start:debug": "pnpm db:push && nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
