@@ -1,6 +1,8 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Bookmark, BookmarkX } from 'lucide-react';
 import {
   addToShortlist,
   removeFromShortlist,
@@ -20,6 +22,11 @@ export function useAddToShortlist() {
         return list.includes(playerId) ? list : [...list, playerId];
       });
       return { previous };
+    },
+    onSuccess: () => {
+      toast('Added to shortlist', {
+        icon: <Bookmark className="size-4 fill-sky-400/40 text-sky-300" strokeWidth={1.75} />,
+      });
     },
     onError: (_err, _playerId, ctx) => {
       if (ctx?.previous) {
@@ -44,6 +51,11 @@ export function useRemoveFromShortlist() {
         return (old ?? []).filter((id) => id !== playerId);
       });
       return { previous };
+    },
+    onSuccess: () => {
+      toast('Removed from shortlist', {
+        icon: <BookmarkX className="size-4 text-sky-300" strokeWidth={1.75} />,
+      });
     },
     onError: (_err, _playerId, ctx) => {
       if (ctx?.previous) {
