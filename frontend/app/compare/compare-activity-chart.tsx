@@ -79,8 +79,8 @@ export default function CompareActivityChart({ players }: Props) {
   const lastIso = monthIsoByKey[sortedKeys[sortedKeys.length - 1]];
 
   return (
-    <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-6 flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+    <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-4 sm:p-6 flex flex-col gap-3 sm:gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:flex-wrap">
         <div>
           <p className="text-white font-bold text-base">Season activity</p>
           <p className="text-neutral-500 text-xs mt-0.5">Minutes played per month</p>
@@ -104,9 +104,9 @@ export default function CompareActivityChart({ players }: Props) {
 
       <ChartContainer
         config={chartConfig}
-        className="aspect-auto h-[240px] w-full min-w-0 justify-start"
+        className="aspect-auto h-[200px] sm:h-[240px] w-full min-w-0 justify-start"
       >
-        <AreaChart data={data} margin={{ top: 16, right: 20, left: 20, bottom: 8 }}>
+        <AreaChart data={data} margin={{ top: 12, right: 8, left: 4, bottom: 8 }}>
           <XAxis
             dataKey="month"
             tickLine={false}
@@ -173,7 +173,7 @@ export default function CompareActivityChart({ players }: Props) {
       </ChartContainer>
 
       <div className="flex flex-col gap-0.5 text-sm border-t border-white/5 pt-4">
-        <span className="text-neutral-500 text-xs">
+        <span className="text-neutral-500 text-[11px] sm:text-xs">
           {formatMonth(firstIso)} – {formatMonth(lastIso)}
         </span>
       </div>

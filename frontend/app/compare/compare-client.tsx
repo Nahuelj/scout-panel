@@ -18,7 +18,7 @@ export default function CompareClient({ players, initialShortlistedIds }: Props)
   );
 
   return (
-    <div className="space-y-4 pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]">
+    <div className="space-y-3 sm:space-y-4 pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] sm:pb-[calc(4.25rem+env(safe-area-inset-bottom,0px))]">
       <CompareStickyBar players={players} nameAnchorRef={nameAnchorRef} />
 
       <CompareHeaders

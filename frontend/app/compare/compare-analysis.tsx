@@ -148,16 +148,16 @@ export default function CompareAnalysis({ players }: Props) {
     };
   }, []);
 
-  const valueColTemplate =
-    players.length === 2
-      ? 'grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_repeat(2,minmax(5rem,6rem))]'
-      : 'grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_repeat(3,minmax(5rem,6rem))]';
+  const isThree = players.length === 3;
+  const valueColTemplate = isThree
+    ? 'grid-cols-[11rem_repeat(3,minmax(6rem,1fr))] sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_repeat(3,minmax(5rem,6rem))]'
+    : 'grid-cols-[11rem_repeat(2,minmax(6rem,1fr))] sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1.4fr)_repeat(2,minmax(5rem,6rem))]';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 lg:items-start">
       <div
         ref={radarPanelRef}
-        className="flex flex-col rounded-2xl border border-white/5 bg-[#0f1923] p-6"
+        className="flex flex-col rounded-2xl border border-white/5 bg-[#0f1923] p-4 sm:p-6"
       >
         <div className="flex items-center justify-between mb-4 shrink-0">
           <h3 className="text-white font-bold text-base tracking-tight">Radar chart</h3>
@@ -181,7 +181,7 @@ export default function CompareAnalysis({ players }: Props) {
 
         <div
           ref={radarChartWrapRef}
-          className="w-full h-[300px] shrink-0"
+          className="w-full h-[260px] sm:h-[300px] shrink-0"
           onMouseMove={handleRadarMouseMove}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -193,7 +193,7 @@ export default function CompareAnalysis({ players }: Props) {
               <PolarGrid stroke="rgba(255,255,255,0.06)" radialLines={false} />
               <PolarAngleAxis
                 dataKey="category"
-                tick={{ fill: '#6b7280', fontSize: 12, fontWeight: 600 }}
+                tick={{ fill: '#6b7280', fontSize: 11, fontWeight: 600 }}
               />
               {players.map((p, seriesIdx) => {
                 const slot = getSlotColor(seriesIdx);
@@ -287,7 +287,7 @@ export default function CompareAnalysis({ players }: Props) {
               <TabsTrigger
                 key={cat}
                 value={cat}
-                className="relative flex h-full min-h-11 min-w-0 flex-1 items-center justify-center rounded-none bg-[#0b121c] px-2 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-wide text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm"
+                className="relative flex h-full min-h-11 min-w-0 flex-1 items-center justify-center rounded-none bg-[#0b121c] px-1.5 py-2 text-center text-[10px] font-semibold uppercase leading-snug tracking-wide text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm"
                 title={`${cat} statistics`}
                 aria-label={`${cat} statistics`}
               >
@@ -304,9 +304,14 @@ export default function CompareAnalysis({ players }: Props) {
                 value={cat}
                 className="mt-0 flex flex-col px-0 pt-0 pb-0 outline-none lg:min-h-0 lg:flex-1 lg:overflow-hidden"
               >
-                <div className="flex flex-col pl-6 pr-2 pt-5 lg:min-h-0 lg:flex-1">
-                  <div className="overflow-x-auto pb-6 pr-4 lg:scrollbar-panel lg:min-h-0 lg:flex-1 lg:overflow-x-auto lg:overflow-y-auto">
-                    <div className="min-w-[36rem]">
+                <div className="flex flex-col pl-4 pr-2 pt-5 sm:pl-6 lg:min-h-0 lg:flex-1">
+                  <div className="scrollbar-panel overflow-x-auto pb-6 pr-3 sm:pr-4 lg:min-h-0 lg:flex-1 lg:overflow-x-auto lg:overflow-y-auto">
+                    <div
+                      className={cn(
+                        isThree ? 'min-w-[32rem]' : 'min-w-[25rem]',
+                        'sm:min-w-[36rem]',
+                      )}
+                    >
                       <div
                         className={cn(
                           'sticky top-0 z-[1] mb-1 grid gap-x-3 border-b border-white/5 bg-[#0f1923] pb-2',
@@ -316,7 +321,7 @@ export default function CompareAnalysis({ players }: Props) {
                         <span className={STATS_TABLE_HEAD_CLASS}>
                           Metric
                         </span>
-                        <span className={STATS_TABLE_HEAD_CLASS}>
+                        <span className={cn(STATS_TABLE_HEAD_CLASS, 'hidden sm:inline')}>
                           Description
                         </span>
                         {players.map((p, i) => {
@@ -356,7 +361,7 @@ export default function CompareAnalysis({ players }: Props) {
                               <span className="min-w-0 truncate text-sm font-medium text-white">
                                 {row.label}
                               </span>
-                              <span className="text-sm leading-snug text-neutral-400 md:text-neutral-300 truncate">
+                              <span className="hidden sm:inline text-sm leading-snug text-neutral-400 md:text-neutral-300 truncate">
                                 {row.description}
                               </span>
                               {row.values.map(({ playerId, value }, i) => {

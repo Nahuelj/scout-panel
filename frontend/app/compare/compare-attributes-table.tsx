@@ -224,60 +224,123 @@ export default function CompareAttributesTable({ players }: Props) {
   const count = players.length;
   const gridCols =
     count === 2
-      ? 'gap-x-3 grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
-      : 'gap-x-3 grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
+      ? 'gap-x-3 grid-cols-[7rem_repeat(2,minmax(0,1fr))] md:grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
+      : 'gap-x-3 grid-cols-[7rem_repeat(3,minmax(8rem,1fr))] lg:grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
 
   return (
-    <div className='rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden'>
-      <div className={`grid ${gridCols} border-b border-white/10`}>
-        <div className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold text-neutral-400 bg-[#0b121c]'>
-          Attribute
-        </div>
-        {players.map((p, i) => {
-          const slot = getSlotColor(i);
-          return (
-            <div
-              key={`${p.id}-${i}`}
-              className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2 transition-[background-color] duration-300'
-              style={{ color: slot.base, backgroundColor: `${slot.base}1f` }}
-            >
-              <span
-                className='inline-block w-1.5 h-1.5 rounded-full flex-shrink-0'
-                style={{ backgroundColor: slot.base }}
-                aria-hidden
-              />
-              <span className='truncate text-white text-xs normal-case tracking-normal'>
-                {p.name}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {ROWS.map((row, idx) => (
-        <div
-          key={row.label}
-          className={`grid ${gridCols} ${
-            idx < ROWS.length - 1 ? 'border-b border-white/5' : ''
-          }`}
-        >
-          <div className='px-5 py-4 text-[10px] uppercase tracking-widest text-neutral-400 font-semibold flex items-center'>
-            {row.label}
-          </div>
+    <>
+      <div className='md:hidden rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden'>
+        <div className='scrollbar-panel sticky top-0 z-[1] flex w-full items-center gap-2 overflow-x-auto border-b border-white/10 bg-[#0b121c] px-3 py-2.5'>
           {players.map((p, i) => {
             const slot = getSlotColor(i);
             return (
-              <div
-                key={`${row.label}-${p.id}-${i}`}
-                className='px-5 py-4 min-w-0 flex items-center transition-[background-color] duration-300'
-                style={{ backgroundColor: `${slot.base}1f` }}
+              <span
+                key={`legend-${p.id}-${i}`}
+                className='inline-flex min-w-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs'
+                style={{
+                  color: slot.base,
+                  backgroundColor: `${slot.base}1f`,
+                }}
               >
-                {row.render(p)}
-              </div>
+                <span
+                  className='size-1.5 shrink-0 rounded-full'
+                  style={{ backgroundColor: slot.base }}
+                  aria-hidden
+                />
+                <span className='truncate font-medium text-white'>{p.name}</span>
+              </span>
             );
           })}
         </div>
-      ))}
-    </div>
+
+        <div className='divide-y divide-white/5'>
+          {ROWS.map((row) => (
+            <div key={`m-${row.label}`} className='px-4 py-3'>
+              <p className='text-[10px] uppercase tracking-widest font-semibold text-neutral-400'>
+                {row.label}
+              </p>
+              <div className='mt-2 flex flex-col gap-1.5'>
+                {players.map((p, i) => {
+                  const slot = getSlotColor(i);
+                  return (
+                    <div
+                      key={`m-${row.label}-${p.id}-${i}`}
+                      className='flex items-center justify-between gap-3 rounded-lg px-3 py-2'
+                      style={{ backgroundColor: `${slot.base}1f` }}
+                    >
+                      <span className='flex min-w-0 items-center gap-2'>
+                        <span
+                          className='size-1.5 shrink-0 rounded-full'
+                          style={{ backgroundColor: slot.base }}
+                          aria-hidden
+                        />
+                        <span className='truncate text-xs font-medium text-white'>
+                          {p.name}
+                        </span>
+                      </span>
+                      <span className='shrink-0 text-right'>{row.render(p)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className='hidden md:block rounded-2xl bg-[#0f1923] border border-white/5 overflow-hidden'>
+        <div className='scrollbar-panel overflow-x-auto'>
+          <div className={`grid ${gridCols} border-b border-white/10`}>
+            <div className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold text-neutral-400 bg-[#0b121c]'>
+              Attribute
+            </div>
+            {players.map((p, i) => {
+              const slot = getSlotColor(i);
+              return (
+                <div
+                  key={`${p.id}-${i}`}
+                  className='px-5 py-3 text-[10px] uppercase tracking-widest font-semibold flex items-center gap-2 transition-[background-color] duration-300'
+                  style={{ color: slot.base, backgroundColor: `${slot.base}1f` }}
+                >
+                  <span
+                    className='inline-block w-1.5 h-1.5 rounded-full flex-shrink-0'
+                    style={{ backgroundColor: slot.base }}
+                    aria-hidden
+                  />
+                  <span className='truncate text-white text-xs normal-case tracking-normal'>
+                    {p.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {ROWS.map((row, idx) => (
+            <div
+              key={row.label}
+              className={`grid ${gridCols} ${
+                idx < ROWS.length - 1 ? 'border-b border-white/5' : ''
+              }`}
+            >
+              <div className='px-5 py-4 text-[10px] uppercase tracking-widest text-neutral-400 font-semibold flex items-center'>
+                {row.label}
+              </div>
+              {players.map((p, i) => {
+                const slot = getSlotColor(i);
+                return (
+                  <div
+                    key={`${row.label}-${p.id}-${i}`}
+                    className='px-5 py-4 min-w-0 flex items-center transition-[background-color] duration-300'
+                    style={{ backgroundColor: `${slot.base}1f` }}
+                  >
+                    {row.render(p)}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }

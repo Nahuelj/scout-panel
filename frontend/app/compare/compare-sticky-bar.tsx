@@ -29,8 +29,8 @@ function StickyMini({ player, index }: MiniProps) {
         style={{ backgroundColor: accent }}
         aria-hidden
       />
-      <div className="flex min-w-0 items-center gap-3 py-3.5">
-        <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-white/10">
+      <div className="flex min-w-0 items-center gap-3 py-2.5 sm:py-3.5">
+        <div className="relative h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-white/10">
           {player.photoUrl ? (
             <Image
               src={player.photoUrl}
@@ -46,11 +46,11 @@ function StickyMini({ player, index }: MiniProps) {
           )}
         </div>
 
-        <div className="min-w-0 max-w-[min(20rem,calc(100vw-5.5rem))]">
+        <div className="min-w-0 max-w-[min(10rem,calc(100vw-5rem))] sm:max-w-[min(14rem,calc(100vw-5.5rem))] md:max-w-[min(20rem,calc(100vw-5.5rem))]">
           <p className="truncate text-sm font-bold leading-none text-white">
             {player.name}
           </p>
-          <p className="mt-1.5 text-xs whitespace-nowrap text-neutral-500">
+          <p className="mt-1.5 truncate text-[11px] sm:text-xs whitespace-nowrap text-neutral-500">
             {player.position}
             {age !== null && (
               <span>
@@ -129,13 +129,13 @@ export default function CompareStickyBar({ players, nameAnchorRef }: Props) {
           : 'translate-y-0 opacity-100'
       }`}
     >
-      <div className="mx-auto w-full max-w-screen-xl px-6 md:px-8">
+      <div className="mx-auto w-full max-w-screen-xl px-4 md:px-8">
         <div className="scrollbar-panel flex w-full items-center overflow-x-auto">
           {players.map((player, i) => (
             <Fragment key={`${player.id}-${i}`}>
               {i > 0 && (
                 <div
-                  className="mx-4 h-10 w-px shrink-0 self-center bg-white/10"
+                  className="mx-3 sm:mx-4 h-10 w-px shrink-0 self-center bg-white/10"
                   aria-hidden
                 />
               )}

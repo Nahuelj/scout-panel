@@ -28,7 +28,6 @@ type CardProps = {
   canShortlist: boolean;
   shortlistBusy: boolean;
   onShortlistClick: (e: MouseEvent) => void;
-  className?: string;
 };
 
 function HeaderCard({
@@ -39,7 +38,6 @@ function HeaderCard({
   canShortlist,
   shortlistBusy,
   onShortlistClick,
-  className,
 }: CardProps) {
   const router = useRouter();
   const slot = getSlotColor(index);
@@ -57,7 +55,7 @@ function HeaderCard({
   };
 
   return (
-    <div className={`relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden${className ? ` ${className}` : ''}`}>
+    <div className="relative flex min-w-0 flex-col rounded-b-2xl rounded-t-none border border-white/5 bg-[#0f1923] overflow-hidden">
       <div
         className="h-1 w-full"
         style={{ backgroundColor: slot.base }}
@@ -94,9 +92,9 @@ function HeaderCard({
         </button>
       </div>
 
-      <div className="flex items-center gap-4 px-5 py-4 pr-24">
+      <div className="flex items-center gap-3 px-4 py-3 pr-20 sm:gap-4 sm:px-5 sm:py-4 sm:pr-24">
         <div
-          className="relative w-16 h-16 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0 ring-2"
+          className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-xl overflow-hidden bg-neutral-800 flex-shrink-0 ring-2"
           style={{ boxShadow: `0 0 0 2px ${slot.base}40` }}
         >
           {player.photoUrl ? (
@@ -128,7 +126,7 @@ function HeaderCard({
               Player {index + 1}
             </span>
           </div>
-          <h2 className="text-white font-bold text-lg leading-tight truncate">
+          <h2 className="text-white font-bold text-base sm:text-lg leading-tight truncate">
             {player.name}
           </h2>
           <p className="text-neutral-400 text-xs mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -149,7 +147,7 @@ function HeaderCard({
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 px-5 pb-4 border-t border-white/5 pt-3 min-h-[3.25rem]">
+      <div className="flex items-center gap-2.5 px-4 sm:px-5 pb-4 border-t border-white/5 pt-3 min-h-[3.25rem]">
         {club ? (
           <>
             <div className="relative w-7 h-7 rounded-md bg-white/5 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -260,8 +258,8 @@ export default function CompareHeaders({
 
   const gridClass =
     count === 2
-      ? 'grid grid-cols-1 gap-3 sm:grid-cols-[8rem_repeat(2,minmax(0,1fr))]'
-      : 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[8rem_repeat(3,minmax(0,1fr))]';
+      ? 'grid grid-cols-1 gap-3 sm:grid-cols-2'
+      : 'grid grid-cols-1 gap-3 lg:grid-cols-3';
 
   return (
     <div ref={nameAnchorRef} className="space-y-3">
@@ -276,13 +274,6 @@ export default function CompareHeaders({
             canShortlist={canShortlist}
             shortlistBusy={busyId === player.id}
             onShortlistClick={(e) => handleShortlistClick(player, e)}
-            className={
-              i === 0
-                ? count === 2
-                  ? 'sm:col-span-2'
-                  : 'lg:col-span-2'
-                : undefined
-            }
           />
         ))}
       </div>
