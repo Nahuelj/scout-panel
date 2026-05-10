@@ -51,7 +51,7 @@ const sessionUserSkeleton = (
 );
 
 const accountMenuContentClass =
-  'z-50 min-w-[12rem] overflow-hidden rounded-xl border border-white/[0.1] bg-[#0c141c] p-1 shadow-xl shadow-black/50';
+  'z-50 flex min-w-[12rem] flex-col gap-1 overflow-hidden rounded-xl border border-white/[0.1] bg-[#0c141c] p-1.5 shadow-xl shadow-black/50';
 
 const accountMenuItemClass =
   'flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none';
@@ -182,7 +182,7 @@ export default function DashboardHeader() {
                 />
                 Shortlists
               </DropdownMenu.Item>
-              <DropdownMenu.Separator className="my-1 h-px bg-white/[0.08]" />
+              <DropdownMenu.Separator className="h-px w-full shrink-0 bg-white/[0.08]" />
               <DropdownMenu.Item
                 className={`${accountMenuItemClass} text-red-300 data-highlighted:bg-red-500/10 data-highlighted:text-red-200`}
                 onSelect={() => handleSignOut()}
