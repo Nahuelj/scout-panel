@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PlayersModule } from './players/players.module';
 import { ShortlistModule } from './shortlist/shortlist.module';
+import { SeedModule } from './seed/seed.module';
 import { validateEnv } from './config/env.schema';
 
 @Module({
@@ -18,6 +19,7 @@ import { validateEnv } from './config/env.schema';
     AuthModule,
     PlayersModule,
     ShortlistModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],

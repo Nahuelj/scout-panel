@@ -8,9 +8,6 @@ import { riverPlayers } from './fixtures/players/river';
 import { barcelonaPlayers } from './fixtures/players/barcelona';
 import { realMadridPlayers } from './fixtures/players/realMadrid';
 
-const adapter = new PrismaPg(process.env.DATABASE_URL as string);
-const prisma = new PrismaClient({ adapter });
-
 const SEASON_NAME = '2023-2024';
 const SEASON_START = new Date('2023-07-01');
 const SEASON_END = new Date('2024-06-30');
@@ -39,7 +36,7 @@ function stripDerivedStatsFields(
   return cleaned;
 }
 
-async function upsertSeason() {
+async function upsertSeason(prisma: PrismaClient) {
   return prisma.season.upsert({
     where: { name: SEASON_NAME },
     update: { isCurrent: true },
@@ -52,7 +49,9 @@ async function upsertSeason() {
   });
 }
 
-async function upsertClubs(): Promise<Record<ClubKey, Club>> {
+async function upsertClubs(
+  prisma: PrismaClient,
+): Promise<Record<ClubKey, Club>> {
   const entries = await Promise.all(
     (Object.keys(clubsFixture) as ClubKey[]).map(async (key) => {
       const data = clubsFixture[key];
@@ -73,6 +72,7 @@ async function upsertClubs(): Promise<Record<ClubKey, Club>> {
 }
 
 async function seedPlayer(
+  prisma: PrismaClient,
   player: PlayerFixture,
   clubs: Record<ClubKey, Club>,
   seasonId: string,
@@ -123,12 +123,15 @@ async function seedPlayer(
   });
 }
 
-async function main() {
-  await prisma.player.deleteMany({});
+export type RunSeedResult = {
+  totalFixtures: number;
+  created: number;
+  alreadyPresent: number;
+};
 
-  const season = await upsertSeason();
-  const clubs = await upsertClubs();
-
+// Idempotent seed: every entity is upserted by its natural unique key, so it's
+// safe to run on every boot. Missing fixtures get added; existing rows stay.
+export async function runSeed(prisma: PrismaClient): Promise<RunSeedResult> {
   const allPlayers: PlayerFixture[] = [
     ...bocaPlayers,
     ...riverPlayers,
@@ -136,22 +139,51 @@ async function main() {
     ...realMadridPlayers,
   ];
 
+  const fixtureIds = allPlayers.map((player) => player.id);
+  const existingBefore = await prisma.player.findMany({
+    where: { id: { in: fixtureIds } },
+    select: { id: true },
+  });
+  const alreadyPresent = existingBefore.length;
+
+  const season = await upsertSeason(prisma);
+  const clubs = await upsertClubs(prisma);
+
   for (const player of allPlayers) {
-    await seedPlayer(player, clubs, season.id);
+    await seedPlayer(prisma, player, clubs, season.id);
   }
 
-  console.log(
-    `Seed completed - ${allPlayers.length} players across ${
-      Object.keys(clubs).length
-    } clubs (${SEASON_NAME})`,
-  );
+  return {
+    totalFixtures: allPlayers.length,
+    created: allPlayers.length - alreadyPresent,
+    alreadyPresent,
+  };
 }
 
-main()
-  .catch((error) => {
+async function runFromCli() {
+  const adapter = new PrismaPg(process.env.DATABASE_URL as string);
+  const prisma = new PrismaClient({ adapter });
+
+  try {
+    // CLI invocation always wipes existing players to guarantee a clean dataset.
+    await prisma.player.deleteMany({});
+    const result = await runSeed(prisma);
+    console.log(
+      `Seed completed - ${result.totalFixtures} players seeded (${SEASON_NAME})`,
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Only run the CLI bootstrap when this file is executed directly (e.g. via
+// `tsx prisma/seed/seed.ts` or `prisma db seed`), not when imported as a module.
+const isDirectInvocation =
+  typeof require !== 'undefined' && require.main === module;
+
+if (isDirectInvocation) {
+  runFromCli().catch((error) => {
     console.error(error);
     process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
   });
+}

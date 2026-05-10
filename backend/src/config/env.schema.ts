@@ -9,6 +9,16 @@ const envSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url().optional(),
   FRONTEND_URL: z.string().url().optional(),
+  // Seed the database automatically on application bootstrap. Idempotent:
+  // skips if players already exist. Defaults to false so production never
+  // seeds unless explicitly enabled.
+  SEED_ON_BOOT: z
+    .union([z.boolean(), z.string()])
+    .transform((value) => {
+      if (typeof value === 'boolean') return value;
+      return value === 'true' || value === '1';
+    })
+    .default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;
