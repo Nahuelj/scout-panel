@@ -4,7 +4,6 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
-  dashboard: '/dashboard',
   players: '/players',
   shortlist: '/players/shortlist',
   compare: '/compare',

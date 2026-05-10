@@ -3,12 +3,16 @@ import { ValidationPipe } from '@nestjs/common';
 import { json, type NextFunction, type Request, type Response } from 'express';
 import { AppModule } from './app.module';
 import { getFrontendOrigins } from './frontend-origins';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { setupSwagger } from './config/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
   });
 
+  // better-auth handles its own body parsing for `/api/auth/*` requests, so we
+  // skip the JSON parser for that path and apply it to everything else.
   const expressApp = app.getHttpAdapter().getInstance();
   const parseJson = json();
   expressApp.use((req: Request, res: Response, next: NextFunction) => {
@@ -20,6 +24,10 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableShutdownHooks();
+
+  setupSwagger(app);
 
   app.enableCors({
     origin: getFrontendOrigins(),
@@ -38,4 +46,9 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 8080);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error('Fatal bootstrap error:', error);
+  process.exit(1);
+});

@@ -1,9 +1,9 @@
 model Player {
-  id          String    @id @default(cuid())
-  name        String
-  birthDate   DateTime?
-  nationality String?
-  position    Position
+  id            String         @id @default(cuid())
+  name          String
+  birthDate     DateTime?      @db.Date
+  nationality   String?
+  position      Position
   photoUrl      String?
   height        Float?
   weight        Float?
@@ -15,5 +15,8 @@ model Player {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([name])
+  @@index([nationality])
+  @@index([position])
   @@map("players")
 }

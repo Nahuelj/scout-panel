@@ -6,11 +6,13 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PlayersModule } from './players/players.module';
 import { ShortlistModule } from './shortlist/shortlist.module';
+import { validateEnv } from './config/env.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnv,
     }),
     PrismaModule,
     AuthModule,

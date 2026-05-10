@@ -1,3 +1,5 @@
+// Tables required by better-auth. Names and shapes (singular table names,
+// specific column types) are dictated by the library and must not be renamed.
 model User {
   id            String    @id
   name          String

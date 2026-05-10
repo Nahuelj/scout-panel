@@ -1,5 +1,29 @@
+# Dependencies
 node_modules
-# Keep environment variables out of version control
-.env
+.pnpm-store
 
-/generated/prisma
+# Build output
+dist
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Coverage
+coverage
+
+# Caches
+.eslintcache
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode
+.idea

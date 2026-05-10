@@ -8,6 +8,6 @@ model ShortlistEntry {
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
 
   @@unique([userId, playerId])
-  @@index([userId])
+  @@index([userId, createdAt])
   @@map("shortlist_entries")
 }

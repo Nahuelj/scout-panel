@@ -5,13 +5,13 @@ model PlayerSeason {
   clubId      String
   shirtNumber Int?
 
-  contractStart DateTime?
-  contractEnd   DateTime?
+  contractStart DateTime? @db.Date
+  contractEnd   DateTime? @db.Date
 
   player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
   season Season @relation(fields: [seasonId], references: [id])
   club   Club   @relation(fields: [clubId], references: [id])
-  stats    Stats?
+  stats    PlayerSeasonStats?
   activity PlayerActivity[]
 
   createdAt DateTime @default(now())

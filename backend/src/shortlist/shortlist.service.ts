@@ -4,82 +4,25 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { buildPaginationMeta } from '../common/pagination';
+import type { PaginatedResult } from '../common/pagination/pagination.helper';
 import { PlayerListQueryDto } from '../players/dto/player-list-query.dto';
-import {
-  mapRowToPlayerListCard,
-  PLAYER_LIST_SEASON_SELECT,
-  type PlayerListCard,
-} from '../players/player-list-card';
-import { buildPlayerListWhereContext } from '../players/player-list-where';
+import { PlayersListReadService } from '../players/players-list-read.service';
+import type { PlayerListCard } from '../players/mappers/player-list-card.mapper';
 
 const MAX_SHORTLIST_ENTRIES = 200;
 
-const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 10;
-const MAX_PAGE_SIZE = 100;
-
 @Injectable()
 export class ShortlistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly playersListReadService: PlayersListReadService,
+  ) {}
 
-  async findAllForUser(
+  findAllForUser(
     userId: string,
     query: PlayerListQueryDto,
-  ): Promise<{ data: PlayerListCard[]; meta: ReturnType<typeof buildPaginationMeta> }> {
-    const whereCtx = buildPlayerListWhereContext(query);
-    const { playerSeasonWhere, ...playerWhere } = whereCtx;
-
-    const baseShortlistWhere = {
-      userId,
-      player: playerWhere,
-    };
-
-    const rawPageSize =
-      query.pageSize === undefined || Number.isNaN(query.pageSize)
-        ? DEFAULT_PAGE_SIZE
-        : query.pageSize;
-    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, rawPageSize));
-    const requestedPage =
-      query.page === undefined || Number.isNaN(query.page)
-        ? DEFAULT_PAGE
-        : query.page;
-
-    const totalItems = await this.prisma.shortlistEntry.count({
-      where: baseShortlistWhere,
-    });
-    const meta = buildPaginationMeta({
-      page: requestedPage,
-      pageSize,
-      totalItems,
-    });
-    const skip = (meta.page - 1) * pageSize;
-
-    const entries = await this.prisma.shortlistEntry.findMany({
-      where: baseShortlistWhere,
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: pageSize,
-      select: {
-        player: {
-          select: {
-            id: true,
-            name: true,
-            photoUrl: true,
-            position: true,
-            nationality: true,
-            birthDate: true,
-            seasons: {
-              where: playerSeasonWhere,
-              take: 1,
-              select: PLAYER_LIST_SEASON_SELECT,
-            },
-          },
-        },
-      },
-    });
-    const data = entries.map((e) => mapRowToPlayerListCard(e.player));
-    return { data, meta };
+  ): Promise<PaginatedResult<PlayerListCard>> {
+    return this.playersListReadService.findShortlistedForUser(userId, query);
   }
 
   async playerIdsForUser(userId: string): Promise<string[]> {

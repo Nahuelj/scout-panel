@@ -1,20 +1,20 @@
-model Stats {
-  id                  String @id @default(cuid())
+/// Aggregated stats for a player across a single season.
+/// Derived metrics (matches per card, skillful foot scores) are computed at
+/// runtime in the service layer and intentionally not persisted.
+model PlayerSeasonStats {
+  id String @id @default(cuid())
 
-  playerSeasonId String @unique
+  playerSeasonId String       @unique
+  playerSeason   PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
 
-  playerSeason PlayerSeason @relation(fields: [playerSeasonId], references: [id], onDelete: Cascade)
+  matchesPlayed Int @default(0)
+  minutesPlayed Int @default(0)
+  goals         Int @default(0)
+  assists       Int @default(0)
+  yellowCards   Int @default(0)
+  redCards      Int @default(0)
 
-  matchesPlayed Int   @default(0)
-  minutesPlayed Int   @default(0)
-  goals         Int   @default(0)
-  assists       Int   @default(0)
-  yellowCards   Int   @default(0)
-  redCards      Int   @default(0)
-  matchesPerYellowCard Float?
-  matchesPerRedCard    Float?
-
-  // DRI — DRIBBLING
+  /// DRI - Dribbling
   dribblesAttempted     Int?
   dribbleSuccessPct     Float?
   progressiveCarries    Int?
@@ -22,26 +22,25 @@ model Stats {
   ballRetentionPct      Float?
   foulsWon              Int?
 
-  // VEL — PACE
-  topSpeed        Float? // km/h
-  sprintDistance  Int?   // metros
+  /// VEL - Pace
+  topSpeed        Float?
+  sprintDistance  Int?
   accelerations   Int?
   progressiveRuns Int?
-  distanceCovered Float? // km
+  distanceCovered Float?
 
-  // PAS — PASSING
+  /// PAS - Passing
   passAccuracyPct         Float?
   progressivePasses       Int?
   keyPasses               Int?
   throughBalls            Int?
   crossAccuracyPct        Float?
-  xA                      Float? // Expected Assists
+  xA                      Float?
   weakFootPassPct         Float?
   weakFootPassAccuracyPct Float?
   progressiveWfPasses     Int?
-  skillfulFootPassScore   Float?
 
-  // TIR — SHOOTING
+  /// TIR - Shooting
   goalsPer90              Float?
   xGPer90                 Float?
   shotAccuracyPct         Float?
@@ -51,9 +50,8 @@ model Stats {
   weakFootShotPct         Float?
   weakFootGoals           Int?
   weakFootShotAccuracyPct Float?
-  skillfulFootShotScore   Float?
 
-  // DEF — DEFENDING
+  /// DEF - Defending
   tacklesWonPct     Float?
   interceptions     Int?
   recoveries        Int?
@@ -61,15 +59,15 @@ model Stats {
   aerialDuelsWonPct Float?
   clearances        Int?
 
-  // FZA — PHYSICAL
-  physicalDuelsWonPct  Float?
-  strengthDuels        Int?
-  balance              Float? // Score
-  stamina              Float? // Score
+  /// FZA - Physical
+  physicalDuelsWonPct   Float?
+  strengthDuels         Int?
+  balance               Float?
+  stamina               Float?
   bodyContactSuccessPct Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("stats")
+  @@map("player_season_stats")
 }

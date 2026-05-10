@@ -1,22 +1,14 @@
-import type { Position } from '../../generated/prisma/enums';
+import type { Position, Prisma } from '@prisma/client';
+import {
+  PLAYER_LIST_SELECT,
+  PLAYER_LIST_SEASON_SELECT,
+} from '../queries/player-list.select';
 
-export const PLAYER_LIST_SEASON_SELECT = {
-  club: {
-    select: {
-      name: true,
-      league: true,
-      logoUrl: true,
-    },
-  },
-  stats: {
-    select: {
-      matchesPlayed: true,
-      goals: true,
-      assists: true,
-      xGPer90: true,
-    },
-  },
-} as const;
+export type PlayerListCardRow = Prisma.PlayerGetPayload<{
+  select: typeof PLAYER_LIST_SELECT & {
+    seasons: { select: typeof PLAYER_LIST_SEASON_SELECT };
+  };
+}>;
 
 export type PlayerListCard = {
   id: string;
@@ -36,24 +28,6 @@ export type PlayerListCard = {
       xGPer90: number | null;
     } | null;
   } | null;
-};
-
-export type PlayerListCardRow = {
-  id: string;
-  name: string;
-  photoUrl: string | null;
-  position: Position;
-  nationality: string | null;
-  birthDate: Date | null;
-  seasons: Array<{
-    club: { name: string; league: string | null; logoUrl: string | null };
-    stats: {
-      matchesPlayed: number;
-      goals: number;
-      assists: number;
-      xGPer90: number | null;
-    } | null;
-  }>;
 };
 
 export function mapRowToPlayerListCard(row: PlayerListCardRow): PlayerListCard {

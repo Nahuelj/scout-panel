@@ -1,0 +1,1207 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/players/filter-options": {
+      "get": {
+        "operationId": "PlayersController_filterOptionsForListing",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterOptionsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Distinct values usable to filter the player list",
+        "tags": [
+          "players"
+        ]
+      }
+    },
+    "/players": {
+      "get": {
+        "operationId": "PlayersController_findAll",
+        "parameters": [
+          {
+            "name": "position",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          {
+            "name": "nationality",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Argentina",
+              "type": "string"
+            }
+          },
+          {
+            "name": "seasonId",
+            "required": false,
+            "in": "query",
+            "description": "Restrict to a specific season id.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive name search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAge",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAge",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PlayerListCardDto"
+                          }
+                        },
+                        "meta": {
+                          "$ref": "#/components/schemas/PaginationMetaDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "List players with filters and pagination",
+        "tags": [
+          "players"
+        ]
+      }
+    },
+    "/players/{id}": {
+      "get": {
+        "operationId": "PlayersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "seasonId",
+            "required": false,
+            "in": "query",
+            "description": "When omitted, the current season is returned. Otherwise, the season with the given id.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Player not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get player detail by id",
+        "tags": [
+          "players"
+        ]
+      }
+    },
+    "/shortlist/player-ids": {
+      "get": {
+        "operationId": "ShortlistController_playerIds",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortlistPlayerIdsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "better-auth.session_token": []
+          }
+        ],
+        "summary": "List all shortlisted player ids for the current user",
+        "tags": [
+          "shortlist"
+        ]
+      }
+    },
+    "/shortlist": {
+      "get": {
+        "operationId": "ShortlistController_list",
+        "parameters": [
+          {
+            "name": "position",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          {
+            "name": "nationality",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Argentina",
+              "type": "string"
+            }
+          },
+          {
+            "name": "seasonId",
+            "required": false,
+            "in": "query",
+            "description": "Restrict to a specific season id.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive name search.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minAge",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxAge",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/PlayerListCardDto"
+                          }
+                        },
+                        "meta": {
+                          "$ref": "#/components/schemas/PaginationMetaDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "better-auth.session_token": []
+          }
+        ],
+        "summary": "Paginated list of shortlisted players",
+        "tags": [
+          "shortlist"
+        ]
+      },
+      "post": {
+        "operationId": "ShortlistController_add",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddShortlistDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Player added (or already present)."
+          },
+          "400": {
+            "description": "Shortlist size limit reached.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Player not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "better-auth.session_token": []
+          }
+        ],
+        "summary": "Add a player to the current user shortlist",
+        "tags": [
+          "shortlist"
+        ]
+      }
+    },
+    "/shortlist/{playerId}": {
+      "delete": {
+        "operationId": "ShortlistController_remove",
+        "parameters": [
+          {
+            "name": "playerId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Player removed (idempotent)."
+          },
+          "401": {
+            "description": "Missing or invalid session.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "better-auth.session_token": []
+          }
+        ],
+        "summary": "Remove a player from the current user shortlist",
+        "tags": [
+          "shortlist"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Scout Panel API",
+    "description": "Players, seasons, stats and shortlist endpoints for the scout panel.",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "players",
+      "description": "Player listing and detail endpoints"
+    },
+    {
+      "name": "shortlist",
+      "description": "User shortlist management"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication endpoints (handled by better-auth)"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "cookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token",
+        "description": "Session cookie issued by better-auth on sign-in."
+      }
+    },
+    "schemas": {
+      "FilterOptionsDto": {
+        "type": "object",
+        "properties": {
+          "nationalities": {
+            "example": [
+              "Argentina",
+              "Spain",
+              "Uruguay"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "nationalities"
+        ]
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 1
+          },
+          "pageSize": {
+            "type": "number",
+            "example": 10
+          },
+          "totalItems": {
+            "type": "number",
+            "example": 42
+          },
+          "totalPages": {
+            "type": "number",
+            "example": 5
+          },
+          "hasNextPage": {
+            "type": "boolean",
+            "example": true
+          },
+          "hasPreviousPage": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages",
+          "hasNextPage",
+          "hasPreviousPage"
+        ]
+      },
+      "Position": {
+        "type": "string",
+        "enum": [
+          "GK",
+          "RB",
+          "RWB",
+          "CB",
+          "LB",
+          "LWB",
+          "CDM",
+          "CM",
+          "CAM",
+          "RW",
+          "RM",
+          "LW",
+          "LM",
+          "ST",
+          "CF",
+          "SS"
+        ]
+      },
+      "PlayerListCardStatsDto": {
+        "type": "object",
+        "properties": {
+          "matchesPlayed": {
+            "type": "number",
+            "example": 38
+          },
+          "goals": {
+            "type": "number",
+            "example": 14
+          },
+          "assists": {
+            "type": "number",
+            "example": 5
+          },
+          "xGPer90": {
+            "type": "number",
+            "nullable": true,
+            "example": 0.55,
+            "description": "Expected Goals per 90 minutes"
+          }
+        },
+        "required": [
+          "matchesPlayed",
+          "goals",
+          "assists",
+          "xGPer90"
+        ]
+      },
+      "PlayerListCardCurrentSeasonDto": {
+        "type": "object",
+        "properties": {
+          "club": {
+            "type": "string",
+            "example": "Boca Juniors"
+          },
+          "clubLogoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "league": {
+            "type": "string",
+            "nullable": true
+          },
+          "stats": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlayerListCardStatsDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "club",
+          "clubLogoUrl",
+          "league",
+          "stats"
+        ]
+      },
+      "PlayerListCardDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              }
+            ]
+          },
+          "nationality": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "currentSeason": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlayerListCardCurrentSeasonDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "photoUrl",
+          "position",
+          "nationality",
+          "birthDate",
+          "currentSeason"
+        ]
+      },
+      "PreferredFoot": {
+        "type": "string",
+        "enum": [
+          "RIGHT",
+          "LEFT",
+          "BOTH"
+        ]
+      },
+      "PlayerDetailSeasonRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isCurrent": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "isCurrent"
+        ]
+      },
+      "PlayerDetailClubDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string",
+            "nullable": true
+          },
+          "league": {
+            "type": "string",
+            "nullable": true
+          },
+          "country": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "shortName",
+          "league",
+          "country",
+          "logoUrl"
+        ]
+      },
+      "PlayerDetailStatsDto": {
+        "type": "object",
+        "properties": {
+          "matchesPlayed": {
+            "type": "number"
+          },
+          "minutesPlayed": {
+            "type": "number"
+          },
+          "goals": {
+            "type": "number"
+          },
+          "assists": {
+            "type": "number"
+          },
+          "yellowCards": {
+            "type": "number"
+          },
+          "redCards": {
+            "type": "number"
+          },
+          "matchesPerYellowCard": {
+            "type": "number",
+            "nullable": true
+          },
+          "matchesPerRedCard": {
+            "type": "number",
+            "nullable": true
+          },
+          "dribblesAttempted": {
+            "type": "number",
+            "nullable": true
+          },
+          "dribbleSuccessPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "progressiveCarries": {
+            "type": "number",
+            "nullable": true
+          },
+          "carriesIntoFinalThird": {
+            "type": "number",
+            "nullable": true
+          },
+          "ballRetentionPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "foulsWon": {
+            "type": "number",
+            "nullable": true
+          },
+          "topSpeed": {
+            "type": "number",
+            "nullable": true
+          },
+          "sprintDistance": {
+            "type": "number",
+            "nullable": true
+          },
+          "accelerations": {
+            "type": "number",
+            "nullable": true
+          },
+          "progressiveRuns": {
+            "type": "number",
+            "nullable": true
+          },
+          "distanceCovered": {
+            "type": "number",
+            "nullable": true
+          },
+          "passAccuracyPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "progressivePasses": {
+            "type": "number",
+            "nullable": true
+          },
+          "keyPasses": {
+            "type": "number",
+            "nullable": true
+          },
+          "throughBalls": {
+            "type": "number",
+            "nullable": true
+          },
+          "crossAccuracyPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "xA": {
+            "type": "number",
+            "nullable": true
+          },
+          "weakFootPassPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "weakFootPassAccuracyPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "progressiveWfPasses": {
+            "type": "number",
+            "nullable": true
+          },
+          "skillfulFootPassScore": {
+            "type": "number",
+            "nullable": true,
+            "description": "Computed from passAccuracyPct, scaled to 0-10."
+          },
+          "goalsPer90": {
+            "type": "number",
+            "nullable": true
+          },
+          "xGPer90": {
+            "type": "number",
+            "nullable": true
+          },
+          "shotAccuracyPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "conversionRatePct": {
+            "type": "number",
+            "nullable": true
+          },
+          "shotsOnTarget": {
+            "type": "number",
+            "nullable": true
+          },
+          "touchesInBox": {
+            "type": "number",
+            "nullable": true
+          },
+          "weakFootShotPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "weakFootGoals": {
+            "type": "number",
+            "nullable": true
+          },
+          "weakFootShotAccuracyPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "skillfulFootShotScore": {
+            "type": "number",
+            "nullable": true,
+            "description": "Computed from shotAccuracyPct, scaled to 0-10."
+          },
+          "tacklesWonPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "interceptions": {
+            "type": "number",
+            "nullable": true
+          },
+          "recoveries": {
+            "type": "number",
+            "nullable": true
+          },
+          "blocks": {
+            "type": "number",
+            "nullable": true
+          },
+          "aerialDuelsWonPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "clearances": {
+            "type": "number",
+            "nullable": true
+          },
+          "physicalDuelsWonPct": {
+            "type": "number",
+            "nullable": true
+          },
+          "strengthDuels": {
+            "type": "number",
+            "nullable": true
+          },
+          "balance": {
+            "type": "number",
+            "nullable": true
+          },
+          "stamina": {
+            "type": "number",
+            "nullable": true
+          },
+          "bodyContactSuccessPct": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "matchesPlayed",
+          "minutesPlayed",
+          "goals",
+          "assists",
+          "yellowCards",
+          "redCards",
+          "matchesPerYellowCard",
+          "matchesPerRedCard",
+          "dribblesAttempted",
+          "dribbleSuccessPct",
+          "progressiveCarries",
+          "carriesIntoFinalThird",
+          "ballRetentionPct",
+          "foulsWon",
+          "topSpeed",
+          "sprintDistance",
+          "accelerations",
+          "progressiveRuns",
+          "distanceCovered",
+          "passAccuracyPct",
+          "progressivePasses",
+          "keyPasses",
+          "throughBalls",
+          "crossAccuracyPct",
+          "xA",
+          "weakFootPassPct",
+          "weakFootPassAccuracyPct",
+          "progressiveWfPasses",
+          "skillfulFootPassScore",
+          "goalsPer90",
+          "xGPer90",
+          "shotAccuracyPct",
+          "conversionRatePct",
+          "shotsOnTarget",
+          "touchesInBox",
+          "weakFootShotPct",
+          "weakFootGoals",
+          "weakFootShotAccuracyPct",
+          "skillfulFootShotScore",
+          "tacklesWonPct",
+          "interceptions",
+          "recoveries",
+          "blocks",
+          "aerialDuelsWonPct",
+          "clearances",
+          "physicalDuelsWonPct",
+          "strengthDuels",
+          "balance",
+          "stamina",
+          "bodyContactSuccessPct"
+        ]
+      },
+      "PlayerActivityEntryDto": {
+        "type": "object",
+        "properties": {
+          "monthDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutesPlayed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "monthDate",
+          "minutesPlayed"
+        ]
+      },
+      "PlayerDetailCurrentSeasonDto": {
+        "type": "object",
+        "properties": {
+          "season": {
+            "$ref": "#/components/schemas/PlayerDetailSeasonRefDto"
+          },
+          "club": {
+            "$ref": "#/components/schemas/PlayerDetailClubDto"
+          },
+          "shirtNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "contractStart": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "contractEnd": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "stats": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlayerDetailStatsDto"
+              }
+            ]
+          },
+          "activity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlayerActivityEntryDto"
+            }
+          }
+        },
+        "required": [
+          "season",
+          "club",
+          "shirtNumber",
+          "contractStart",
+          "contractEnd",
+          "stats",
+          "activity"
+        ]
+      },
+      "PlayerDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              }
+            ]
+          },
+          "nationality": {
+            "type": "string",
+            "nullable": true
+          },
+          "birthDate": {
+            "type": "string",
+            "nullable": true,
+            "format": "date"
+          },
+          "height": {
+            "type": "number",
+            "nullable": true
+          },
+          "weight": {
+            "type": "number",
+            "nullable": true
+          },
+          "preferredFoot": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PreferredFoot"
+              }
+            ]
+          },
+          "currentSeason": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlayerDetailCurrentSeasonDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "photoUrl",
+          "position",
+          "nationality",
+          "birthDate",
+          "height",
+          "weight",
+          "preferredFoot",
+          "currentSeason"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "message": {
+            "example": "Validation failed",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "path": {
+            "type": "string",
+            "example": "/players"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-05-10T01:33:00.000Z"
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message",
+          "path",
+          "timestamp"
+        ]
+      },
+      "ShortlistPlayerIdsDto": {
+        "type": "object",
+        "properties": {
+          "playerIds": {
+            "example": [
+              "boca-merentiel-001"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "playerIds"
+        ]
+      },
+      "AddShortlistDto": {
+        "type": "object",
+        "properties": {
+          "playerId": {
+            "type": "string",
+            "example": "boca-merentiel-001"
+          }
+        },
+        "required": [
+          "playerId"
+        ]
+      }
+    }
+  }
+}

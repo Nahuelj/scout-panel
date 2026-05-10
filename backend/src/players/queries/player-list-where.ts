@@ -1,29 +1,19 @@
-import type { PlayerListQueryDto } from './dto/player-list-query.dto';
-
-export type PlayerListFilterInput = Pick<
-  PlayerListQueryDto,
-  'position' | 'nationality' | 'seasonId' | 'search' | 'minAge' | 'maxAge'
->;
+import type { Prisma } from '@prisma/client';
+import type { PlayerFiltersDto } from '../dto/player-filters.dto';
 
 export type PlayerListWhereContext = {
-  position?: PlayerListFilterInput['position'];
-  nationality?: string;
-  name?: { contains: string; mode: 'insensitive' };
-  birthDate?: { lte?: Date; gte?: Date };
-  seasons: { some: Record<string, unknown> };
-  playerSeasonWhere: Record<string, unknown>;
+  playerWhere: Prisma.PlayerWhereInput;
+  seasonWhere: Prisma.PlayerSeasonWhereInput;
 };
 
 export function buildPlayerListWhereContext(
-  query: PlayerListFilterInput,
+  query: PlayerFiltersDto,
 ): PlayerListWhereContext {
   const { position, nationality, seasonId, search, minAge, maxAge } = query;
 
-  const seasonWhere = seasonId
+  const seasonWhere: Prisma.PlayerSeasonWhereInput = seasonId
     ? { seasonId }
     : { season: { isCurrent: true } };
-
-  const playerSeasonWhere = { ...seasonWhere };
 
   const today = new Date();
   const birthDateFilter: { lte?: Date; gte?: Date } = {};
@@ -40,14 +30,15 @@ export function buildPlayerListWhereContext(
   }
   const hasBirthDateFilter = Object.keys(birthDateFilter).length > 0;
 
-  return {
+  const playerWhere: Prisma.PlayerWhereInput = {
     ...(position && { position }),
     ...(nationality && { nationality }),
     ...(search && {
       name: { contains: search, mode: 'insensitive' as const },
     }),
     ...(hasBirthDateFilter && { birthDate: birthDateFilter }),
-    seasons: { some: playerSeasonWhere },
-    playerSeasonWhere,
+    seasons: { some: seasonWhere },
   };
+
+  return { playerWhere, seasonWhere };
 }
