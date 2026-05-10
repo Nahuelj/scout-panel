@@ -16,8 +16,9 @@ import {
   DEFAULT_PLAYERS_PAGE,
   PLAYERS_FIXED_PAGE_SIZE,
   playersListHrefForState,
-} from "@/lib/player-list-params";
-import { getPlayers, type PlayerCardData } from "@/lib/players-api";
+} from "@/features/players/utils/player-list-params";
+import { getPlayers } from "@/features/players/api/players-api";
+import type { PlayerCardData } from "@/features/players/types/player.types";
 
 type Props = {
   currentIds: string[];

@@ -1,3 +1,36 @@
+import type { PaginationMeta } from '@/types/api.types';
+
+export type { PaginationMeta };
+
+export type PlayerCardData = {
+  id: string;
+  name: string;
+  photoUrl: string | null;
+  position: string;
+  nationality: string | null;
+  birthDate: string | null;
+  currentSeason: {
+    club: string;
+    clubLogoUrl: string | null;
+    league: string | null;
+    stats: {
+      matchesPlayed: number;
+      goals: number;
+      assists: number;
+      xGPer90: number | null;
+    } | null;
+  } | null;
+};
+
+export type PaginatedPlayersResponse = {
+  data: PlayerCardData[];
+  meta: PaginationMeta;
+};
+
+export type PlayersFilterOptions = {
+  nationalities: string[];
+};
+
 export type PlayerActivity = {
   monthDate: string;
   minutesPlayed: number;
@@ -83,16 +116,3 @@ export type PlayerDetail = {
     activity: PlayerActivity[];
   } | null;
 };
-
-import { playersApiOrigin } from './players-api';
-
-export async function getPlayerDetail(
-  id: string,
-  seasonId?: string,
-): Promise<PlayerDetail | null> {
-  const params = seasonId ? `?seasonId=${seasonId}` : '';
-  const res = await fetch(`${playersApiOrigin()}/players/${id}${params}`, { cache: 'no-store' });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error('Failed to fetch player detail');
-  return res.json();
-}

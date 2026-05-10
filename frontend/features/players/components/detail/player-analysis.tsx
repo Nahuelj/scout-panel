@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { PlayerDetailStats } from '@/lib/player-detail-api';
+import type { PlayerDetailStats } from '@/features/players/types/player.types';
 import {
   STAT_CATEGORIES,
   METRIC_META,
@@ -19,7 +19,7 @@ import {
   clientToSvgPoint,
   pickCategoryByNearestAxis,
   type StatFormatKind,
-} from '@/lib/player-stats-metadata';
+} from '@/features/players/utils/player-stats-metadata';
 import { cn } from '@/lib/utils';
 
 const STATS_TABLE_HEAD_CLASS =
@@ -107,10 +107,15 @@ export default function PlayerAnalysis({ stats }: Props) {
         </h3>
         <div
           ref={radarChartWrapRef}
-          className="h-[220px] w-full shrink-0 sm:h-[260px] lg:h-[300px]"
+          className="relative h-[220px] min-w-0 w-full shrink-0 sm:h-[260px] lg:h-[300px]"
           onMouseMove={handleRadarMouseMove}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            initialDimension={{ width: 348, height: 300 }}
+          >
             <RadarChart
               data={radarData}
               outerRadius="90%"
@@ -235,7 +240,7 @@ export default function PlayerAnalysis({ stats }: Props) {
           onValueChange={setActiveTab}
           className="flex min-h-0 w-full min-w-0 flex-col gap-0 lg:h-full lg:min-h-0"
         >
-          <div className="min-w-0 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="scrollbar-panel min-w-0 overflow-x-auto">
             <TabsList className="isolate inline-flex h-auto min-h-11 w-max min-w-full shrink-0 flex-nowrap items-stretch justify-start gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
               {Object.entries(STAT_CATEGORIES).map(([cat]) => (
                 <TabsTrigger
@@ -274,7 +279,7 @@ export default function PlayerAnalysis({ stats }: Props) {
                 className="mt-0 flex flex-col px-0 pt-0 pb-0 outline-none lg:min-h-0 lg:flex-1 lg:overflow-hidden"
               >
                 <div className="flex flex-col pl-4 pr-2 pt-5 sm:pl-6 lg:min-h-0 lg:flex-1">
-                  <div className="pb-6 pr-3 sm:pr-4 lg:scrollbar-panel lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+                  <div className="scrollbar-panel pb-6 pr-3 sm:pr-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
                     <div className="sticky top-0 z-[1] mb-2 flex items-end justify-between border-b border-white/10 bg-[#0f1923] pb-2 md:hidden">
                       <span className={STATS_TABLE_HEAD_CLASS}>Metric</span>
                       <span className={STATS_TABLE_HEAD_CLASS}>Value</span>

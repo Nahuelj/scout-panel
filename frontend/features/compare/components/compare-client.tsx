@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import CompareHeaders from './compare-headers';
 import CompareAttributesTable from './compare-attributes-table';
 import CompareAnalysis from './compare-analysis';

@@ -1,13 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bookmark } from 'lucide-react';
 import type { RefObject } from 'react';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import { getSlotColor } from '@/lib/compare-colors';
-import { useSession } from '@/lib/auth-client';
-import { addToShortlist, removeFromShortlist } from '@/lib/shortlist-api';
+import { useSession } from '@/features/auth/lib/auth-client';
+import {
+  useShortlistIds,
+  useAddToShortlist,
+  useRemoveFromShortlist,
+} from '@/features/shortlist';
 
 function calcAge(birthDate: string): number {
   return Math.floor(
@@ -29,8 +33,21 @@ export default function PlayerHero({
   initialShortlisted,
 }: Props) {
   const { data: session } = useSession();
-  const [shortlisted, setShortlisted] = useState(initialShortlisted);
-  const [busy, setBusy] = useState(false);
+  const canShortlist = Boolean(session?.user);
+  const initialIds = useMemo(
+    () => (initialShortlisted ? [player.id] : []),
+    [initialShortlisted, player.id],
+  );
+  const { data: shortlistIds } = useShortlistIds({
+    enabled: canShortlist,
+    initialData: initialIds,
+  });
+  const addMutation = useAddToShortlist();
+  const removeMutation = useRemoveFromShortlist();
+
+  const shortlisted = (shortlistIds ?? initialIds).includes(player.id);
+  const busy = addMutation.isPending || removeMutation.isPending;
+
   const [isNarrow, setIsNarrow] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +86,7 @@ export default function PlayerHero({
                   fill
                   className="object-cover"
                   priority
+                  loading="eager"
                   unoptimized
                 />
               ) : (
@@ -131,27 +149,15 @@ export default function PlayerHero({
               )}
               <button
                 type="button"
-                disabled={!session?.user || busy}
+                disabled={!canShortlist || busy}
                 aria-label={shortlisted ? 'Remove from shortlist' : 'Add to shortlist'}
                 onClick={() => {
-                  if (!session?.user || busy) return;
-                  const previous = shortlisted;
-                  setBusy(true);
-                  void (async () => {
-                    try {
-                      if (shortlisted) {
-                        await removeFromShortlist(player.id);
-                        setShortlisted(false);
-                      } else {
-                        await addToShortlist(player.id);
-                        setShortlisted(true);
-                      }
-                    } catch {
-                      setShortlisted(previous);
-                    } finally {
-                      setBusy(false);
-                    }
-                  })();
+                  if (!canShortlist || busy) return;
+                  if (shortlisted) {
+                    removeMutation.mutate(player.id);
+                  } else {
+                    addMutation.mutate(player.id);
+                  }
                 }}
                 className={`group inline-flex w-fit shrink-0 items-center justify-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-medium outline-none transition-all duration-200 focus-visible:border-sky-500/40 focus-visible:ring-2 focus-visible:ring-sky-500/25 disabled:pointer-events-none disabled:opacity-40 sm:gap-2 sm:px-3 sm:py-2 sm:text-sm ${
                   shortlisted

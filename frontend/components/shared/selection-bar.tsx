@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useSelectionStore } from '@/lib/selection-store';
+import { useSelectionStore } from '@/stores/selection-store';
 
 export default function SelectionBar() {
   const { selectedPlayers, clearSelection } = useSelectionStore();

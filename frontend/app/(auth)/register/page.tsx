@@ -1,6 +1,6 @@
 import { Crosshair } from 'lucide-react';
-import { SignupForm } from '@/components/signup-form';
-import WaveMeshBackground from '@/app/components/wave-mesh-background';
+import { SignupForm } from '@/features/auth';
+import WaveMeshBackground from '@/components/shared/wave-mesh-background';
 
 export default function RegisterPage() {
   return (

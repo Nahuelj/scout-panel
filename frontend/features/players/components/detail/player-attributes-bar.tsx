@@ -2,8 +2,8 @@
 
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { PlayerDetail } from '@/lib/player-detail-api';
-import { POSITION_FULL } from '@/lib/player-stats-metadata';
+import type { PlayerDetail } from '@/features/players/types/player.types';
+import { POSITION_FULL } from '@/features/players/utils/player-stats-metadata';
 
 function scoreLabel(value: number | null): string {
   if (value === null) return '';

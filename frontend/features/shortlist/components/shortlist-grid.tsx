@@ -5,13 +5,12 @@ import {
   serializePlayersListToPathQuery,
   shortlistListHrefForState,
   type PlayersListRouteState,
-} from '@/lib/player-list-params';
-import { getPlayersFilterOptions } from '@/lib/players-api';
-import { fetchShortlistServer } from '@/lib/shortlist-api';
-import PlayersListControls from '@/app/players/players-list-controls';
-import PlayersPagination from '@/app/players/players-pagination';
+} from '@/features/players/utils/player-list-params';
+import { getPlayersFilterOptions } from '@/features/players/api/players-api';
+import { fetchShortlistServer } from '@/features/shortlist/api/shortlist-api';
+import { PlayersListControls, PlayersPagination } from '@/features/players';
 import ShortlistGridClient from './shortlist-grid-client';
-import { BETTER_AUTH_SESSION_COOKIE } from '@/lib/better-auth-session-cookie';
+import { BETTER_AUTH_SESSION_COOKIE } from '@/features/auth/lib/session-cookie';
 
 export default async function ShortlistGrid({
   routeState,

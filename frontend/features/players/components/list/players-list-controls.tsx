@@ -12,7 +12,7 @@ import {
   PLAYER_POSITION_VALUES,
   serializePlayersListToPathQuery,
   type PlayersListRouteState,
-} from '@/lib/player-list-params';
+} from '@/features/players/utils/player-list-params';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import { getSlotColor } from '@/lib/compare-colors';
 
 type Props = { players: PlayerDetail[] };

@@ -1,17 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSession } from '@/lib/auth-client';
-import PlayerCard from '@/app/components/player-card';
-import { useSelectionStore } from '@/lib/selection-store';
-import type { PlayerCardData } from '@/lib/players-api';
+import { useCallback, useMemo } from 'react';
+import { useSession } from '@/features/auth/lib/auth-client';
+import PlayerCard from '@/features/players/components/list/player-card';
+import { useSelectionStore } from '@/stores/selection-store';
+import type { PlayerCardData } from '@/features/players/types/player.types';
 import {
-  addToShortlist,
-  fetchShortlistPlayerIds,
-  removeFromShortlist,
-} from '@/lib/shortlist-api';
+  useShortlistIds,
+  useAddToShortlist,
+  useRemoveFromShortlist,
+} from '@/features/shortlist';
 
-const EMPTY_SHORTLIST_IDS = new Set<string>();
+const EMPTY_SHORTLIST_IDS: string[] = [];
 
 type Props = {
   players: PlayerCardData[];
@@ -30,73 +30,31 @@ export default function PlayersGridClient({
     if (isPending) return initialCanShortlist;
     return Boolean(session?.user);
   }, [initialCanShortlist, isPending, session?.user]);
-  const [shortlistIds, setShortlistIds] = useState<Set<string>>(
-    () => new Set(initialShortlistIds),
-  );
-  const serverShortlistKey = [...initialShortlistIds].sort().join('|');
-  const prevServerShortlistKey = useRef<string | null>(null);
+
+  const { data: shortlistIds = EMPTY_SHORTLIST_IDS } = useShortlistIds({
+    enabled: canShortlist,
+    initialData: initialShortlistIds,
+  });
 
   const idsForUi = useMemo(
-    () => (canShortlist ? shortlistIds : EMPTY_SHORTLIST_IDS),
+    () => new Set(canShortlist ? shortlistIds : EMPTY_SHORTLIST_IDS),
     [canShortlist, shortlistIds],
   );
 
-  useEffect(() => {
-    if (prevServerShortlistKey.current === null) {
-      prevServerShortlistKey.current = serverShortlistKey;
-      return;
-    }
-    if (prevServerShortlistKey.current === serverShortlistKey) return;
-    prevServerShortlistKey.current = serverShortlistKey;
-    setShortlistIds(new Set(initialShortlistIds));
-  }, [initialShortlistIds, serverShortlistKey]);
-
-  useEffect(() => {
-    if (!canShortlist) return;
-    let cancelled = false;
-    fetchShortlistPlayerIds()
-      .then((ids) => {
-        if (cancelled) return;
-        setShortlistIds((prev) => {
-          const next = new Set(ids);
-          if (prev.size !== next.size) return next;
-          for (const id of prev) {
-            if (!next.has(id)) return next;
-          }
-          return prev;
-        });
-      })
-      .catch(() => {
-        if (!cancelled) setShortlistIds(new Set());
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [canShortlist]);
+  const addMutation = useAddToShortlist();
+  const removeMutation = useRemoveFromShortlist();
 
   const handleShortlistToggle = useCallback(
-    async (player: PlayerCardData, e: React.MouseEvent) => {
+    (player: PlayerCardData, e: React.MouseEvent) => {
       e.stopPropagation();
       if (!canShortlist) return;
-      const on = idsForUi.has(player.id);
-      try {
-        if (on) {
-          await removeFromShortlist(player.id);
-          setShortlistIds((prev) => {
-            const next = new Set(prev);
-            next.delete(player.id);
-            return next;
-          });
-        } else {
-          await addToShortlist(player.id);
-          setShortlistIds((prev) => new Set(prev).add(player.id));
-        }
-      } catch {
-        const ids = await fetchShortlistPlayerIds().catch(() => [] as string[]);
-        setShortlistIds(new Set(ids));
+      if (idsForUi.has(player.id)) {
+        removeMutation.mutate(player.id);
+      } else {
+        addMutation.mutate(player.id);
       }
     },
-    [canShortlist, idsForUi],
+    [canShortlist, idsForUi, addMutation, removeMutation],
   );
 
   if (players.length === 0) {
@@ -121,7 +79,7 @@ export default function PlayersGridClient({
           priorityPhoto={index === 0}
           isShortlisted={idsForUi.has(player.id)}
           onShortlistToggle={
-            canShortlist ? (e) => void handleShortlistToggle(player, e) : undefined
+            canShortlist ? (e) => handleShortlistToggle(player, e) : undefined
           }
         />
       ))}

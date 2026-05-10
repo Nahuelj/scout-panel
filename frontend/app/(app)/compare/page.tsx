@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { getPlayerDetail, type PlayerDetail } from '@/lib/player-detail-api';
-import { fetchShortlistPlayerIdsServer } from '@/lib/shortlist-api';
-import CompareClient from './compare-client';
+import { getPlayerDetail, type PlayerDetail } from '@/features/players';
+import { CompareClient } from '@/features/compare';
+import { fetchShortlistPlayerIdsServer } from '@/features/shortlist/server';
 
 const MAX_PLAYERS = 3;
 

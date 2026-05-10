@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PlayerCardData } from './players-api';
+import type { PlayerCardData } from '@/features/players/types/player.types';
 
 const MAX_SELECTION = 3;
 

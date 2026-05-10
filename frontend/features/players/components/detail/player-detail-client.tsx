@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import PlayerHero from './player-hero';
 import PlayerStickyBar from './player-sticky-bar';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 
 type Props = { player: PlayerDetail; initialShortlisted: boolean };
 

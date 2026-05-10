@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import PlayersGridSkeleton from '@/app/players/players-grid-skeleton';
-import { ShortlistGridFromSearchParams } from './shortlist-grid';
+import { PlayersGridSkeleton } from '@/features/players';
+import { ShortlistGridFromSearchParams } from '@/features/shortlist/server';
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

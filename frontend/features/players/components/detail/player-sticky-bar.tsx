@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import { getSlotColor } from '@/lib/compare-colors';
 
 function calcAge(birthDate: string): number {

@@ -1,8 +1,10 @@
-import AppHeaderHeightSync from '@/app/components/app-header-height-sync';
-import DashboardHeader from '@/app/components/dashboard-header';
-import PageTransition from '@/app/components/page-transition';
-import SelectionBar from '@/app/components/selection-bar';
-import WaveMeshBackground from '@/app/components/wave-mesh-background';
+import { Suspense } from 'react';
+
+import AppHeaderHeightSync from '@/components/shared/app-header-height-sync';
+import DashboardHeader from '@/components/shared/dashboard-header';
+import PageTransition from '@/components/shared/page-transition';
+import SelectionBar from '@/components/shared/selection-bar';
+import WaveMeshBackground from '@/components/shared/wave-mesh-background';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +19,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         <WaveMeshBackground />
         <div className="relative z-10 mx-auto max-w-screen-xl px-6 pb-4 pt-6 md:px-8 md:pt-8">
-          <DashboardHeader />
+          <Suspense fallback={null}>
+            <DashboardHeader />
+          </Suspense>
         </div>
       </div>
       <div className="mx-auto max-w-screen-xl px-6 md:px-8 pb-6 md:pb-8 pt-8">

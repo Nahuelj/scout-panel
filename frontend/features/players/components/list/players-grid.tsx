@@ -4,13 +4,13 @@ import {
   parsePlayerListSearchParams,
   playersListHrefForState,
   type PlayersListRouteState,
-} from '@/lib/player-list-params';
-import { getPlayers, getPlayersFilterOptions } from '@/lib/players-api';
-import { fetchShortlistPlayerIdsServer } from '@/lib/shortlist-api';
+} from '@/features/players/utils/player-list-params';
+import { getPlayers, getPlayersFilterOptions } from '@/features/players/api/players-api';
+import { fetchShortlistPlayerIdsServer } from '@/features/shortlist/server';
 import PlayersGridClient from './players-grid-client';
 import PlayersListControls from './players-list-controls';
 import PlayersPagination from './players-pagination';
-import { BETTER_AUTH_SESSION_COOKIE } from '@/lib/better-auth-session-cookie';
+import { BETTER_AUTH_SESSION_COOKIE } from '@/features/auth/lib/session-cookie';
 
 export default async function PlayersGrid({
   routeState,

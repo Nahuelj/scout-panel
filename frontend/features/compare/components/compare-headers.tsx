@@ -1,18 +1,18 @@
 'use client';
 
 import type { MouseEvent, RefObject } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Bookmark, X } from 'lucide-react';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import { getSlotColor } from '@/lib/compare-colors';
-import { useSession } from '@/lib/auth-client';
+import { useSession } from '@/features/auth/lib/auth-client';
 import {
-  addToShortlist,
-  fetchShortlistPlayerIds,
-  removeFromShortlist,
-} from '@/lib/shortlist-api';
+  useShortlistIds,
+  useAddToShortlist,
+  useRemoveFromShortlist,
+} from '@/features/shortlist';
 
 function calcAge(birthDate: string): number {
   return Math.floor(
@@ -104,6 +104,7 @@ function HeaderCard({
               fill
               className="object-cover"
               priority={index === 0}
+              loading={index === 0 ? 'eager' : 'lazy'}
               unoptimized
             />
           ) : (
@@ -196,62 +197,36 @@ export default function CompareHeaders({
   initialShortlistedIds,
 }: Props) {
   const { data: session } = useSession();
-  const [mounted, setMounted] = useState(false);
-  const [shortlistIds, setShortlistIds] = useState(
-    () => new Set(initialShortlistedIds),
+  const canShortlist = Boolean(session?.user);
+
+  const { data: shortlistIdsData } = useShortlistIds({
+    enabled: canShortlist,
+    initialData: initialShortlistedIds,
+  });
+  const shortlistIds = useMemo(
+    () => new Set(shortlistIdsData ?? initialShortlistedIds),
+    [shortlistIdsData, initialShortlistedIds],
   );
-  const [busyId, setBusyId] = useState<string | null>(null);
 
-  const canShortlist = mounted && Boolean(session?.user);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!canShortlist) return;
-    let cancelled = false;
-    fetchShortlistPlayerIds()
-      .then((ids) => {
-        if (!cancelled) setShortlistIds(new Set(ids));
-      })
-      .catch(() => {
-        if (!cancelled) setShortlistIds(new Set());
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [canShortlist]);
+  const addMutation = useAddToShortlist();
+  const removeMutation = useRemoveFromShortlist();
+  const busyId = addMutation.isPending
+    ? (addMutation.variables ?? null)
+    : removeMutation.isPending
+      ? (removeMutation.variables ?? null)
+      : null;
 
   const handleShortlistClick = useCallback(
     (player: PlayerDetail, e: MouseEvent) => {
       e.preventDefault();
       if (!canShortlist || busyId) return;
-      const on = shortlistIds.has(player.id);
-      setBusyId(player.id);
-      void (async () => {
-        try {
-          if (on) {
-            await removeFromShortlist(player.id);
-            setShortlistIds((prev) => {
-              const next = new Set(prev);
-              next.delete(player.id);
-              return next;
-            });
-          } else {
-            await addToShortlist(player.id);
-            setShortlistIds((prev) => new Set(prev).add(player.id));
-          }
-        } catch {
-          const ids = await fetchShortlistPlayerIds().catch(() => [] as string[]);
-          setShortlistIds(new Set(ids));
-        } finally {
-          setBusyId(null);
-        }
-      })();
+      if (shortlistIds.has(player.id)) {
+        removeMutation.mutate(player.id);
+      } else {
+        addMutation.mutate(player.id);
+      }
     },
-    [busyId, canShortlist, shortlistIds],
+    [busyId, canShortlist, shortlistIds, addMutation, removeMutation],
   );
 
   const count = players.length;

@@ -2,13 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
-import { signIn } from '@/lib/auth-client';
+import { useSignInMutation } from '@/features/auth/hooks/use-auth-mutations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -34,28 +33,24 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const signInMutation = useSignInMutation();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = async (data: FormData) => {
+  const isSubmitting = signInMutation.isPending;
+
+  const onSubmit = (data: FormData) => {
     setError(null);
-    const { error: signInError } = await signIn.email({
-      email: data.email,
-      password: data.password,
+    signInMutation.mutate(data, {
+      onError: (mutationError) => {
+        setError(mutationError.message);
+      },
     });
-
-    if (signInError) {
-      setError(signInError.message ?? 'Invalid credentials');
-      return;
-    }
-
-    router.push('/players');
   };
 
   return (

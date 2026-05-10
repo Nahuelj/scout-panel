@@ -2,11 +2,10 @@
 
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from '@/lib/auth-client';
-import PlayerCard from '@/app/components/player-card';
-import { useSelectionStore } from '@/lib/selection-store';
-import type { PlayerCardData } from '@/lib/players-api';
-import { removeFromShortlist } from '@/lib/shortlist-api';
+import { useSession } from '@/features/auth/lib/auth-client';
+import { PlayerCard, type PlayerCardData } from '@/features/players';
+import { useSelectionStore } from '@/stores/selection-store';
+import { useRemoveFromShortlist } from '@/features/shortlist/hooks/use-shortlist-mutations';
 
 type Props = { players: PlayerCardData[]; initialCanShortlist: boolean };
 
@@ -19,18 +18,17 @@ export default function ShortlistGridClient({ players, initialCanShortlist }: Pr
     return Boolean(session?.user);
   }, [initialCanShortlist, isPending, session?.user]);
 
+  const removeMutation = useRemoveFromShortlist();
+
   const handleShortlistToggle = useCallback(
-    async (player: PlayerCardData, e: React.MouseEvent) => {
+    (player: PlayerCardData, e: React.MouseEvent) => {
       e.stopPropagation();
       if (!canShortlist) return;
-      try {
-        await removeFromShortlist(player.id);
-        router.refresh();
-      } catch {
-        router.refresh();
-      }
+      removeMutation.mutate(player.id, {
+        onSettled: () => router.refresh(),
+      });
     },
-    [canShortlist, router],
+    [canShortlist, router, removeMutation],
   );
 
   if (players.length === 0) {
@@ -56,7 +54,7 @@ export default function ShortlistGridClient({ players, initialCanShortlist }: Pr
           priorityPhoto={index === 0}
           isShortlisted
           onShortlistToggle={
-            canShortlist ? (e) => void handleShortlistToggle(player, e) : undefined
+            canShortlist ? (e) => handleShortlistToggle(player, e) : undefined
           }
         />
       ))}

@@ -7,7 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import type { PlayerActivity } from "@/lib/player-detail-api";
+import type { PlayerActivity } from "@/features/players/types/player.types";
 
 type Props = {
   activity: PlayerActivity[];

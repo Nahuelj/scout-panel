@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Bookmark } from 'lucide-react';
 import type { MouseEvent } from 'react';
-import type { PlayerCardData } from '@/lib/players-api';
+import type { PlayerCardData } from '@/features/players/types/player.types';
 
 const POSITION_LABEL: Record<string, string> = {
   GK: 'GK',
@@ -145,6 +145,7 @@ export default function PlayerCard({
             fill
             className="object-cover"
             priority={priorityPhoto}
+            loading={priorityPhoto ? 'eager' : 'lazy'}
             unoptimized
           />
         ) : (

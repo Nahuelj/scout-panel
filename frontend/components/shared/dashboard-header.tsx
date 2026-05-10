@@ -6,9 +6,10 @@ import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Bookmark, ChevronDown, Crosshair, LogOut, Search } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
-import { signOut, useSession } from '@/lib/auth-client';
+import { useSession } from '@/features/auth/lib/auth-client';
+import { useSignOutMutation } from '@/features/auth/hooks/use-auth-mutations';
 import { cn } from '@/lib/utils';
-import PlayerDetailHeaderSearch from '@/app/components/player-detail-header-search';
+import { PlayerDetailHeaderSearch } from '@/features/players';
 
 const WORKFLOW_STEPS = [
   { n: '1', label: 'Find' },
@@ -68,6 +69,7 @@ export default function DashboardHeader() {
   const { data: session, isPending } = useSession();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const signOutMutation = useSignOutMutation();
 
   useEffect(() => {
     setMounted(true);
@@ -100,9 +102,8 @@ export default function DashboardHeader() {
     return [];
   }, [onCompare, onPlayerDetail, pathname, compareIdsParam]);
 
-  const handleSignOut = async () => {
-    await signOut();
-    router.push('/login');
+  const handleSignOut = () => {
+    signOutMutation.mutate();
   };
 
   const brandLink = (
@@ -124,7 +125,7 @@ export default function DashboardHeader() {
       {!mounted || isPending ? (
         sessionUserSkeleton
       ) : user ? (
-        <DropdownMenu.Root>
+        <DropdownMenu.Root modal={false}>
           <DropdownMenu.Trigger asChild>
             <button
               type="button"
@@ -184,7 +185,7 @@ export default function DashboardHeader() {
               <DropdownMenu.Separator className="my-1 h-px bg-white/[0.08]" />
               <DropdownMenu.Item
                 className={`${accountMenuItemClass} text-red-300 data-highlighted:bg-red-500/10 data-highlighted:text-red-200`}
-                onSelect={() => void handleSignOut()}
+                onSelect={() => handleSignOut()}
               >
                 <LogOut className="size-[15px] shrink-0" strokeWidth={1.75} aria-hidden />
                 Logout

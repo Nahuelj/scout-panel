@@ -3,8 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   serializePlayersListToPathQuery,
   type PlayersListRouteState,
-} from '@/lib/player-list-params';
-import type { PaginationMeta } from '@/lib/players-api';
+} from '@/features/players/utils/player-list-params';
+import type { PaginationMeta } from '@/features/players/types/player.types';
 
 type Props = {
   routeState: PlayersListRouteState;

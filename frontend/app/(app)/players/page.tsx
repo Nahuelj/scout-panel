@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
-import { PlayersGridFromSearchParams } from './players-grid';
-import PlayersGridSkeleton from './players-grid-skeleton';
+import { PlayersGridSkeleton } from '@/features/players';
+import { PlayersGridFromSearchParams } from '@/features/players/server';
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

@@ -2,11 +2,11 @@
 
 import { useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 import {
   POSITION_FULL,
   formatCardIntervalGames,
-} from '@/lib/player-stats-metadata';
+} from '@/features/players/utils/player-stats-metadata';
 import { getSlotColor } from '@/lib/compare-colors';
 
 const TOOLTIP_SKILLFUL_PASS =

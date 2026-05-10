@@ -2,13 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
-import { signUp } from '@/lib/auth-client';
+import { useSignUpMutation } from '@/features/auth/hooks/use-auth-mutations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -41,29 +40,27 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const signUpMutation = useSignUpMutation();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
-  const onSubmit = async (data: FormData) => {
+  const isSubmitting = signUpMutation.isPending;
+
+  const onSubmit = (data: FormData) => {
     setError(null);
-    const { error: signUpError } = await signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
-
-    if (signUpError) {
-      setError(signUpError.message ?? 'Something went wrong');
-      return;
-    }
-
-    router.push('/players');
+    signUpMutation.mutate(
+      { name: data.name, email: data.email, password: data.password },
+      {
+        onError: (mutationError) => {
+          setError(mutationError.message);
+        },
+      },
+    );
   };
 
   return (

@@ -1,4 +1,4 @@
-import type { PlayerDetailStats } from './player-detail-api';
+import type { PlayerDetailStats } from '@/features/players/types/player.types';
 
 export type StatFormatKind = 'number' | 'percentage' | 'decimal';
 

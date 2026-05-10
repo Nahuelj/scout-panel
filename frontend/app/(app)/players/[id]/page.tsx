@@ -1,12 +1,14 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { getPlayerDetail } from '@/lib/player-detail-api';
-import { fetchShortlistPlayerIdsServer } from '@/lib/shortlist-api';
-import PlayerDetailClient from './player-detail-client';
-import PlayerClubCard from './player-club-card';
-import PlayerAttributesBar from './player-attributes-bar';
-import PlayerAnalysis from './player-analysis';
-import PlayerActivityChart from './player-activity-chart';
+import {
+  getPlayerDetail,
+  PlayerDetailClient,
+  PlayerClubCard,
+  PlayerAttributesBar,
+  PlayerAnalysis,
+  PlayerActivityChart,
+} from '@/features/players';
+import { fetchShortlistPlayerIdsServer } from '@/features/shortlist/server';
 
 type Props = { params: Promise<{ id: string }> };
 

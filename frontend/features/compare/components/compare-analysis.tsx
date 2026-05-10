@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { PlayerDetail, PlayerDetailStats } from '@/lib/player-detail-api';
+import type { PlayerDetail, PlayerDetailStats } from '@/features/players/types/player.types';
 import {
   STAT_CATEGORIES,
   METRIC_META,
@@ -18,7 +18,7 @@ import {
   clientToSvgPoint,
   pickCategoryByNearestAxis,
   type StatFormatKind,
-} from '@/lib/player-stats-metadata';
+} from '@/features/players/utils/player-stats-metadata';
 import { getSlotColor } from '@/lib/compare-colors';
 import { cn } from '@/lib/utils';
 
@@ -181,10 +181,15 @@ export default function CompareAnalysis({ players }: Props) {
 
         <div
           ref={radarChartWrapRef}
-          className="w-full h-[260px] sm:h-[300px] shrink-0"
+          className="relative h-[260px] min-w-0 w-full shrink-0 sm:h-[300px]"
           onMouseMove={handleRadarMouseMove}
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            initialDimension={{ width: 348, height: 300 }}
+          >
             <RadarChart
               data={radarData}
               outerRadius="90%"

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { format } from 'date-fns';
-import type { PlayerDetail } from '@/lib/player-detail-api';
+import type { PlayerDetail } from '@/features/players/types/player.types';
 
 type Props = { player: PlayerDetail };
 
