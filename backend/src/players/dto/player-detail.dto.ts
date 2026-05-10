@@ -131,7 +131,11 @@ export class PlayerDetailDto {
   @ApiProperty({ nullable: true }) height!: number | null;
   @ApiProperty({ nullable: true }) weight!: number | null;
 
-  @ApiProperty({ enum: PreferredFoot, enumName: 'PreferredFoot', nullable: true })
+  @ApiProperty({
+    enum: PreferredFoot,
+    enumName: 'PreferredFoot',
+    nullable: true,
+  })
   preferredFoot!: PreferredFoot | null;
 
   @ApiProperty({ type: () => PlayerDetailCurrentSeasonDto, nullable: true })

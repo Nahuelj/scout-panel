@@ -36,7 +36,10 @@ export class PlayersController {
   @Get(':id')
   @ApiOperation({ summary: 'Get player detail by id' })
   @ApiOkResponse({ type: PlayerDetailDto })
-  @ApiNotFoundResponse({ type: ErrorResponseDto, description: 'Player not found' })
+  @ApiNotFoundResponse({
+    type: ErrorResponseDto,
+    description: 'Player not found',
+  })
   findOne(@Param('id') id: string, @Query() query: PlayerDetailQueryDto) {
     return this.playersService.findOne(id, query);
   }

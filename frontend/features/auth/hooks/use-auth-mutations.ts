@@ -17,6 +17,7 @@ export function useSignInMutation(options?: { redirectTo?: string }) {
 
   return useMutation({
     mutationKey: ['auth', 'signIn'],
+    meta: { silent: true },
     mutationFn: async (input: SignInInput) => {
       const { data, error } = await signIn.email({
         email: input.email,
@@ -47,6 +48,7 @@ export function useSignUpMutation(options?: { redirectTo?: string }) {
 
   return useMutation({
     mutationKey: ['auth', 'signUp'],
+    meta: { silent: true },
     mutationFn: async (input: SignUpInput) => {
       const { data, error } = await signUp.email({
         name: input.name,

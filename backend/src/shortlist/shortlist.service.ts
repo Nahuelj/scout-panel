@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { PaginatedResult } from '../common/pagination/pagination.helper';
 import { PlayerListQueryDto } from '../players/dto/player-list-query.dto';
@@ -42,21 +43,36 @@ export class ShortlistService {
     });
     if (!player) throw new NotFoundException(`Player ${playerId} not found`);
 
-    const existing = await this.prisma.shortlistEntry.findUnique({
-      where: { userId_playerId: { userId, playerId } },
-    });
-    if (existing) return;
+    try {
+      await this.prisma.$transaction(
+        async (tx) => {
+          const existing = await tx.shortlistEntry.findUnique({
+            where: { userId_playerId: { userId, playerId } },
+          });
+          if (existing) return;
 
-    const count = await this.prisma.shortlistEntry.count({ where: { userId } });
-    if (count >= MAX_SHORTLIST_ENTRIES) {
-      throw new BadRequestException(
-        `Shortlist cannot exceed ${MAX_SHORTLIST_ENTRIES} players`,
+          const count = await tx.shortlistEntry.count({ where: { userId } });
+          if (count >= MAX_SHORTLIST_ENTRIES) {
+            throw new BadRequestException(
+              `Shortlist cannot exceed ${MAX_SHORTLIST_ENTRIES} players`,
+            );
+          }
+
+          await tx.shortlistEntry.create({
+            data: { userId, playerId },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return;
+      }
+      throw error;
     }
-
-    await this.prisma.shortlistEntry.create({
-      data: { userId, playerId },
-    });
   }
 
   async remove(userId: string, playerId: string): Promise<void> {

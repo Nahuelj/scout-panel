@@ -1,9 +1,5 @@
 import { applyDecorators, Type } from '@nestjs/common';
-import {
-  ApiExtraModels,
-  ApiOkResponse,
-  getSchemaPath,
-} from '@nestjs/swagger';
+import { ApiExtraModels, ApiOkResponse, getSchemaPath } from '@nestjs/swagger';
 import { PaginationMetaDto } from '../dto/pagination.dto';
 
 export function ApiPaginatedResponse<TModel extends Type<unknown>>(

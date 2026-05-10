@@ -30,7 +30,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message: string | string[] = isHttp ? exception.message : 'Internal server error';
+    let message: string | string[] = isHttp
+      ? exception.message
+      : 'Internal server error';
     let error = isHttp ? exception.name : 'InternalServerError';
 
     if (isHttp) {
@@ -59,6 +61,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
     };
 
+    if (response.headersSent) return;
     response.status(status).json(body);
   }
 }

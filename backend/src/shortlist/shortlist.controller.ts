@@ -42,7 +42,9 @@ export class ShortlistController {
   constructor(private readonly shortlistService: ShortlistService) {}
 
   @Get('player-ids')
-  @ApiOperation({ summary: 'List all shortlisted player ids for the current user' })
+  @ApiOperation({
+    summary: 'List all shortlisted player ids for the current user',
+  })
   @ApiOkResponse({ type: ShortlistPlayerIdsDto })
   playerIds(@CurrentUser() user: AuthedSessionUser) {
     return this.shortlistService
@@ -64,7 +66,10 @@ export class ShortlistController {
   @HttpCode(204)
   @ApiOperation({ summary: 'Add a player to the current user shortlist' })
   @ApiNoContentResponse({ description: 'Player added (or already present).' })
-  @ApiNotFoundResponse({ type: ErrorResponseDto, description: 'Player not found' })
+  @ApiNotFoundResponse({
+    type: ErrorResponseDto,
+    description: 'Player not found',
+  })
   @ApiBadRequestResponse({
     type: ErrorResponseDto,
     description: 'Shortlist size limit reached.',

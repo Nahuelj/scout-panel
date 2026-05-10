@@ -4,6 +4,7 @@ import { json, type NextFunction, type Request, type Response } from 'express';
 import { AppModule } from './app.module';
 import { getFrontendOrigins } from './frontend-origins';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { setupSwagger } from './config/swagger';
 
 async function bootstrap() {
@@ -24,7 +25,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter(), new PrismaExceptionFilter());
   app.enableShutdownHooks();
 
   setupSwagger(app);
