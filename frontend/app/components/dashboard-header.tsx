@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Bookmark, ChevronDown, Crosshair, LogOut, Search } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
 import { signOut, useSession } from '@/lib/auth-client';
+import { cn } from '@/lib/utils';
 import PlayerDetailHeaderSearch from '@/app/components/player-detail-header-search';
 
 const WORKFLOW_STEPS = [
@@ -52,7 +53,16 @@ const accountMenuContentClass =
   'z-50 min-w-[12rem] overflow-hidden rounded-xl border border-white/[0.1] bg-[#0c141c] p-1 shadow-xl shadow-black/50';
 
 const accountMenuItemClass =
-  'flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-200 outline-none data-highlighted:bg-white/[0.06]';
+  'flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none';
+
+function accountNavItemClass(active: boolean) {
+  return cn(
+    accountMenuItemClass,
+    active
+      ? 'bg-emerald-500/15 font-medium text-emerald-200 data-highlighted:bg-emerald-500/22 data-highlighted:text-emerald-100'
+      : 'text-neutral-200 data-highlighted:bg-white/[0.06]',
+  );
+}
 
 export default function DashboardHeader() {
   const { data: session, isPending } = useSession();
@@ -67,8 +77,7 @@ export default function DashboardHeader() {
   const user = session?.user;
   const displayName = user?.name?.trim() || user?.email?.trim() || '';
   const isShortlistSection = pathname?.startsWith('/players/shortlist') ?? false;
-  const primaryNavHref = (isShortlistSection ? '/players' : '/players/shortlist') as Route;
-  const primaryNavLabel = isShortlistSection ? 'Find players' : 'Go to Shortlists';
+  const isFindSectionActive = !isShortlistSection;
   const onPlayerDetail = isPlayerDetailPath(pathname ?? null);
   const onCompare = isComparePath(pathname ?? null);
   const showPlayerDetailSearch = onPlayerDetail || onCompare;
@@ -143,23 +152,34 @@ export default function DashboardHeader() {
               className={accountMenuContentClass}
             >
               <DropdownMenu.Item
-                className={accountMenuItemClass}
-                onSelect={() => router.push(primaryNavHref)}
+                className={accountNavItemClass(isFindSectionActive)}
+                aria-current={isFindSectionActive ? 'page' : undefined}
+                onSelect={() => router.push('/players' as Route)}
               >
-                {isShortlistSection ? (
-                  <Search
-                    className="size-[15px] shrink-0 text-neutral-500"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                ) : (
-                  <Bookmark
-                    className="size-[15px] shrink-0 text-neutral-500"
-                    strokeWidth={1.75}
-                    aria-hidden
-                  />
-                )}
-                {primaryNavLabel}
+                <Search
+                  className={cn(
+                    'size-[15px] shrink-0',
+                    isFindSectionActive ? 'text-emerald-400/90' : 'text-neutral-500',
+                  )}
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                Find players
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className={accountNavItemClass(isShortlistSection)}
+                aria-current={isShortlistSection ? 'page' : undefined}
+                onSelect={() => router.push('/players/shortlist' as Route)}
+              >
+                <Bookmark
+                  className={cn(
+                    'size-[15px] shrink-0',
+                    isShortlistSection ? 'text-emerald-400/90' : 'text-neutral-500',
+                  )}
+                  strokeWidth={1.75}
+                  aria-hidden
+                />
+                Shortlists
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="my-1 h-px bg-white/[0.08]" />
               <DropdownMenu.Item

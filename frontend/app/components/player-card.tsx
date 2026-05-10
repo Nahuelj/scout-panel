@@ -54,6 +54,7 @@ type Props = {
   visualVariant?: PlayerCardVisualVariant;
   isShortlisted?: boolean;
   onShortlistToggle?: (e: MouseEvent) => void;
+  priorityPhoto?: boolean;
 };
 
 export default function PlayerCard({
@@ -64,6 +65,7 @@ export default function PlayerCard({
   visualVariant = 'default',
   isShortlisted = false,
   onShortlistToggle,
+  priorityPhoto = false,
 }: Props) {
   const router = useRouter();
   const posGroup = POSITION_LABEL[player.position] ?? player.position;
@@ -142,6 +144,7 @@ export default function PlayerCard({
             alt={player.name}
             fill
             className="object-cover"
+            priority={priorityPhoto}
             unoptimized
           />
         ) : (

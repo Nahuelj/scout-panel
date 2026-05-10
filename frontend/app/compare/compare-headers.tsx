@@ -103,6 +103,7 @@ function HeaderCard({
               alt={player.name}
               fill
               className="object-cover"
+              priority={index === 0}
               unoptimized
             />
           ) : (

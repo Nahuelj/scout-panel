@@ -68,6 +68,7 @@ export default function PlayerHero({
                   alt={player.name}
                   fill
                   className="object-cover"
+                  priority
                   unoptimized
                 />
               ) : (
