@@ -103,6 +103,7 @@ export default function DashboardHeader() {
         href={'/players/shortlist' as Route}
         prefetch={false}
         data-active={isShortlistSection}
+        aria-label="Shortlist"
         className="group inline-flex shrink-0 items-center gap-1.5 py-1 text-sm font-medium text-neutral-400 underline-offset-[6px] transition-colors duration-200 hover:text-sky-300 hover:underline focus-visible:rounded-sm focus-visible:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 data-[active=true]:font-semibold data-[active=true]:text-sky-300 data-[active=true]:underline"
       >
         <Bookmark
@@ -110,7 +111,7 @@ export default function DashboardHeader() {
           strokeWidth={1.75}
           aria-hidden
         />
-        <span>Shortlist</span>
+        <span className="hidden sm:inline">Shortlist</span>
       </Link>
 
       <div className="mx-0.5 h-5 w-px shrink-0 bg-white/[0.08]" aria-hidden />
@@ -145,17 +146,19 @@ export default function DashboardHeader() {
     <header
       className={
         showPlayerDetailSearch
-          ? 'flex flex-col gap-4'
+          ? 'min-w-0 w-full'
           : 'flex flex-row items-center justify-between gap-4 lg:gap-6'
       }
     >
       {showPlayerDetailSearch ? (
-        <div className="grid w-full grid-cols-1 items-center gap-4 lg:grid-cols-[auto_1fr_auto] lg:gap-6">
-          <div className="justify-self-start">{brandLink}</div>
-          <div className="flex w-full justify-center lg:min-w-0 lg:px-4">
+        <div className="grid w-full min-w-0 grid-cols-[1fr_auto] gap-x-2 gap-y-3 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:gap-x-3 md:gap-y-0 lg:gap-x-4">
+          <div className="min-w-0 shrink-0 justify-self-start">{brandLink}</div>
+          <div className="col-start-2 row-start-1 justify-self-end md:col-start-3 md:justify-self-end">
+            {actionsToolbar}
+          </div>
+          <div className="col-span-2 col-start-1 row-start-2 min-w-0 w-full md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:justify-center md:px-2 lg:px-4">
             <PlayerDetailHeaderSearch currentIds={searchCurrentIds} />
           </div>
-          <div className="flex justify-end lg:justify-self-end">{actionsToolbar}</div>
         </div>
       ) : (
         <>

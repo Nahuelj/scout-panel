@@ -13,7 +13,6 @@ import type { PlayerDetail, PlayerDetailStats } from '@/lib/player-detail-api';
 import {
   STAT_CATEGORIES,
   METRIC_META,
-  categoryLabel,
   computeRadarScores,
   formatValue,
   clientToSvgPoint,
@@ -22,6 +21,9 @@ import {
 } from '@/lib/player-stats-metadata';
 import { getSlotColor } from '@/lib/compare-colors';
 import { cn } from '@/lib/utils';
+
+const STATS_TABLE_HEAD_CLASS =
+  'text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-300 md:text-[11px] lg:text-xs';
 
 type RadarPointEntry = {
   x?: number;
@@ -268,7 +270,7 @@ export default function CompareAnalysis({ players }: Props) {
       </div>
 
       <div
-        className="flex max-h-[min(36rem,75vh)] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0f1923] p-0 lg:max-h-none"
+        className="flex min-w-0 flex-col overflow-visible rounded-2xl border border-white/5 bg-[#0f1923] p-0 lg:max-h-none lg:min-h-0 lg:overflow-hidden"
         style={
           tablePanelHeightPx !== undefined
             ? { height: tablePanelHeightPx }
@@ -278,16 +280,18 @@ export default function CompareAnalysis({ players }: Props) {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex h-full min-h-0 w-full flex-col gap-0"
+          className="flex min-h-0 w-full flex-col gap-0 lg:h-full lg:min-h-0"
         >
           <TabsList className="isolate flex min-h-11 w-full shrink-0 items-stretch justify-stretch gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
-            {Object.entries(STAT_CATEGORIES).map(([cat, { title }]) => (
+            {Object.entries(STAT_CATEGORIES).map(([cat]) => (
               <TabsTrigger
                 key={cat}
                 value={cat}
-                className="relative flex h-full min-h-11 min-w-0 flex-1 items-center justify-center rounded-none bg-[#0b121c] px-2 py-2 text-center text-[11px] font-semibold leading-snug text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm"
+                className="relative flex h-full min-h-11 min-w-0 flex-1 items-center justify-center rounded-none bg-[#0b121c] px-2 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-wide text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm"
+                title={`${cat} statistics`}
+                aria-label={`${cat} statistics`}
               >
-                {categoryLabel(title)}
+                {cat}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -298,10 +302,10 @@ export default function CompareAnalysis({ players }: Props) {
               <TabsContent
                 key={cat}
                 value={cat}
-                className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden px-0 pt-0 pb-0 outline-none"
+                className="mt-0 flex flex-col px-0 pt-0 pb-0 outline-none lg:min-h-0 lg:flex-1 lg:overflow-hidden"
               >
-                <div className="flex min-h-0 flex-1 flex-col pl-6 pr-2 pt-5">
-                  <div className="scrollbar-panel min-h-0 flex-1 overflow-x-auto overflow-y-auto pb-6 pr-4">
+                <div className="flex flex-col pl-6 pr-2 pt-5 lg:min-h-0 lg:flex-1">
+                  <div className="overflow-x-auto pb-6 pr-4 lg:scrollbar-panel lg:min-h-0 lg:flex-1 lg:overflow-x-auto lg:overflow-y-auto">
                     <div className="min-w-[36rem]">
                       <div
                         className={cn(
@@ -309,10 +313,10 @@ export default function CompareAnalysis({ players }: Props) {
                           valueColTemplate,
                         )}
                       >
-                        <span className="text-[9px] uppercase tracking-widest text-neutral-600">
+                        <span className={STATS_TABLE_HEAD_CLASS}>
                           Metric
                         </span>
-                        <span className="text-[9px] uppercase tracking-widest text-neutral-600">
+                        <span className={STATS_TABLE_HEAD_CLASS}>
                           Description
                         </span>
                         {players.map((p, i) => {
@@ -320,7 +324,7 @@ export default function CompareAnalysis({ players }: Props) {
                           return (
                             <span
                               key={`${p.id}-${i}`}
-                              className="text-[9px] uppercase tracking-widest text-center flex items-center justify-center gap-1.5 min-w-0"
+                              className={`flex min-w-0 items-center justify-center gap-1.5 text-center ${STATS_TABLE_HEAD_CLASS}`}
                               style={{ color: slot.base }}
                             >
                               <span
@@ -328,7 +332,7 @@ export default function CompareAnalysis({ players }: Props) {
                                 style={{ backgroundColor: slot.base }}
                                 aria-hidden
                               />
-                              <span className="truncate">{p.name}</span>
+                              <span className="min-w-0 font-medium truncate">{p.name}</span>
                             </span>
                           );
                         })}
@@ -349,10 +353,10 @@ export default function CompareAnalysis({ players }: Props) {
                                 valueColTemplate,
                               )}
                             >
-                              <span className="text-sm font-medium text-white truncate">
+                              <span className="min-w-0 truncate text-sm font-medium text-white">
                                 {row.label}
                               </span>
-                              <span className="text-sm text-neutral-500 truncate">
+                              <span className="text-sm leading-snug text-neutral-400 md:text-neutral-300 truncate">
                                 {row.description}
                               </span>
                               {row.values.map(({ playerId, value }, i) => {

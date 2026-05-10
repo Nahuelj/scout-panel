@@ -35,6 +35,25 @@ function StatItem({ label, children }: StatItemProps) {
   );
 }
 
+type StatCellProps = {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+};
+
+function StatCell({ label, children, className = '' }: StatCellProps) {
+  return (
+    <div
+      className={`flex min-h-[5.25rem] flex-col items-center justify-center px-3 py-4 sm:px-4 ${className}`}
+    >
+      <div className="text-center text-sm font-semibold leading-snug text-white sm:text-base">{children}</div>
+      <p className="mt-1.5 px-1 text-center text-[10px] font-semibold uppercase tracking-widest text-neutral-400 sm:text-[11px]">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 function Divider() {
   return <div className="my-3.5 w-px shrink-0 self-stretch bg-white/12" />;
 }
@@ -144,11 +163,79 @@ export default function PlayerAttributesBar({ player }: Props) {
   const positionFull = POSITION_FULL[player.position] ?? player.position;
 
   return (
-    <div className="rounded-2xl bg-[#0f1923] border border-white/5 w-full">
-      <div className="flex w-full items-stretch min-h-[6rem]">
+    <div className="w-full rounded-2xl border border-white/5 bg-[#0f1923]">
+      <div className="grid min-h-0 grid-cols-2 lg:hidden">
+        <StatCell
+          label="Position"
+          className="min-w-0 border-b border-r border-white/10"
+        >
+          <span className="flex items-center justify-center gap-2">
+            <span className="size-2.5 shrink-0 rounded-full bg-emerald-400" />
+            <span className="break-words">{positionFull}</span>
+          </span>
+        </StatCell>
+        <StatCell label="Preferred foot" className="min-w-0 border-b border-white/10">
+          <span className="capitalize">
+            {player.preferredFoot?.toLowerCase() ?? '—'}
+          </span>
+        </StatCell>
+        <StatCell label="Height" className="min-w-0 border-b border-r border-white/10">
+          {player.height !== null ? `${player.height} mts` : '—'}
+        </StatCell>
+        <StatCell label="Weight" className="min-w-0 border-b border-white/10">
+          {player.weight !== null ? `${player.weight} kg` : '—'}
+        </StatCell>
+        {(stats?.skillfulFootPassScore != null ||
+          stats?.skillfulFootShotScore != null) && (
+          <StatCell
+            label="Skillful Foot"
+            className="col-span-2 min-w-0 border-b border-white/10"
+          >
+            <span className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
+              {stats?.skillfulFootPassScore != null && (
+                <SkillfulFootRating
+                  label="Pass"
+                  score={stats.skillfulFootPassScore}
+                  tooltip={TOOLTIP_SKILLFUL_PASS}
+                />
+              )}
+              {stats?.skillfulFootShotScore != null && (
+                <SkillfulFootRating
+                  label="Shot"
+                  score={stats.skillfulFootShotScore}
+                  tooltip={TOOLTIP_SKILLFUL_SHOT}
+                />
+              )}
+            </span>
+          </StatCell>
+        )}
+        {(stats?.weakFootPassAccuracyPct != null ||
+          stats?.weakFootShotAccuracyPct != null) && (
+          <StatCell label="Weak Foot" className="col-span-2 min-w-0">
+            <span className="flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm">
+              {stats?.weakFootPassAccuracyPct != null && (
+                <WeakFootRating
+                  label="Pass"
+                  accuracyPct={stats.weakFootPassAccuracyPct}
+                  tooltip={TOOLTIP_WEAK_PASS}
+                />
+              )}
+              {stats?.weakFootShotAccuracyPct != null && (
+                <WeakFootRating
+                  label="Shot"
+                  accuracyPct={stats.weakFootShotAccuracyPct}
+                  tooltip={TOOLTIP_WEAK_SHOT}
+                />
+              )}
+            </span>
+          </StatCell>
+        )}
+      </div>
+
+      <div className="hidden min-h-[6rem] w-full items-stretch lg:flex">
         <StatItem label="Position">
           <span className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
             {positionFull}
           </span>
         </StatItem>

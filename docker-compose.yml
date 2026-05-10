@@ -1,7 +1,9 @@
+name: scout-panel-db
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: scout-panel-postgres
+    container_name: scout-panel-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -13,8 +15,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 5s
-      timeout: 5s
+      interval: '5s'
+      timeout: '5s'
       retries: 5
 
 volumes:

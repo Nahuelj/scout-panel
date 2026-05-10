@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState, Fragment } from 'react';
 import {
   Radar,
   RadarChart,
@@ -13,7 +13,6 @@ import type { PlayerDetailStats } from '@/lib/player-detail-api';
 import {
   STAT_CATEGORIES,
   METRIC_META,
-  categoryLabel,
   computeRadarScores,
   formatValue,
   formatCardIntervalGames,
@@ -22,6 +21,9 @@ import {
   type StatFormatKind,
 } from '@/lib/player-stats-metadata';
 import { cn } from '@/lib/utils';
+
+const STATS_TABLE_HEAD_CLASS =
+  'text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-300 md:text-[11px] lg:text-xs';
 
 type StatRow = {
   label: string;
@@ -95,17 +97,17 @@ export default function PlayerAnalysis({ stats }: Props) {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 lg:items-start">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[380px_1fr] lg:items-start">
       <div
         ref={radarPanelRef}
-        className="flex flex-col rounded-2xl border border-white/5 bg-[#0f1923] p-6"
+        className="flex flex-col rounded-2xl border border-white/5 bg-[#0f1923] p-4 sm:p-6"
       >
-        <h3 className="text-white font-bold text-base tracking-tight mb-4 shrink-0">
+        <h3 className="mb-4 shrink-0 text-base font-bold tracking-tight text-white">
           Radar chart
         </h3>
         <div
           ref={radarChartWrapRef}
-          className="w-full h-[300px] shrink-0"
+          className="h-[220px] w-full shrink-0 sm:h-[260px] lg:h-[300px]"
           onMouseMove={handleRadarMouseMove}
         >
           <ResponsiveContainer width="100%" height="100%">
@@ -182,7 +184,7 @@ export default function PlayerAnalysis({ stats }: Props) {
             </RadarChart>
           </ResponsiveContainer>
         </div>
-          <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/5 shrink-0">
+        <div className="mt-4 grid shrink-0 grid-cols-2 gap-3 border-t border-white/5 pt-4">
           <div className="rounded-xl bg-white/[0.03] border border-white/5 px-3 py-2.5">
             <p className="text-neutral-400 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1.5">
               <span
@@ -221,7 +223,7 @@ export default function PlayerAnalysis({ stats }: Props) {
       </div>
 
       <div
-        className="flex max-h-[min(32rem,70vh)] min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0f1923] p-0 lg:max-h-none"
+        className="flex min-w-0 flex-col overflow-visible rounded-2xl border border-white/5 bg-[#0f1923] p-0 lg:max-h-none lg:min-h-0 lg:overflow-hidden"
         style={
           tablePanelHeightPx !== undefined
             ? { height: tablePanelHeightPx }
@@ -231,19 +233,23 @@ export default function PlayerAnalysis({ stats }: Props) {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex h-full min-h-0 w-full flex-col gap-0"
+          className="flex min-h-0 w-full min-w-0 flex-col gap-0 lg:h-full lg:min-h-0"
         >
-          <TabsList className="isolate flex min-h-11 w-full shrink-0 items-stretch justify-stretch gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
-            {Object.entries(STAT_CATEGORIES).map(([cat, { title }]) => (
-              <TabsTrigger
-                key={cat}
-                value={cat}
-                className="relative flex h-full min-h-11 min-w-0 flex-1 items-center justify-center rounded-none bg-[#0b121c] px-2 py-2 text-center text-[11px] font-semibold leading-snug text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:ring-0 focus-visible:outline-none focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm"
-              >
-                {categoryLabel(title)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="min-w-0 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="isolate inline-flex h-auto min-h-11 w-max min-w-full shrink-0 flex-nowrap items-stretch justify-start gap-0 divide-x divide-white/10 rounded-none border-0 border-b border-white/10 bg-[#0f1923] p-0 shadow-none">
+              {Object.entries(STAT_CATEGORIES).map(([cat]) => (
+                <TabsTrigger
+                  key={cat}
+                  value={cat}
+                  className="relative flex h-full min-h-11 shrink-0 items-center justify-center rounded-none bg-[#0b121c] px-2.5 py-2 text-center text-[11px] font-semibold uppercase leading-snug tracking-wide text-neutral-500 outline-none ring-0 transition-colors hover:bg-[#141e2a] hover:text-neutral-300 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=active]:z-[1] data-[state=active]:bg-[#0f1923] data-[state=active]:text-emerald-400 sm:px-3 sm:text-sm md:min-w-0 md:flex-1 md:justify-center"
+                  title={`${cat} statistics`}
+                  aria-label={`${cat} statistics`}
+                >
+                  {cat}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           {Object.entries(STAT_CATEGORIES).map(([cat, { metrics }]) => {
             const rows = metrics
@@ -265,16 +271,20 @@ export default function PlayerAnalysis({ stats }: Props) {
               <TabsContent
                 key={cat}
                 value={cat}
-                className="mt-0 flex min-h-0 flex-1 flex-col overflow-hidden px-0 pt-0 pb-0 outline-none"
+                className="mt-0 flex flex-col px-0 pt-0 pb-0 outline-none lg:min-h-0 lg:flex-1 lg:overflow-hidden"
               >
-                <div className="flex min-h-0 flex-1 flex-col pl-6 pr-2 pt-5">
-                  <div className="scrollbar-panel min-h-0 flex-1 overflow-y-auto pb-6 pr-4">
-                    <div className="sticky top-0 z-[1] mb-1 grid grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/5 bg-[#0f1923] pb-2">
+                <div className="flex flex-col pl-4 pr-2 pt-5 sm:pl-6 lg:min-h-0 lg:flex-1">
+                  <div className="pb-6 pr-3 sm:pr-4 lg:scrollbar-panel lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+                    <div className="sticky top-0 z-[1] mb-2 flex items-end justify-between border-b border-white/10 bg-[#0f1923] pb-2 md:hidden">
+                      <span className={STATS_TABLE_HEAD_CLASS}>Metric</span>
+                      <span className={STATS_TABLE_HEAD_CLASS}>Value</span>
+                    </div>
+                    <div className="sticky top-0 z-[1] mb-1 hidden grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/10 bg-[#0f1923] pb-2 md:grid">
                       {(['Metric', 'Description', 'Value'] as const).map((h) => (
                         <span
                           key={h}
                           className={cn(
-                            'text-[9px] uppercase tracking-widest text-neutral-600',
+                            STATS_TABLE_HEAD_CLASS,
                             h === 'Value' && 'text-center',
                           )}
                         >
@@ -285,18 +295,45 @@ export default function PlayerAnalysis({ stats }: Props) {
                     {rows.length === 0 ? (
                       <p className="py-4 text-sm text-neutral-600">No data available</p>
                     ) : (
-                      rows.map((row) => (
-                        <div
-                          key={row.label}
-                          className="grid grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/5 py-3 last:border-0"
-                        >
-                          <span className="text-sm font-medium text-white">{row.label}</span>
-                          <span className="text-sm text-neutral-500">{row.description}</span>
-                          <span className="text-center text-sm font-bold tabular-nums text-white">
-                            {formatValue(row.value, row.formatKind)}
-                          </span>
-                        </div>
-                      ))
+                      rows.map((row, i) => {
+                        const isLast = i === rows.length - 1;
+                        return (
+                          <Fragment key={`${cat}-${row.label}-${i}`}>
+                            <div
+                              className={cn(
+                                'border-b border-white/5 py-3 md:hidden',
+                                isLast && 'border-b-0',
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-white">
+                                  {row.label}
+                                </span>
+                                <span className="shrink-0 text-right text-sm font-bold tabular-nums text-white">
+                                  {formatValue(row.value, row.formatKind)}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs leading-snug text-neutral-500">
+                                {row.description}
+                              </p>
+                            </div>
+                            <div
+                              className={cn(
+                                'hidden grid-cols-[1fr_1fr_6.5rem] gap-x-4 gap-y-0 border-b border-white/5 py-3 md:grid',
+                                isLast && 'border-b-0',
+                              )}
+                            >
+                              <span className="text-sm font-medium text-white">{row.label}</span>
+                              <span className="text-sm leading-snug text-neutral-400">
+                                {row.description}
+                              </span>
+                              <span className="text-center text-sm font-bold tabular-nums text-white">
+                                {formatValue(row.value, row.formatKind)}
+                              </span>
+                            </div>
+                          </Fragment>
+                        );
+                      })
                     )}
                   </div>
                 </div>

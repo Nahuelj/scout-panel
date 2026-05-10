@@ -68,7 +68,7 @@ export default function PlayerStickyBar({ player, nameAnchorRef }: Props) {
 
   return createPortal(
     <div
-      className={`fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-[#080d14]/95 backdrop-blur-sm transition-all duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-[#080d14]/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-sm transition-all duration-300 ${
         isNameVisible
           ? 'translate-y-full opacity-0 pointer-events-none'
           : 'translate-y-0 opacity-100'
@@ -81,8 +81,8 @@ export default function PlayerStickyBar({ player, nameAnchorRef }: Props) {
             style={{ backgroundColor: accent }}
             aria-hidden
           />
-          <div className="flex min-w-0 items-center gap-4 py-3.5">
-            <div className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-white/10">
+          <div className="flex min-w-0 items-center gap-3 py-3.5">
+            <div className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-white/10">
               {player.photoUrl ? (
                 <Image
                   src={player.photoUrl}
@@ -98,9 +98,11 @@ export default function PlayerStickyBar({ player, nameAnchorRef }: Props) {
               )}
             </div>
 
-            <div className="min-w-0 max-w-[min(28rem,calc(100vw-5.5rem))]">
-              <p className="truncate text-base font-bold leading-none text-white">{player.name}</p>
-              <p className="mt-1.5 text-sm whitespace-nowrap text-neutral-500">
+            <div className="min-w-0 max-w-[min(20rem,calc(100vw-5.5rem))]">
+              <p className="truncate text-sm font-bold leading-none text-white">
+                {player.name}
+              </p>
+              <p className="mt-1.5 text-xs whitespace-nowrap text-neutral-500">
                 {player.position}
                 {age !== null && (
                   <span>

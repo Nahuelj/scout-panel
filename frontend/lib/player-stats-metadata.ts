@@ -332,8 +332,7 @@ export function computeRadarScores(stats: PlayerDetailStats): RadarScore[] {
     if (filtered.length === 0) return 0;
     return filtered.reduce((a, b) => a + b, 0) / filtered.length;
   };
-
-  return [
+return [
     {
       category: 'SHO',
       score: Math.round(
@@ -442,8 +441,7 @@ export function pickCategoryByNearestAxis(
   const dy = mouse.y - pole.y;
   const dist = Math.hypot(dx, dy);
   if (dist > effectiveMax * 1.4) return null;
-
-  const mouseAngle = Math.atan2(dy, dx);
+const mouseAngle = Math.atan2(dy, dx);
   let best = vertices[0]?.category ?? null;
   let bestDiff = Infinity;
   for (const v of vertices) {

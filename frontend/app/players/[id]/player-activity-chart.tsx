@@ -35,7 +35,7 @@ export default function PlayerActivityChart({ activity, seasonName }: Props) {
   const last = formatMonth(activity[activity.length - 1].monthDate);
 
   return (
-    <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-6 flex flex-col gap-4">
+    <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-[#0f1923] p-4 sm:p-6">
       <div>
         <p className="text-white font-bold text-base">Season activity</p>
         <p className="text-neutral-500 text-xs mt-0.5">Minutes played per month</p>
@@ -43,9 +43,9 @@ export default function PlayerActivityChart({ activity, seasonName }: Props) {
 
       <ChartContainer
         config={chartConfig}
-        className="aspect-auto h-[200px] w-full min-w-0 justify-start"
+        className="aspect-auto h-[180px] w-full min-w-0 justify-start sm:h-[200px]"
       >
-        <AreaChart data={data} margin={{ top: 16, right: 20, left: 20, bottom: 8 }}>
+        <AreaChart data={data} margin={{ top: 14, right: 10, left: 8, bottom: 8 }}>
           <XAxis
             dataKey="month"
             tickLine={false}

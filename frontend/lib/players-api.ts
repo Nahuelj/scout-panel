@@ -98,7 +98,13 @@ export async function getPlayers(
   } catch (err) {
     throw formatPlayersApiConnectionError(url, err);
   }
-  if (!res.ok) throw new Error('Failed to fetch players');
+  if (!res.ok) {
+    const body = await res.text();
+    const detail = body.length > 500 ? `${body.slice(0, 500)}…` : body;
+    throw new Error(
+      `Failed to fetch players (${res.status} ${res.statusText}). ${detail}`.trim(),
+    );
+  }
   return res.json();
 }
 

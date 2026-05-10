@@ -210,11 +210,11 @@ export default function PlayerDetailHeaderSearch({
   return (
     <>
       {mainDim}
-      <div ref={containerRef} className="relative z-[70] w-full max-w-xl">
+      <div ref={containerRef} className="relative z-[70] w-full min-w-0 max-w-full md:max-w-xl">
         <form onSubmit={handleSubmit} noValidate>
-          <div className="relative">
+          <div className="relative min-w-0">
             <Search
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-neutral-500"
+              className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-neutral-500 md:left-3"
               strokeWidth={1.75}
               aria-hidden
             />
@@ -229,7 +229,7 @@ export default function PlayerDetailHeaderSearch({
               aria-label="Search players by name"
               aria-expanded={showPanel}
               aria-controls="player-detail-search-panel"
-              className="h-10 w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-10 pr-3 text-sm text-white outline-none placeholder:text-neutral-500 focus:border-white/20"
+              className="h-9 w-full min-w-0 rounded-lg border border-white/10 bg-white/5 py-2 pl-9 pr-2.5 text-sm text-white outline-none placeholder:text-neutral-500 focus:border-white/20 md:h-10 md:pl-10 md:pr-3"
             />
             {showPanel ? (
               <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] overflow-hidden rounded-lg border border-white/10 bg-[#0f1923] shadow-xl ring-1 ring-black/40 animate-in fade-in zoom-in-95 slide-in-from-top-1 duration-200">
@@ -266,7 +266,7 @@ export default function PlayerDetailHeaderSearch({
                           key={player.id}
                           role="option"
                           aria-selected={false}
-                          className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:gap-2 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:border-emerald-400/55 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:bg-emerald-500/25 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:text-emerald-200"
+                          className="flex flex-row items-center gap-2 py-2 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:border-emerald-400/55 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:bg-emerald-500/25 [&:has(.player-row-compare-hit:hover)_.compare-action-hit:not(:disabled)]:text-emerald-200"
                         >
                           <button
                             type="button"
@@ -309,7 +309,7 @@ export default function PlayerDetailHeaderSearch({
                               </span>
                             </span>
                           </button>
-                          <div className="flex shrink-0 items-center justify-end gap-2 sm:pl-1">
+                          <div className="flex shrink-0 items-center justify-end gap-2 pl-1">
                             <button
                               type="button"
                               onClick={() => goToPlayer(player.id)}

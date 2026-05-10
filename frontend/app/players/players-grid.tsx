@@ -61,7 +61,7 @@ export default async function PlayersGrid({
         </div>
       </nav>
 
-      <div className="pt-[110px] pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
+      <div className="pt-24 pb-[calc(7.5rem+env(safe-area-inset-bottom))] lg:pt-[110px] sm:pb-[calc(6rem+env(safe-area-inset-bottom))]">
         <PlayersGridClient
           players={listing.data}
           initialShortlistIds={initialShortlistIds}

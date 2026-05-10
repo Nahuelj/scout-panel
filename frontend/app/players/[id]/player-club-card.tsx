@@ -12,7 +12,7 @@ export default function PlayerClubCard({ player }: Props) {
 
   if (!season) {
     return (
-      <div className="rounded-2xl bg-[#0f1923] border border-white/5 p-6 flex items-center justify-center">
+      <div className="flex items-center justify-center rounded-2xl border border-white/5 bg-[#0f1923] p-4 sm:p-6">
         <p className="text-neutral-600 text-sm">No club data</p>
       </div>
     );
@@ -24,7 +24,7 @@ export default function PlayerClubCard({ player }: Props) {
     date ? format(new Date(date), 'dd/MM/yy') : '—';
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#0f1923] p-6 flex flex-col gap-5">
+    <div className="flex flex-col gap-5 overflow-hidden rounded-2xl border border-white/5 bg-[#0f1923] p-4 sm:p-6">
       <div className="relative flex min-h-12 items-center gap-3">
         {club.logoUrl ? (
           <div
@@ -61,9 +61,9 @@ export default function PlayerClubCard({ player }: Props) {
             </div>
           )}
         </div>
-        <div className="relative z-[1] min-w-0">
+        <div className="relative z-[1] min-w-0 break-words">
           <p
-            className={`text-white font-bold text-base leading-tight ${legibleOnTint}`}
+            className={`text-base font-bold leading-tight text-white ${legibleOnTint}`}
           >
             {club.name}
           </p>
@@ -77,25 +77,25 @@ export default function PlayerClubCard({ player }: Props) {
         </div>
       </div>
 
-      <div className="flex items-center justify-start gap-4">
+      <div className="flex flex-row items-center gap-4">
         <div className="text-left">
           <p
-            className={`text-white/82 font-bold text-[10px] uppercase tracking-widest mb-1 ${legibleOnTint}`}
+            className={`mb-1 text-[10px] font-bold uppercase tracking-widest text-white/82 ${legibleOnTint}`}
           >
             From
           </p>
-          <p className={`text-white text-sm font-semibold ${legibleOnTint}`}>
+          <p className={`text-sm font-semibold text-white ${legibleOnTint}`}>
             {fmt(contractStart)}
           </p>
         </div>
-        <div className="h-px w-10 sm:w-16 bg-white/5 shrink-0" />
+        <div className="h-8 w-px shrink-0 self-center bg-white/5" />
         <div className="text-left">
           <p
-            className={`text-white/82 font-bold text-[10px] uppercase tracking-widest mb-1 ${legibleOnTint}`}
+            className={`mb-1 text-[10px] font-bold uppercase tracking-widest text-white/82 ${legibleOnTint}`}
           >
             To
           </p>
-          <p className={`text-white text-sm font-semibold ${legibleOnTint}`}>
+          <p className={`text-sm font-semibold text-white ${legibleOnTint}`}>
             {fmt(contractEnd)}
           </p>
         </div>
