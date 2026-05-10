@@ -1,16 +1,19 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Bookmark, BookmarkX } from 'lucide-react';
 import {
   addToShortlist,
   removeFromShortlist,
 } from '@/features/shortlist/api/shortlist-api';
+import { ROUTES } from '@/lib/constants';
 import { SHORTLIST_IDS_KEY } from './use-shortlist-ids';
 
 export function useAddToShortlist() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   return useMutation({
     mutationKey: ['shortlist', 'add'],
     mutationFn: addToShortlist,
@@ -26,6 +29,10 @@ export function useAddToShortlist() {
     onSuccess: () => {
       toast('Added to shortlist', {
         icon: <Bookmark className="size-4 fill-sky-400/40 text-sky-300" strokeWidth={1.75} />,
+        action: {
+          label: 'View shortlist',
+          onClick: () => router.push(ROUTES.shortlist),
+        },
       });
     },
     onError: (_err, _playerId, ctx) => {

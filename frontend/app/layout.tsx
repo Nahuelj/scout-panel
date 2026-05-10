@@ -36,6 +36,15 @@ export default function RootLayout({
               color: 'rgb(125 211 252)',
               fontSize: '0.875rem',
             },
+            actionButtonStyle: {
+              background: 'transparent',
+              color: 'rgb(125 211 252)',
+              padding: 0,
+              fontSize: '0.8rem',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+              fontWeight: '400',
+            },
           }}
         />
       </body>
