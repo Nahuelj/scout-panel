@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -169,30 +169,32 @@
 
   .scrollbar-panel {
     scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(16, 185, 129, 0.45) rgba(255, 255, 255, 0.06);
+    scrollbar-width: none;
+    scrollbar-color: rgba(16, 185, 129, 0.45) transparent;
   }
 
   .scrollbar-panel::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
+    height: 5px;
   }
 
   .scrollbar-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 9999px;
+    background: transparent;
+  }
+
+  .scrollbar-panel::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   .scrollbar-panel::-webkit-scrollbar-thumb {
     background: rgba(16, 185, 129, 0.4);
     border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: padding-box;
   }
 
   .scrollbar-panel::-webkit-scrollbar-thumb:hover {
     background: rgba(16, 185, 129, 0.62);
-    border: 2px solid transparent;
-    background-clip: padding-box;
   }
 }
 

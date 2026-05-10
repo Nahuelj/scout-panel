@@ -4,7 +4,8 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Bookmark, LogOut, Crosshair } from 'lucide-react';
+import { Bookmark, ChevronDown, Crosshair, LogOut, Search } from 'lucide-react';
+import { DropdownMenu } from 'radix-ui';
 import { signOut, useSession } from '@/lib/auth-client';
 import PlayerDetailHeaderSearch from '@/app/components/player-detail-header-search';
 
@@ -37,11 +38,21 @@ function isComparePath(pathname: string | null): boolean {
 }
 
 const sessionUserSkeleton = (
-  <div className="flex items-center gap-2.5" aria-hidden>
-    <div className="h-8 w-8 animate-pulse rounded-full bg-white/[0.06]" />
-    <div className="hidden h-3.5 w-20 animate-pulse rounded-full bg-white/[0.06] sm:block" />
+  <div
+    className="flex h-9 max-w-[min(18rem,calc(100vw-5.5rem))] items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.02] py-1 pl-1 pr-2.5"
+    aria-hidden
+  >
+    <div className="h-7 w-7 shrink-0 animate-pulse rounded-full bg-white/[0.06]" />
+    <div className="h-3.5 min-w-0 flex-1 animate-pulse rounded-full bg-white/[0.06]" />
+    <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-white/[0.06]" />
   </div>
 );
+
+const accountMenuContentClass =
+  'z-50 min-w-[12rem] overflow-hidden rounded-xl border border-white/[0.1] bg-[#0c141c] p-1 shadow-xl shadow-black/50';
+
+const accountMenuItemClass =
+  'flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm text-neutral-200 outline-none data-highlighted:bg-white/[0.06]';
 
 export default function DashboardHeader() {
   const { data: session, isPending } = useSession();
@@ -56,6 +67,8 @@ export default function DashboardHeader() {
   const user = session?.user;
   const displayName = user?.name?.trim() || user?.email?.trim() || '';
   const isShortlistSection = pathname?.startsWith('/players/shortlist') ?? false;
+  const primaryNavHref = (isShortlistSection ? '/players' : '/players/shortlist') as Route;
+  const primaryNavLabel = isShortlistSection ? 'Find players' : 'Go to Shortlists';
   const onPlayerDetail = isPlayerDetailPath(pathname ?? null);
   const onCompare = isComparePath(pathname ?? null);
   const showPlayerDetailSearch = onPlayerDetail || onCompare;
@@ -99,46 +112,67 @@ export default function DashboardHeader() {
 
   const actionsToolbar = (
     <div className="flex shrink-0 flex-nowrap items-center justify-end gap-2 sm:gap-2.5">
-      <Link
-        href={'/players/shortlist' as Route}
-        prefetch={false}
-        data-active={isShortlistSection}
-        aria-label="Shortlist"
-        className="group inline-flex shrink-0 items-center gap-1.5 py-1 text-sm font-medium text-neutral-400 underline-offset-[6px] transition-colors duration-200 hover:text-sky-300 hover:underline focus-visible:rounded-sm focus-visible:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 data-[active=true]:font-semibold data-[active=true]:text-sky-300 data-[active=true]:underline"
-      >
-        <Bookmark
-          className="size-[15px] shrink-0 text-neutral-500 transition-colors group-hover:text-sky-300 group-data-[active=true]:fill-sky-400/20 group-data-[active=true]:text-sky-300"
-          strokeWidth={1.75}
-          aria-hidden
-        />
-        <span className="hidden sm:inline">Shortlist</span>
-      </Link>
-
-      <div className="mx-0.5 h-5 w-px shrink-0 bg-white/[0.08]" aria-hidden />
-
-      {!mounted || isPending
-        ? sessionUserSkeleton
-        : user && (
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neutral-600 to-neutral-700 text-sm font-semibold text-white shadow-inner ring-1 ring-white/[0.1]">
+      {!mounted || isPending ? (
+        sessionUserSkeleton
+      ) : user ? (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-label="Account menu"
+              className="inline-flex max-w-[min(18rem,calc(100vw-5.5rem))] items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.025] py-1 pl-1 pr-2 text-left text-sm outline-none transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] focus-visible:border-emerald-500/40 focus-visible:ring-2 focus-visible:ring-emerald-500/25 data-[state=open]:border-white/[0.13] data-[state=open]:bg-white/[0.05] [&[data-state=open]>svg:last-child]:rotate-180"
+            >
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-neutral-600 to-neutral-700 text-xs font-semibold text-white shadow-inner ring-1 ring-white/[0.1]">
                 {displayName ? displayName.charAt(0).toUpperCase() : '?'}
               </div>
-              {displayName ? (
-                <span className="hidden max-w-[9rem] truncate text-sm text-neutral-400 sm:inline">
-                  {displayName}
-                </span>
-              ) : null}
-            </div>
-          )}
-
-      <button
-        type="button"
-        onClick={handleSignOut}
-        aria-label="Sign out"
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.025] text-neutral-500 transition-all duration-200 hover:border-white/[0.13] hover:bg-white/[0.05] hover:text-neutral-200"
-      >
-        <LogOut className="size-[15px] shrink-0" strokeWidth={1.75} aria-hidden />
-      </button>
+              <span className="min-w-0 flex-1 truncate font-medium text-neutral-200">
+                {displayName || 'Account'}
+              </span>
+              <ChevronDown
+                className="size-4 shrink-0 text-neutral-500 transition-transform duration-200"
+                strokeWidth={2}
+                aria-hidden
+              />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              sideOffset={8}
+              align="end"
+              className={accountMenuContentClass}
+            >
+              <DropdownMenu.Item
+                className={accountMenuItemClass}
+                onSelect={() => router.push(primaryNavHref)}
+              >
+                {isShortlistSection ? (
+                  <Search
+                    className="size-[15px] shrink-0 text-neutral-500"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                ) : (
+                  <Bookmark
+                    className="size-[15px] shrink-0 text-neutral-500"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                )}
+                {primaryNavLabel}
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator className="my-1 h-px bg-white/[0.08]" />
+              <DropdownMenu.Item
+                className={`${accountMenuItemClass} text-red-300 data-highlighted:bg-red-500/10 data-highlighted:text-red-200`}
+                onSelect={() => void handleSignOut()}
+              >
+                <LogOut className="size-[15px] shrink-0" strokeWidth={1.75} aria-hidden />
+                Logout
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      ) : null}
     </div>
   );
 
