@@ -31,8 +31,7 @@ export function getErrorMessage(err: unknown): string {
     if (err.status === 404) return 'Resource not found.';
     if (err.status === 429) return 'Too many requests. Please try again in a moment.';
     if (err.status >= 500) return 'Something went wrong on our side. Please try again.';
-    return err.message || 'Request failed.';
+    return 'An unexpected error occurred. Please try again.';
   }
-  if (err instanceof Error) return err.message || 'Unexpected error.';
-  return 'Unexpected error.';
+  return 'An unexpected error occurred. Please try again.';
 }

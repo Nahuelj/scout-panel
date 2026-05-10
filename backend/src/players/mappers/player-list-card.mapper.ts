@@ -30,6 +30,10 @@ export type PlayerListCard = {
   } | null;
 };
 
+/**
+ * Maps a raw Prisma player row to the PlayerListCard shape used in list responses.
+ * Returns currentSeason as null when the player has no associated seasons.
+ */
 export function mapRowToPlayerListCard(row: PlayerListCardRow): PlayerListCard {
   const season = row.seasons[0] ?? null;
   return {

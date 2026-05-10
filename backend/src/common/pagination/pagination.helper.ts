@@ -26,6 +26,9 @@ export type ResolvedPagination = {
   pageSize: number;
 };
 
+/**
+ * Resolves pagination params from a query, applying defaults and clamping to safe bounds.
+ */
 export function resolvePagination(query: PaginationQuery): ResolvedPagination {
   const rawPageSize =
     query.pageSize === undefined || Number.isNaN(query.pageSize)
@@ -39,6 +42,9 @@ export function resolvePagination(query: PaginationQuery): ResolvedPagination {
   return { page: Math.max(1, requestedPage), pageSize };
 }
 
+/**
+ * Builds pagination metadata (totalPages, hasNextPage, etc.) from resolved page, pageSize and totalItems.
+ */
 export function buildPaginationMeta(params: {
   page: number;
   pageSize: number;

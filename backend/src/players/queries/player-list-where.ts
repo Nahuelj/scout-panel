@@ -6,6 +6,10 @@ export type PlayerListWhereContext = {
   seasonWhere: Prisma.PlayerSeasonWhereInput;
 };
 
+/**
+ * Builds Prisma WHERE clauses for player list queries based on the provided filters.
+ * Age filters are converted to birthDate ranges relative to today.
+ */
 export function buildPlayerListWhereContext(
   query: PlayerFiltersDto,
 ): PlayerListWhereContext {

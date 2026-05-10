@@ -21,6 +21,11 @@ export type PlayerDetailStats = PlayerDetailRawStats & {
   skillfulFootShotScore: number | null;
 };
 
+/**
+ * Maps a raw Prisma player row to the full player detail shape.
+ * Computes derived stats (matchesPerYellowCard, matchesPerRedCard, skillfulFootScores)
+ * and returns currentSeason as null when no seasons are present.
+ */
 export function mapRowToPlayerDetail(player: PlayerDetailRow) {
   const season = player.seasons[0] ?? null;
   const rawStats = season?.stats ?? null;
