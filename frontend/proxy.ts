@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { BETTER_AUTH_SESSION_COOKIE } from '@/features/auth/lib/session-cookie';
+import { AUTH_TOKEN_COOKIE } from '@/features/auth/lib/auth-cookie';
 
 const authRoutes = ['/login', '/register'];
 
@@ -9,7 +9,7 @@ function isAuthRoute(pathname: string): boolean {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get(BETTER_AUTH_SESSION_COOKIE);
+  const sessionCookie = request.cookies.get(AUTH_TOKEN_COOKIE);
   const isAuthenticated = Boolean(sessionCookie?.value);
 
   if (pathname === '/') {

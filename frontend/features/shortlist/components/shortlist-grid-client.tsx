@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from '@/features/auth/lib/auth-client';
+import { useSession } from '@/features/auth/hooks/use-session';
 import { PlayerCard, type PlayerCardData } from '@/features/players';
 import { useSelectionStore } from '@/stores/selection-store';
 import { useRemoveFromShortlist } from '@/features/shortlist/hooks/use-shortlist-mutations';

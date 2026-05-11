@@ -2,13 +2,51 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { signIn, signOut, signUp } from '@/features/auth/lib/auth-client';
+import {
+  login as loginRequest,
+  logout as logoutRequest,
+  register as registerRequest,
+} from '@/features/auth/api/auth-api';
+import { SESSION_QUERY_KEY } from '@/features/auth/hooks/use-session';
+import { ApiError } from '@/lib/api-client';
 import { ROUTES } from '@/lib/constants';
 
 export type SignInInput = {
   email: string;
   password: string;
 };
+
+export type SignUpInput = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+function toFriendlyError(err: unknown, fallback: string): Error {
+  if (err instanceof ApiError) {
+    const parsed = parseApiErrorBody(err.body);
+    return new Error(parsed ?? fallback);
+  }
+  if (err instanceof Error) return err;
+  return new Error(fallback);
+}
+
+function parseApiErrorBody(body: string): string | null {
+  if (!body) return null;
+  try {
+    const parsed: unknown = JSON.parse(body);
+    if (parsed && typeof parsed === 'object' && 'message' in parsed) {
+      const message = (parsed as { message: unknown }).message;
+      if (typeof message === 'string') return message;
+      if (Array.isArray(message) && typeof message[0] === 'string') {
+        return message[0];
+      }
+    }
+  } catch {
+    // ignore JSON parse errors
+  }
+  return null;
+}
 
 export function useSignInMutation(options?: { redirectTo?: string }) {
   const router = useRouter();
@@ -19,27 +57,18 @@ export function useSignInMutation(options?: { redirectTo?: string }) {
     mutationKey: ['auth', 'signIn'],
     meta: { silent: true },
     mutationFn: async (input: SignInInput) => {
-      const { data, error } = await signIn.email({
-        email: input.email,
-        password: input.password,
-      });
-      if (error) {
-        throw new Error(error.message ?? 'Invalid credentials');
+      try {
+        return await loginRequest(input);
+      } catch (err) {
+        throw toFriendlyError(err, 'Invalid credentials');
       }
-      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
       router.push(redirectTo);
     },
   });
 }
-
-export type SignUpInput = {
-  name: string;
-  email: string;
-  password: string;
-};
 
 export function useSignUpMutation(options?: { redirectTo?: string }) {
   const router = useRouter();
@@ -50,18 +79,14 @@ export function useSignUpMutation(options?: { redirectTo?: string }) {
     mutationKey: ['auth', 'signUp'],
     meta: { silent: true },
     mutationFn: async (input: SignUpInput) => {
-      const { data, error } = await signUp.email({
-        name: input.name,
-        email: input.email,
-        password: input.password,
-      });
-      if (error) {
-        throw new Error(error.message ?? 'Something went wrong');
+      try {
+        return await registerRequest(input);
+      } catch (err) {
+        throw toFriendlyError(err, 'Something went wrong');
       }
-      return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      queryClient.invalidateQueries({ queryKey: SESSION_QUERY_KEY });
       router.push(redirectTo);
     },
   });
@@ -75,7 +100,7 @@ export function useSignOutMutation(options?: { redirectTo?: string }) {
   return useMutation({
     mutationKey: ['auth', 'signOut'],
     mutationFn: async () => {
-      await signOut();
+      await logoutRequest();
     },
     onSuccess: () => {
       queryClient.clear();

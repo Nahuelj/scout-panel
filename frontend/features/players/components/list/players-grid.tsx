@@ -10,7 +10,7 @@ import { fetchShortlistPlayerIdsServer } from '@/features/shortlist/server';
 import PlayersGridClient from './players-grid-client';
 import PlayersListControls from './players-list-controls';
 import PlayersPagination from './players-pagination';
-import { BETTER_AUTH_SESSION_COOKIE } from '@/features/auth/lib/session-cookie';
+import { AUTH_TOKEN_COOKIE } from '@/features/auth/lib/auth-cookie';
 
 export default async function PlayersGrid({
   routeState,
@@ -22,7 +22,7 @@ export default async function PlayersGrid({
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join('; ');
-  const initialCanShortlist = Boolean(cookieStore.get(BETTER_AUTH_SESSION_COOKIE)?.value);
+  const initialCanShortlist = Boolean(cookieStore.get(AUTH_TOKEN_COOKIE)?.value);
   const [filterOptions, listing, initialShortlistIds] = await Promise.all([
     getPlayersFilterOptions(),
     getPlayers(routeState),

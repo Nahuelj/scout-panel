@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
-  ApiCookieAuth,
+  ApiBearerAuth,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -31,10 +31,10 @@ import { ShortlistPlayerIdsDto } from './dto/shortlist-player-ids.dto';
 import { ShortlistService } from './shortlist.service';
 
 @ApiTags('shortlist')
-@ApiCookieAuth('better-auth.session_token')
+@ApiBearerAuth('bearer')
 @ApiUnauthorizedResponse({
   type: ErrorResponseDto,
-  description: 'Missing or invalid session.',
+  description: 'Missing or invalid token.',
 })
 @Controller('shortlist')
 @UseGuards(AuthGuard)

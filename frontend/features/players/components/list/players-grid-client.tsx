@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useMemo } from 'react';
-import { useSession } from '@/features/auth/lib/auth-client';
+import { useSession } from '@/features/auth/hooks/use-session';
 import PlayerCard from '@/features/players/components/list/player-card';
 import { useSelectionStore } from '@/stores/selection-store';
 import type { PlayerCardData } from '@/features/players/types/player.types';

@@ -22,6 +22,162 @@
         ]
       }
     },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create a new user and start a session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Authenticate with email and password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "summary": "Clear the current session cookie",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Return the authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/players/filter-options": {
       "get": {
         "operationId": "PlayersController_filterOptionsForListing",
@@ -221,7 +377,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid session.",
+            "description": "Missing or invalid token.",
             "content": {
               "application/json": {
                 "schema": {
@@ -233,7 +389,7 @@
         },
         "security": [
           {
-            "better-auth.session_token": []
+            "bearer": []
           }
         ],
         "summary": "List all shortlisted player ids for the current user",
@@ -347,7 +503,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid session.",
+            "description": "Missing or invalid token.",
             "content": {
               "application/json": {
                 "schema": {
@@ -359,7 +515,7 @@
         },
         "security": [
           {
-            "better-auth.session_token": []
+            "bearer": []
           }
         ],
         "summary": "Paginated list of shortlisted players",
@@ -395,7 +551,7 @@
             }
           },
           "401": {
-            "description": "Missing or invalid session.",
+            "description": "Missing or invalid token.",
             "content": {
               "application/json": {
                 "schema": {
@@ -417,7 +573,7 @@
         },
         "security": [
           {
-            "better-auth.session_token": []
+            "bearer": []
           }
         ],
         "summary": "Add a player to the current user shortlist",
@@ -444,7 +600,7 @@
             "description": "Player removed (idempotent)."
           },
           "401": {
-            "description": "Missing or invalid session.",
+            "description": "Missing or invalid token.",
             "content": {
               "application/json": {
                 "schema": {
@@ -456,7 +612,7 @@
         },
         "security": [
           {
-            "better-auth.session_token": []
+            "bearer": []
           }
         ],
         "summary": "Remove a player from the current user shortlist",
@@ -483,20 +639,136 @@
     },
     {
       "name": "auth",
-      "description": "Authentication endpoints (handled by better-auth)"
+      "description": "Authentication endpoints (manual JWT)"
     }
   ],
   "servers": [],
   "components": {
     "securitySchemes": {
-      "cookie": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "better-auth.session_token",
-        "description": "Session cookie issued by better-auth on sign-in."
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "description": "JWT issued by POST /auth/login or POST /auth/register. Paste the token without the \"Bearer\" prefix."
       }
     },
     "schemas": {
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "user@scout.local"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "example": "John Doe"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "example": "supersecret"
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "password"
+        ]
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AuthUserDto"
+          }
+        },
+        "required": [
+          "user"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "error": {
+            "type": "string",
+            "example": "Bad Request"
+          },
+          "message": {
+            "example": "Validation failed",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "path": {
+            "type": "string",
+            "example": "/players"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-05-10T01:33:00.000Z"
+          }
+        },
+        "required": [
+          "statusCode",
+          "error",
+          "message",
+          "path",
+          "timestamp"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@scout.local"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "example": "admin12345"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
       "FilterOptionsDto": {
         "type": "object",
         "properties": {
@@ -1129,48 +1401,6 @@
           "weight",
           "preferredFoot",
           "currentSeason"
-        ]
-      },
-      "ErrorResponseDto": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "example": 400
-          },
-          "error": {
-            "type": "string",
-            "example": "Bad Request"
-          },
-          "message": {
-            "example": "Validation failed",
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            ]
-          },
-          "path": {
-            "type": "string",
-            "example": "/players"
-          },
-          "timestamp": {
-            "type": "string",
-            "example": "2026-05-10T01:33:00.000Z"
-          }
-        },
-        "required": [
-          "statusCode",
-          "error",
-          "message",
-          "path",
-          "timestamp"
         ]
       },
       "ShortlistPlayerIdsDto": {

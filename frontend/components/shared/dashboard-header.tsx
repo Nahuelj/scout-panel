@@ -6,7 +6,7 @@ import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Bookmark, ChevronDown, Crosshair, LogOut, Search } from 'lucide-react';
 import { DropdownMenu } from 'radix-ui';
-import { useSession } from '@/features/auth/lib/auth-client';
+import { useSession } from '@/features/auth/hooks/use-session';
 import { useSignOutMutation } from '@/features/auth/hooks/use-auth-mutations';
 import { cn } from '@/lib/utils';
 import { PlayerDetailHeaderSearch } from '@/features/players';

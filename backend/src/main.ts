@@ -1,27 +1,29 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { json, type NextFunction, type Request, type Response } from 'express';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { getFrontendOrigins } from './frontend-origins';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 import { setupSwagger } from './config/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    bodyParser: false,
-  });
+  const app = await NestFactory.create(AppModule);
 
-  // better-auth handles its own body parsing for `/api/auth/*` requests, so we
-  // skip the JSON parser for that path and apply it to everything else.
-  const expressApp = app.getHttpAdapter().getInstance();
-  const parseJson = json();
-  expressApp.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.originalUrl.startsWith('/api/auth')) {
-      next();
-      return;
-    }
-    parseJson(req, res, next);
+  app.use(cookieParser());
+
+  const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+  app.enableCors({
+    origin: frontendUrl,
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Set-Cookie'],
   });
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
@@ -29,21 +31,6 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   setupSwagger(app);
-
-  app.enableCors({
-    origin: getFrontendOrigins(),
-    credentials: true,
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'Cookie',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-    ],
-    exposedHeaders: ['Set-Cookie'],
-  });
 
   await app.listen(process.env.PORT ?? 8080);
 }

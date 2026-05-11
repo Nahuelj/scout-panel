@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Bookmark, X } from 'lucide-react';
 import type { PlayerDetail } from '@/features/players/types/player.types';
 import { getSlotColor } from '@/lib/compare-colors';
-import { useSession } from '@/features/auth/lib/auth-client';
+import { useSession } from '@/features/auth/hooks/use-session';
 import {
   useShortlistIds,
   useAddToShortlist,

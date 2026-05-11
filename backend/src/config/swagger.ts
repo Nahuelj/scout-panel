@@ -3,8 +3,6 @@ import { resolve } from 'node:path';
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-const SESSION_COOKIE_NAME = 'better-auth.session_token';
-
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('Scout Panel API')
@@ -12,15 +10,19 @@ export function setupSwagger(app: INestApplication): void {
       'Players, seasons, stats and shortlist endpoints for the scout panel.',
     )
     .setVersion('1.0.0')
-    .addCookieAuth(SESSION_COOKIE_NAME, {
-      type: 'apiKey',
-      in: 'cookie',
-      name: SESSION_COOKIE_NAME,
-      description: 'Session cookie issued by better-auth on sign-in.',
-    })
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description:
+          'JWT issued by POST /auth/login or POST /auth/register. Paste the token without the "Bearer" prefix.',
+      },
+      'bearer',
+    )
     .addTag('players', 'Player listing and detail endpoints')
     .addTag('shortlist', 'User shortlist management')
-    .addTag('auth', 'Authentication endpoints (handled by better-auth)')
+    .addTag('auth', 'Authentication endpoints (manual JWT)')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

@@ -63,9 +63,7 @@ export class SeedService implements OnApplicationBootstrap {
         return;
       }
 
-      await this.authService.auth.api.signUpEmail({
-        body: { email, password, name },
-      });
+      await this.authService.register({ email, password, name });
       this.logger.log(`Default user created (${email}).`);
     } catch (error) {
       this.logger.error('Failed to create default user', error as Error);
