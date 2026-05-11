@@ -126,7 +126,7 @@ Desde Swagger UI se pueden probar endpoints con `Try it out`. Para los que requi
 
 ## Tests
 
-Ambos proyectos usan **Jest** como test runner. Los tests están pensados para correr **sin necesidad de levantar la base de datos ni el server** (todo lo que toca Prisma o Nest se mockea), salvo el e2e del backend que sí instancia el `AppModule` completo.
+Ambos proyectos usan **Jest** como test runner. Los tests están pensados para correr **sin necesidad de levantar la base de datos ni el server**: todo lo que toca Prisma o Nest se mockea.
 
 ### Backend
 
@@ -141,9 +141,6 @@ pnpm test:watch
 
 # unit tests con reporte de cobertura (output en backend/coverage/)
 pnpm test:cov
-
-# end-to-end tests (usa test/jest-e2e.json)
-pnpm test:e2e
 ```
 
 **Tipos de tests cubiertos:**
@@ -153,9 +150,8 @@ pnpm test:e2e
 - **Unit tests de validación de DTOs** — `class-validator` + `class-transformer` sobre los DTOs de entrada (`PlayerFiltersDto`, `AddShortlistDto`, `PaginationDto`) para asegurar que payloads inválidos se rechacen antes de llegar a los servicios.
 - **Unit tests de utilidades y query builders** — lógica pura de scoring (`skillful-foot-score.util`), construcción de filtros Prisma (`player-list-where`) y helpers de paginación.
 - **Tests de controllers** — smoke test del `AppController` para verificar el wiring básico de Nest.
-- **End-to-end tests (`test/app.e2e-spec.ts`)** — levanta el `AppModule` completo con `@nestjs/testing` y dispara requests reales con `supertest`. Pensado como base extensible para cubrir endpoints de `players` y `shortlist` con DB de test (ver sección [Qué mejoraría con más tiempo](#a-nivel-de-proyecto)).
 
-Configuración de Jest en [backend/package.json](backend/package.json) (clave `jest`) y del runner e2e en [backend/test/jest-e2e.json](backend/test/jest-e2e.json).
+Configuración de Jest en [backend/package.json](backend/package.json) (clave `jest`).
 
 ### Frontend
 
@@ -257,6 +253,9 @@ El schema está partido en archivos separados dentro de [backend/prisma/models/]
 
 - **Separar back y front en repos distintos.** Hoy conviven en un monorepo plano sin tooling (sin pnpm workspaces ni Turborepo). Repos separados habilitan: pipelines de CI/CD independientes (deploys del back sin esperar al front y viceversa), versionado y releases desacoplados, permisos finos por equipo, y PRs con menos ruido. El contrato entre ambos queda atado por el `openapi.json` generado por Swagger, que se puede publicar como paquete npm para que el front genere su cliente HTTP tipado automáticamente.
 - **Husky + lint-staged + commitlint.** Pre-commit corriendo `eslint --fix` y `prettier` solo sobre archivos staged, y pre-push corriendo `pnpm test` y `pnpm lint` en ambos proyectos. Esto **filtra errores antes de que lleguen al repo** y mantiene el historial de commits limpio.
+- **Tests end-to-end en ambos proyectos.** Hoy solo hay unit tests; sumaría una capa e2e para validar los flujos reales de punta a punta:
+  - **Backend con `supertest`** — levantar el `AppModule` completo contra una base de datos de test (Postgres dockerizado o esquema dedicado) y cubrir en profundidad cada endpoint de la API: auth (`register`/`login`/`logout`/`me` con cookies y headers), `players` (filtros, paginación, ordenamientos, detalle, comparador) y `shortlist` (alta, baja, listado, conflictos por unique constraint). Esto valida el contrato real que ve el frontend, incluyendo guards, pipes de validación, filtros de excepciones y mapeos de Prisma.
+  - **Frontend con `Playwright`** — automatizar el flujo de uso principal contra el stack completo corriendo: login con el usuario seed, navegación a la grilla de jugadores, aplicación de filtros, apertura del detalle con sus gráficos, selección de dos jugadores para comparar y alta/baja de un jugador en la shortlist. Permite detectar regresiones visuales y de navegación (Server Components, streaming, route groups) que los unit tests con jsdom no pueden cubrir.
 
 ### A nivel de producto
 
