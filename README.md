@@ -70,6 +70,18 @@ Esto levanta un Postgres 16 en el puerto `5432` con usuario/password `postgres/p
 
 Desde la carpeta **`backend/`** (puerto `8080`):
 
+Crear el archivo `.env` en la raíz de `backend/` con el siguiente contenido:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/scout_panel_db?schema=public"
+PORT=8080
+
+JWT_SECRET=replace-this-with-a-long-random-secret-at-least-32-chars
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:3000
+SEED_ON_BOOT=true
+```
+
 ```bash
 # desde la raíz del repo
 cd backend
@@ -85,6 +97,12 @@ Notas:
 ### 3. Frontend
 
 Desde la carpeta **`frontend/`**, en una **terminal nueva** para no matar al backend (puerto `3000`):
+
+Crear el archivo `.env.local` en la raíz de `frontend/` con el siguiente contenido:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
 
 ```bash
 # desde la raíz del repo, en otra terminal
