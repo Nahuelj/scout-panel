@@ -1,31 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "pnpm prisma generate && pnpm build",
-  "installCommand": "pnpm install",
   "builds": [
     {
-      "src": "dist/src/main.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "node_modules/@nestjs/**",
-          "node_modules/@prisma/**",
-          "node_modules/.prisma/**",
-          "node_modules/.pnpm/**/@prisma/**",
-          "node_modules/.pnpm/**/@nestjs/**",
-          "node_modules/better-auth/**",
-          "node_modules/.pnpm/**/better-auth*/**",
-          "node_modules/reflect-metadata/**",
-          "node_modules/.pnpm/**/reflect-metadata*/**"
-        ]
-      }
+      "src": "src/main.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/src/main.js",
-      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"]
+      "dest": "src/main.ts"
     }
   ]
 }
