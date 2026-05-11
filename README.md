@@ -2,7 +2,11 @@
 
 Panel de scouting de futbolistas: listado con filtros, detalle con estadísticas y métricas derivadas, comparador lado a lado entre jugadores y shortlist personal por usuario.
 
-<!-- screenshot: vista general del dashboard de jugadores -->
+<img width="1425" height="958" alt="image" src="https://github.com/user-attachments/assets/08c23537-cd59-420a-af78-e5a43374447b" />
+
+<img width="1423" height="956" alt="image" src="https://github.com/user-attachments/assets/66673d1b-096d-4906-84a9-1991f30b490d" />
+
+<img width="1419" height="957" alt="image" src="https://github.com/user-attachments/assets/f69fd43e-ec00-408b-9606-e9ab275d74d3" />
 
 ---
 
@@ -61,7 +65,6 @@ docker compose up -d
 
 Esto levanta un Postgres 16 en el puerto `5432` con usuario/password `postgres/postgres` y la base `scout_panel_db` (ver [docker-compose.yml](docker-compose.yml)).
 
-<!-- screenshot: contenedor scout-panel-db corriendo en Docker Desktop -->
 
 ### 2. Backend
 
@@ -101,8 +104,11 @@ Usuario seed creado automáticamente al arrancar el backend (defaults en [backen
 
 Alternativamente, también podés **crear tu propio usuario** desde la pantalla de registro en [http://localhost:3000/register](http://localhost:3000/register) (ver [frontend/app/(auth)/register/page.tsx](<frontend/app/(auth)/register/page.tsx>)). El registro pega contra `POST /auth/register`, hashea el password con bcrypt, emite un JWT y lo deja seteado como cookie HttpOnly `auth_token` — el usuario queda logueado automáticamente al terminar.
 
-<!-- screenshot: pantalla de login con credenciales precargadas -->
-<!-- screenshot: pantalla de registro para crear un usuario nuevo -->
+
+<img width="1421" height="955" alt="image" src="https://github.com/user-attachments/assets/4054918d-6834-48ae-b6cd-c41e47b8c7a0" />
+
+<img width="1423" height="958" alt="image" src="https://github.com/user-attachments/assets/393d0480-d239-4558-a133-54a480aeb4c0" />
+
 
 ### Documentación de la API
 
@@ -113,8 +119,8 @@ Con el backend corriendo, la documentación interactiva queda disponible en:
 
 Desde Swagger UI se pueden probar endpoints con `Try it out`. Para los que requieren sesión, primero pegale a `POST /auth/login` con tus credenciales, copiá el `Set-Cookie: auth_token=<JWT>` de la response (o el body si exponés el token), apretá el botón **Authorize** y pegalo como Bearer. Queda persistido automáticamente entre reloads (configurado con `persistAuthorization: true` y `addBearerAuth` en `swagger.ts`).
 
-<!-- screenshot: vista general de Swagger UI listando los tags players / shortlist / auth -->
-<!-- screenshot: endpoint expandido con Try it out y respuesta de ejemplo -->
+<img width="1424" height="960" alt="image" src="https://github.com/user-attachments/assets/16a0711d-a1b0-44fd-8850-533ae671c330" />
+
 
 ---
 
@@ -189,7 +195,6 @@ Configuración con el preset oficial de Next.js (`next/jest.js`), entorno **jsdo
 - **Filtros globales (`HttpExceptionFilter`, `PrismaExceptionFilter`)** — respuestas de error consistentes en formato JSON, mapeando errores de Prisma (constraint violations, not found, etc.) a códigos HTTP correctos.
 - **Seed idempotente en boot** — el `SeedService` carga fixtures y usuario admin si faltan, controlado por la env var `SEED_ON_BOOT` (default `true`). Útil para que un supervisor clone el repo y vea datos sin pasos extra.
 
-<!-- screenshot: estructura modular del backend en explorador de archivos -->
 
 ### Frontend
 
@@ -208,7 +213,11 @@ Configuración con el preset oficial de Next.js (`next/jest.js`), entorno **jsdo
 * **lucide-react** — set de iconos consistente y tree-shakeable.
 
 <!-- screenshot: pantalla de comparador con 2 jugadores -->
+<img width="1426" height="955" alt="image" src="https://github.com/user-attachments/assets/510be952-2a70-43ae-8719-771013cf46f4" />
+
 <!-- screenshot: detalle de jugador con gráficos -->
+<img width="1425" height="959" alt="image" src="https://github.com/user-attachments/assets/0d8be983-8243-45ce-a322-252c0428d5e1" />
+
 
 ---
 
@@ -216,7 +225,6 @@ Configuración con el preset oficial de Next.js (`next/jest.js`), entorno **jsdo
 
 El schema está partido en archivos separados dentro de [backend/prisma/models/](backend/prisma/models/) y [backend/prisma/enums/](backend/prisma/enums/) en vez de un único `schema.prisma` monolítico: cada modelo se lee y modifica aislado, y el diff de un PR muestra solo lo que cambió. La idea general es **separar lo estable del jugador (datos personales) de lo que cambia temporada a temporada (club, número, contrato, stats)**, para no ensuciar la entidad principal con datos que dependen del contexto.
 
-<!-- screenshot: diagrama ER del modelo de datos (Player ↔ PlayerSeason ↔ Club / Season / Stats / Activity) -->
 
 ### Entidades
 
